@@ -27,7 +27,7 @@ namespace GestionDeInventario.Services.Implementations
         direccion = x.direccion,
         departamentoId = x.departamentoId,
         estado = x.estado,
-        }).ToList();
+    }).ToList();
 
         public async Task<Empleado?> GetByIdAsync(int id)
         {
@@ -43,21 +43,21 @@ namespace GestionDeInventario.Services.Implementations
                 direccion = x.direccion,
                 departamentoId = x.departamentoId,
                 estado = x.estado,
-                };
+            };
         }
-        public async Task<Empleado> AddAsync(Empleado categoria)
+        public async Task<Empleado> AddAsync(Empleado empleado)
         {
             var entity = new Empleado
             {
-                nombre = categoria.nombre.Trim(),
-                apellido = categoria.apellido.Trim(),
-                edad = categoria.edad,
-                genero = categoria.genero.Trim(),
-                telefono = categoria.telefono.Trim(),
-                direccion = categoria.direccion.Trim(),
-                departamentoId = categoria.departamentoId,
-                estado = categoria.estado.Trim()
-                };
+                nombre = empleado.nombre.Trim(),
+                apellido = empleado.apellido.Trim(),
+                edad = empleado.edad,
+                genero = empleado.genero.Trim(),
+                telefono = empleado.telefono.Trim(),
+                direccion = empleado.direccion.Trim(),
+                departamentoId = empleado.departamentoId,
+                estado = empleado.estado.Trim()
+            };
             var saved = await _empleadoRepository.AddAsync(entity);
             return new Empleado
             {

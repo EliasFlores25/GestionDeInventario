@@ -7,8 +7,8 @@ namespace GestionDeInventario.Services.Interfaces
         IQueryable<Empleado> GetQueryable();
         Task<List<Empleado>> GetAllAsync();
         Task<Empleado?> GetByIdAsync(int id);
-        Task<Empleado> AddAsync(Empleado categoria);
-        Task<bool> UpdateAsync(int id, Empleado categoria);
+        Task<Empleado> AddAsync(Empleado empleado);
+        Task<bool> UpdateAsync(int id, Empleado empleado);
         Task<bool> DeleteAsync(int id);
     }
 }
