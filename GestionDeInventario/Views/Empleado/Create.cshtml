@@ -35,7 +35,11 @@
                     </div>
                     <div class="col-md-6 form-group mb-3">
                         <label asp-for="genero" class="control-label">Genero</label>
-                        <input asp-for="genero" class="form-control" placeholder="Ej: Masculino/Femenino" />
+                        <select asp-for="genero" class="form-control">
+                            <option value="">-- Seleccione el Genero --</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                        </select>
                         <span asp-validation-for="genero" class="text-danger"></span>
                     </div>
                 </div>

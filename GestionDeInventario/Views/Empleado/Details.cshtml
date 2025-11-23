@@ -1,0 +1,72 @@
+﻿@model GestionDeInventario.Models.Empleado
+
+@{
+    ViewData["Title"] = "Detalles del Empleado";
+}
+<div class="details-container">
+    <h1><i class="fas fa-info-circle"></i> Detalles del Empleado</h1>
+    <h4>Información del Empleado</h4>
+    <hr />
+
+    <div class="row">
+        <div class="col-lg-10 col-md-12">
+            <dl class="row">
+                <dt class="col-sm-3">
+                    Nombre
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.nombre)
+                </dd>
+
+                <dt class="col-sm-3">
+                    Apellido
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.apellido)
+                </dd>
+
+                <dt class="col-sm-3">
+                    Edad
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.edad)
+                </dd>
+                <dt class="col-sm-3">
+                    Genero
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.genero)
+                </dd>
+                <dt class="col-sm-3">
+                    Telefono
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.telefono)
+                </dd>
+                <dt class="col-sm-3">
+                    Dirección
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.direccion)
+                </dd>
+                <dt class="col-sm-3">
+                    Codigo de departamento
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.departamentoId)
+                </dd>
+                <dt class="col-sm-3">
+                    Estado
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.estado)
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="button-container">
+        <a asp-action="Edit" asp-route-id="@Model?.idEmpleado" class="btn btn-edit"><i class="fas fa-edit"></i> Editar</a>
+        <a asp-action="Index" class="btn btn-back"><i class="fas fa-arrow-left"></i> Volver a la Lista</a>
+    </div>
+</div>

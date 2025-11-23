@@ -1,0 +1,80 @@
+﻿@model GestionDeInventario.Models.Empleado
+@{
+    ViewData["Title"] = "Eliminar Empleado";
+}
+<div class="form-container">
+    <h1><i class="fas fa-trash-alt text-danger"></i> Eliminar empleado</h1>
+    <h3>¿Estás seguro de que deseas eliminar este empleado?</h3>
+    <hr />
+
+    <div class="row">
+        <div class="col-lg-10 col-md-12">
+            <dl class="row">
+                <dt class="col-sm-3">
+                    Nombre
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.nombre)
+                </dd>
+
+                <dt class="col-sm-3">
+                    Apellido
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.apellido)
+                </dd>
+
+                <dt class="col-sm-3">
+                    Edad
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.edad)
+                </dd>
+                <dt class="col-sm-3">
+                    Genero
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.genero)
+                </dd>
+                <dt class="col-sm-3">
+                    Telefono
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.telefono)
+                </dd>
+                <dt class="col-sm-3">
+                    Dirección
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.direccion)
+                </dd>
+                <dt class="col-sm-3">
+                    Codigo de departamento
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.departamentoId)
+                </dd>
+                <dt class="col-sm-3">
+                    Estado
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.estado)
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="idEmpleado" />
+        <div class="form-actions">
+            <button type="submit" value="Eliminar" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
+            <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times-circle"></i> Cancelar</a>
+        </div>
+    </form>
+</div>
+
+
+<div class="mt-3">
+    <a asp-action="Index"><i class="fas fa-arrow-left"></i> Volver a la Lista</a>
+</div>
+
