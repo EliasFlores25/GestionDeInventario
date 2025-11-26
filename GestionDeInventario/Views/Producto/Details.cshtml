@@ -1,0 +1,258 @@
+﻿@model GestionDeInventario.DTOs.ProductoDTOs.ProductoResponseDTO
+
+@{
+    ViewData["Title"] = "Detalles del Producto";
+}
+<style>
+    /* --------------------------------------------------
+         * ------------------ DISEÑO MODERNO Y PROFESIONAL ------------------
+         * -------------------------------------------------- */
+    :root {
+        --color-primario: #004d99; /* Azul Corporativo Profundo */
+        --color-acento: #1abc9c; /* Verde/Turquesa para acentos */
+        --color-fondo-claro: #f8f9fa; /* Fondo muy claro */
+        --color-texto-oscuro: #34495e; /* Gris pizarra para texto */
+        --color-borde: #dee2e6; /* Borde de tabla y separación */
+        --color-peligro: #e74c3c; /* Rojo para eliminar */
+        --color-advertencia: #f39c12; /* Naranja/Amarillo para advertencia/edición */
+    }
+
+    body {
+        background-color: var(--color-fondo-claro);
+    }
+
+    /* Contenedor principal para la vista de detalles */
+    .details-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        background-color: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e0e0e0;
+    }
+
+    /* Encabezado principal */
+    h1 {
+        color: var(--color-primario);
+        border-left: 5px solid var(--color-acento);
+        padding-left: 15px;
+        margin-bottom: 5px;
+        font-size: 2.2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+    }
+
+        h1 i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+            color: var(--color-acento); /* Ícono de caja abierto en color acento */
+        }
+
+    h4 {
+        color: var(--color-texto-oscuro);
+        font-size: 1.2rem;
+        font-weight: 400;
+        margin-bottom: 30px;
+        padding-left: 20px;
+    }
+
+    hr {
+        border-top: 1px solid var(--color-borde);
+        margin-bottom: 30px;
+    }
+
+    /* ------------------ ESTILOS DE LISTA DE DETALLES (DL) ------------------ */
+    dl.row {
+        padding: 0 20px;
+    }
+
+        dl.row dt {
+            font-weight: 700;
+            color: var(--color-primario); /* Labels en azul primario */
+            padding-top: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--color-borde);
+        }
+
+        dl.row dd {
+            padding-top: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--color-borde);
+            color: var(--color-texto-oscuro);
+        }
+
+            /* Último elemento de la lista sin borde inferior */
+            dl.row dt:last-child,
+            dl.row dd:last-child {
+                border-bottom: none;
+            }
+
+    /* ------------------ ESTILOS DE BOTONES DE ACCIÓN ------------------ */
+    .button-container {
+        margin-top: 40px;
+        display: flex;
+        gap: 15px;
+        padding-left: 20px;
+    }
+
+        .button-container a {
+            padding: 10px 25px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+    /* Botón Editar (Warning) */
+    .btn-warning {
+        background-color: var(--color-advertencia);
+        border-color: var(--color-advertencia);
+        color: white;
+    }
+
+        .btn-warning:hover {
+            background-color: #d38c11;
+            border-color: #d38c11;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
+        }
+
+    /* Botón Eliminar (Danger) */
+    .btn-danger {
+        background-color: var(--color-peligro);
+        border-color: var(--color-peligro);
+        color: white;
+    }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            border-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+        }
+
+    /* Botón Volver (Secondary) */
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+    }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+
+    .button-container a i {
+        margin-right: 8px;
+    }
+
+    /* ------------------ RESPONSIVENESS (MÓVIL) ------------------ */
+    @@media screen and (max-width: 767px) {
+        .details-container {
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            padding-left: 10px;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            padding-left: 15px;
+        }
+
+        .button-container {
+            flex-direction: column;
+            gap: 10px;
+            padding-left: 0;
+        }
+
+            .button-container a {
+                width: 100%;
+                text-align: center;
+            }
+
+        dl.row dt, dl.row dd {
+            padding: 5px 0;
+            font-size: 0.95rem;
+        }
+    }
+
+</style>
+
+<div class="details-container">
+    <h1><i class="fas fa-box-open"></i> @ViewData["Title"]</h1>
+    <h4>Información del Producto</h4>
+    <hr />
+
+    <div class="row">
+        <div class="col-lg-10 col-md-12">
+            <dl class="row">
+                <dt class="col-sm-4">
+                    Nombre
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.nombre)
+                </dd>
+
+
+                <dt class="col-sm-4">
+                    Descripción
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.descripcion)
+                </dd>
+
+                <dt class="col-sm-4">
+                    Cantidad en Stock
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.cantidadStock)
+                </dd>
+
+                <dt class="col-sm-4">
+                    Unidad de Medida
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.unidadMedida)
+                </dd>
+
+                <dt class="col-sm-4">
+                    Precio Unitario
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.precio)
+                </dd>
+
+                <dt class="col-sm-4">
+                    Estado
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.estado)
+                </dd>
+
+                <dt class="col-sm-4">
+                    ID de Producto
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.idProducto)
+                </dd>
+
+            </dl>
+        </div>
+    </div>
+
+    <div class="button-container">
+
+        <a asp-action="Edit" asp-route-id="@Model?.idProducto" class="btn btn-warning"><i class="fas fa-edit"></i> Editar</a>
+
+        <a asp-action="Delete" asp-route-id="@Model?.idProducto" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Eliminar</a>
+        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver a la Lista</a>
+    </div>
+</div>

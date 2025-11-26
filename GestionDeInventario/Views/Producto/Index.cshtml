@@ -1,0 +1,451 @@
+﻿@model IEnumerable<GestionDeInventario.DTOs.ProductoDTOs.ProductoResponseDTO>
+@using System.Collections.Generic
+
+@{
+    ViewData["Title"] = "Gestión de Productos";
+    int rowsPerPage = 5; // Valor por defecto de registros, lo usaremos en el script
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    /* --------------------------------------------------
+         * ------------------ DISEÑO MODERNO Y PROFESIONAL ------------------
+         * -------------------------------------------------- */
+    :root {
+        --color-primario: #004d99; /* Azul Corporativo Profundo */
+        --color-acento: #1abc9c; /* Verde/Turquesa para acentos y éxito */
+        --color-fondo-claro: #f8f9fa; /* Fondo muy claro */
+        --color-texto-oscuro: #34495e; /* Gris pizarra para texto */
+        --color-borde: #dee2e6; /* Borde de tabla y separación */
+    }
+
+    body {
+        background-color: var(--color-fondo-claro);
+    }
+
+    /* Contenedor principal */
+    .data-card {
+        background-color: white;
+        padding: 40px; /* Más padding para sensación premium */
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Sombra más suave */
+        margin-bottom: 40px;
+        border: 1px solid #e0e0e0;
+    }
+
+    /* Encabezado principal */
+    h1 {
+        color: var(--color-primario);
+        border-left: 5px solid var(--color-acento);
+        padding-left: 15px;
+        margin-bottom: 30px;
+        font-size: 2.2rem;
+        font-weight: 700;
+    }
+
+    /* Botón principal de creación */
+    .btn-primary {
+        background-color: var(--color-primario);
+        border-color: var(--color-primario);
+        transition: background-color 0.3s, transform 0.3s;
+    }
+
+        .btn-primary:hover {
+            background-color: #003366;
+            border-color: #003366;
+            transform: translateY(-1px);
+        }
+
+    /* --------------------------------------------------
+         * ------------------ ESTILOS DE BÚSQUEDA Y FILTRO ------------------
+         * -------------------------------------------------- */
+    .search-container {
+        padding: 25px;
+        background-color: #e9ecef; /* Un gris sutil para diferenciar */
+        border-radius: 10px;
+        margin-bottom: 30px;
+        border: 1px solid var(--color-borde);
+    }
+
+        .search-container label {
+            font-weight: 600;
+            color: var(--color-texto-oscuro);
+            margin-bottom: 8px;
+        }
+
+        .search-container .form-control {
+            border-radius: 6px;
+            box-shadow: none;
+        }
+
+    /* Alineación de botones en el formulario de búsqueda */
+    .search-buttons {
+        /* Asegura que los botones se alineen bien con los inputs */
+        display: flex;
+        gap: 10px;
+    }
+
+    /* --------------------------------------------------
+         * ------------------ ESTILOS DE LA TABLA ------------------
+         * -------------------------------------------------- */
+    .table thead th {
+        background-color: var(--color-primario); /* Usamos el color primario */
+        color: white;
+        border-bottom: 3px solid var(--color-acento); /* Acento en el borde */
+        font-weight: 600;
+        vertical-align: middle;
+        padding: 15px 12px;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f1f4f8; /* Un hover muy suave */
+        cursor: pointer;
+    }
+
+    /* CAMBIOS AQUÍ: Botones de acción en la tabla (cuadrados con esquinas redondeadas) */
+    .action-buttons .btn {
+        /* Tamaño más uniforme para que parezca cuadrado */
+        padding: 6px 6px; /* Ajustamos el padding para un look más compacto/cuadrado */
+        margin: 0 4px;
+        /* El border-radius de 6px está bien, es ligeramente redondeado */
+        border-radius: 6px;
+        width: 34px; /* Ancho fijo para mantener la uniformidad */
+        height: 34px; /* Alto fijo para mantener la uniformidad */
+        display: inline-flex; /* Usar flex para centrar el icono */
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        font-size: 1rem; /* Aseguramos que el icono tenga un buen tamaño */
+    }
+
+        .action-buttons .btn:hover {
+            opacity: 0.85;
+            transform: scale(1.05); /* Un pequeño efecto al pasar el ratón */
+        }
+
+    .action-buttons {
+        min-width: 160px; /* Asegura espacio mínimo para los 3 botones */
+    }
+
+        /* Pequeño ajuste para el grupo de botones */
+        .action-buttons .btn-group {
+            gap: 8px; /* Espacio entre los botones en el grupo */
+        }
+
+    /* Badges de estado mejorados */
+    .badge-agotado {
+        background-color: #e74c3c; /* Rojo de Danger */
+        color: white;
+        font-weight: 700;
+    }
+
+    .badge-disponible {
+        background-color: var(--color-acento); /* Verde/Turquesa de Éxito */
+        color: white;
+        font-weight: 700;
+    }
+
+    .badge {
+        padding: 0.5em 0.8em;
+        border-radius: 10px;
+        min-width: 90px;
+        display: inline-block;
+    }
+
+    /* --------------------------------------------------
+         * ------------------ PAGINACIÓN ------------------
+         * -------------------------------------------------- */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+        .pagination-container .page-item.active .page-link {
+            background-color: var(--color-primario);
+            border-color: var(--color-primario);
+        }
+
+        .pagination-container .page-link {
+            color: var(--color-primario);
+            border-radius: 6px;
+            margin: 0 2px;
+        }
+
+    /* --------------------------------------------------
+         * ------------------ RESPONSIVENESS (MÓVIL) ------------------
+         * -------------------------------------------------- */
+    @@media screen and (max-width: 991px) {
+        .data-card {
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            padding-left: 10px;
+        }
+
+        .search-container {
+            padding: 15px;
+        }
+        /* Asegura el ancho completo en móvil para la tabla responsiva */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        /* La lógica de tabla-a-tarjeta original se mantiene */
+        #mytable {
+            width: 100%;
+        }
+
+            #mytable thead {
+                display: none;
+            }
+
+            #mytable tr {
+                display: block;
+                margin-bottom: 20px;
+                border: 1px solid var(--color-borde);
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            #mytable td {
+                display: flex; /* Usar flex para alinear etiqueta y valor */
+                justify-content: space-between;
+                text-align: right !important;
+                padding: 12px 15px !important;
+                position: relative;
+                border-bottom: 1px solid #f1f1f1;
+                padding-left: 15px !important; /* Quitar el padding fijo */
+            }
+
+                #mytable td:last-child {
+                    border-bottom: none;
+                }
+                /* Muestra el encabezado (label) usando el atributo data-label */
+                #mytable td::before {
+                    content: attr(data-label);
+                    position: static; /* Cambiado a static para el flow */
+                    width: auto;
+                    font-weight: 700;
+                    text-align: left;
+                    color: var(--color-texto-oscuro);
+                    flex-shrink: 0; /* No se encoge */
+                }
+                /* Estilo especial para la columna de Acciones en móvil */
+                #mytable td.action-buttons {
+                    text-align: center !important;
+                    padding: 15px 15px;
+                    min-width: unset;
+                    border-top: 1px solid var(--color-borde);
+                }
+
+                    #mytable td.action-buttons::before {
+                        content: ''; /* No necesitamos el label de acciones en móvil */
+                        display: none;
+                    }
+            /* Asegurar que los botones de acción se vean bien */
+            #mytable .btn-group {
+                display: flex;
+                justify-content: center; /* Centramos los botones en móvil */
+                width: 100%;
+                gap: 15px; /* Más espacio para tocarlos en móvil */
+            }
+            /* Ajuste de tamaño de botones en móvil */
+            #mytable .action-buttons .btn {
+                width: 40px;
+                height: 40px;
+            }
+    }
+</style>
+
+<div class="data-card">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5">
+        <h1 class="text-primary"><i class="bi bi-boxes"></i> @ViewData["Title"]</h1>
+        <a asp-action="Create" class="btn btn-primary mt-3 mt-md-0" style="min-width: 200px;">
+            <i class="bi bi-plus-circle"></i> Crear Nuevo Producto
+        </a>
+    </div>
+
+    <div class="search-container">
+        <form asp-action="Index" method="get">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-6 col-lg-7">
+                    <div class="form-group">
+                        <label class="control-label">Buscar por Nombre de Producto</label>
+                        <input name="nombre" class="form-control" placeholder="Ej: Guantes de Nitrilo" />
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-lg-2">
+                    <div class="form-group">
+                        <label class="control-label">Registros por Página</label>
+                        <select name="registros" class="form-control">
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                            <option value="40">40</option>
+                            <option value="50">50</option>
+                            <option value="0">Todos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-lg-3">
+                    <div class="search-buttons">
+                        <button type="submit" class="btn btn-dark">
+                            <i class="bi bi-funnel"></i> Filtrar
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Limpiar Filtro
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["MensajeExito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["MensajeError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="table-responsive">
+        @if (Model != null && Model.Any())
+        {
+            <table class="table table-striped table-hover align-middle" id="mytable">
+                <thead class="thead-dark">
+                    <tr>
+                        <th data-label="Nombre del Producto">Nombre del Producto</th>
+                        <th data-label="Descripción Breve">Descripción Breve</th>
+                        <th data-label="Existencias">Existencias</th>
+                        <th data-label="U. Medida">Unidad de Medida</th>
+                        <th data-label="Precio Unitario" class="text-end">Precio Unitario</th>
+                        <th data-label="Estado de Stock" class="text-center">Estado de Stock</th>
+                        <th class="text-center action-buttons">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td data-label="Nombre del Producto">@Html.DisplayFor(modelItem => item.nombre)</td>
+                            <td data-label="Descripción Breve">
+                                @{
+                                    string descCorto = (!string.IsNullOrEmpty(item.descripcion) && item.descripcion.Length > 50) ?
+                                    (item.descripcion.Substring(0, 50) + "...") :
+                                    item.descripcion;
+                                    @descCorto
+                                }
+                            </td>
+                            <td data-label="Existencias">@Html.DisplayFor(modelItem => item.cantidadStock)</td>
+                            <td data-label="U. Medida">@Html.DisplayFor(modelItem => item.unidadMedida)</td>
+                            <td data-label="Precio Unitario" class="text-end">@Html.DisplayFor(modelItem => item.precio)</td>
+                            <td class="text-center" data-label="Estado de Stock">
+                                @{
+                                    string badgeClass = item.estado switch
+                                    {
+                                        "Agotado" => "danger",
+                                        "Disponible" => "success",
+                                        _ => "secondary"
+                                    };
+                                }
+                                <span class="badge bg-@badgeClass">
+                                    @Html.DisplayFor(modelItem => item.estado)
+                                </span>
+                            </td>
+
+                            <td class="text-center action-buttons">
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Edit" asp-route-id="@item.idProducto" class="btn btn-warning btn-sm" title="Editar">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.idProducto" class="btn btn-info btn-sm" title="Detalles">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.idProducto" class="btn btn-danger btn-sm" title="Eliminar">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-info text-center mt-5 p-4" role="alert" style="border-left: 5px solid var(--color-acento);">
+                <h4><i class="bi bi-info-circle me-2"></i> No se encontraron productos</h4>
+                <p class="mb-3">Intenta ajustar tus criterios de búsqueda o utiliza el botón para registrar uno nuevo en el sistema.</p>
+                <a asp-action="Create" class="btn btn-primary">Crear Producto Ahora</a>
+            </div>
+        }
+    </div>
+
+    <div id="pagination-placeholder" class="pagination-container"></div>
+
+</div>
+
+@section Scripts {
+    <script>
+        // MANTENEMOS EL SCRIPT DE PAGINACIÓN ORIGINAL SIN CAMBIOS FUNCIONALES
+        $(document).ready(function() {
+            // Aseguramos que rowsPerPage sea un número
+            const rowsPerPage = @rowsPerPage;
+            const $table = $('#mytable');
+            const $rows = $table.find('tbody tr');
+
+            // Solo inicializar la paginación si hay filas y rowsPerPage es mayor a 0 (no "Todos")
+            if ($rows.length > 0 && rowsPerPage > 0) {
+                const pageCount = Math.ceil($rows.length / rowsPerPage);
+                let currentPage = 1;
+
+                function showPage(page) {
+                    $rows.hide();
+                    $rows.slice((page - 1) * rowsPerPage, page * rowsPerPage).show();
+                }
+
+                // Crear controles de paginación Bootstrap
+                const $paginationUl = $('<ul class="pagination"></ul>');
+
+                for (let i = 1; i <= pageCount; i++) {
+                    $('<li class="page-item"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>')
+                        .appendTo($paginationUl)
+                        .click(function(e) {
+                            e.preventDefault();
+                            const newPage = parseInt($(this).find('a').data('page'));
+                            currentPage = newPage;
+                            showPage(currentPage);
+                            $paginationUl.find('li').removeClass('active');
+                            $(this).addClass('active');
+                        });
+                }
+
+                $('#pagination-placeholder').append($paginationUl);
+
+                // Mostrar primera página y activar el botón
+                showPage(1);
+                $paginationUl.find('li:first').addClass('active');
+
+            } else if ($rows.length > 0) {
+                // Si 'Todos' está seleccionado o rowsPerPage es 0, mostramos todas las filas
+                $rows.show();
+            }
+        });
+    </script>
+}

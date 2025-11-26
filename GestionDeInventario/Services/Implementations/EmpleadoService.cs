@@ -86,6 +86,9 @@ namespace GestionDeInventario.Services.Implementations
             current.estado = empleado.estado.Trim();
             return await _empleadoRepository.UpdateAsync(current);
         }
-        public Task<bool> DeleteAsync(int id) => _empleadoRepository.DeleteAsync(id);
+        public async Task<bool> DeleteAsync(int id)
+        {
+            return await _empleadoRepository.DeleteAsync(id);
+        }
     }
 }

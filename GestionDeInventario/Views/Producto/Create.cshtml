@@ -1,0 +1,251 @@
+﻿@model GestionDeInventario.DTOs.ProductoDTOs.ProductoCreateDTO
+
+@{
+    // Título más específico para la página
+    ViewData["Title"] = "Crear Nuevo Producto";
+}
+
+
+<style>
+    /* --------------------------------------------------
+         * ------------------ DISEÑO MODERNO Y PROFESIONAL ------------------
+         * -------------------------------------------------- */
+    :root {
+        --color-primario: #004d99; /* Azul Corporativo Profundo */
+        --color-acento: #1abc9c; /* Verde/Turquesa para acentos y éxito */
+        --color-fondo-claro: #f8f9fa; /* Fondo muy claro */
+        --color-texto-oscuro: #34495e; /* Gris pizarra para texto */
+        --color-borde: #dee2e6; /* Borde de tabla y separación */
+    }
+
+    body {
+        background-color: var(--color-fondo-claro);
+    }
+
+    /* Contenedor principal del formulario */
+    .form-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        background-color: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e0e0e0;
+    }
+
+    /* Encabezado principal */
+    h1 {
+        color: var(--color-primario);
+        border-left: 5px solid var(--color-acento);
+        padding-left: 15px;
+        margin-bottom: 5px;
+        font-size: 2.2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+    }
+
+        h1 i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+
+    h4 {
+        color: var(--color-texto-oscuro);
+        font-size: 1.2rem;
+        font-weight: 400;
+        margin-bottom: 30px;
+        padding-left: 20px; /* Alineación con el borde de h1 */
+    }
+
+    hr {
+        border-top: 1px solid var(--color-borde);
+        margin-bottom: 30px;
+    }
+
+    /* --------------------------------------------------
+         * ------------------ ESTILOS DE FORMULARIO ------------------
+         * -------------------------------------------------- */
+    .control-label {
+        font-weight: 600;
+        color: var(--color-texto-oscuro);
+        margin-bottom: 6px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 8px; /* Bordes redondeados consistentes */
+        border: 1px solid var(--color-borde);
+        padding: 10px 15px;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--color-acento);
+            box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.25); /* Sombra de enfoque con color acento */
+        }
+
+    /* Validaciones */
+    .text-danger {
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: block;
+    }
+
+    .alert-danger {
+        border-left: 5px solid #e74c3c;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    /* --------------------------------------------------
+         * ------------------ ESTILOS DE BOTONES ------------------
+         * -------------------------------------------------- */
+    .form-actions {
+        margin-top: 40px;
+        display: flex;
+        gap: 15px; /* Espacio entre botones */
+    }
+
+    /* Botón Crear/Guardar (Primario) */
+    .btn-primary {
+        background-color: var(--color-primario);
+        border-color: var(--color-primario);
+        padding: 10px 25px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+
+        .btn-primary:hover {
+            background-color: #003366;
+            border-color: #003366;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 77, 153, 0.2);
+        }
+
+    /* Botón Cancelar (Secundario) */
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+        padding: 10px 25px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: background-color 0.3s;
+    }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+
+    .btn i {
+        margin-right: 8px;
+    }
+
+    /* --------------------------------------------------
+         * ------------------ RESPONSIVENESS (MÓVIL) ------------------
+         * -------------------------------------------------- */
+    @@media screen and (max-width: 767px) {
+        .form-container {
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            padding-left: 10px;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            padding-left: 15px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+            .form-actions .btn {
+                width: 100%;
+                text-align: center;
+            }
+    }
+
+</style>
+
+<div class="form-container">
+    <h1><i class="fas fa-box"></i> @ViewData["Title"]</h1>
+    <h4>Ingrese los Datos del Nuevo Producto</h4>
+    <hr />
+
+    <div class="row">
+        <div class="col-lg-10 col-md-12">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row">
+                    <div class="col-md-6 form-group mb-3">
+                        <label asp-for="nombre" class="control-label">Nombre</label>
+                        <input asp-for="nombre" class="form-control" placeholder="Ej: Guantes de Seguridad de Nitrilo" />
+                        <span asp-validation-for="nombre" class="text-danger"></span>
+                    </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="descripcion" class="control-label">Descripción</label>
+                        <textarea asp-for="descripcion" class="form-control" rows="3" placeholder="Ej: Material de nitrilo, Talla L, Color azul, Desechables"></textarea>
+                    <span asp-validation-for="descripcion" class="text-danger"></span>
+                </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 form-group mb-3">
+                        <label asp-for="cantidadStock" class="control-label">Cantidad de Stock</label>
+                        <input asp-for="cantidadStock" class="form-control" placeholder="Ej: 500" />
+                        <span asp-validation-for="cantidadStock" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 form-group mb-3">
+                        <label asp-for="unidadMedida" class="control-label">Unidad de Medida</label>
+                        <input asp-for="unidadMedida" class="form-control" placeholder="Ej: Pares, Cajas (de 100), Unidades" />
+                        <span asp-validation-for="unidadMedida" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 form-group mb-3">
+                        <label asp-for="precio" class="control-label">Precio</label>
+                        <input asp-for="precio" class="form-control" placeholder="Ej: 15.75" />
+                        <span asp-validation-for="precio" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 form-group mb-4">
+                        <label asp-for="estado" class="control-label">Estado</label>
+                        <select asp-for="estado" class="form-control">
+                            <option value="">-- Seleccione el Estado --</option>
+                            <option value="Disponible">Disponible</option>
+                            <option value="Agotado">Agotado</option>
+                        </select>
+                        <span asp-validation-for="estado" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Crear Producto
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-times-circle"></i> Cancelar
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
