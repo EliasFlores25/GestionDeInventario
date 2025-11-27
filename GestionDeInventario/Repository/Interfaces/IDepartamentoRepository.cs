@@ -1,6 +1,13 @@
-﻿namespace GestionDeInventario.Repository.Interfaces
+﻿using GestionDeInventario.Models;
+
+namespace GestionDeInventario.Repository.Interfaces
 {
-    public class IDepartamentoRepository
+    public interface IDepartamentoService
     {
+        Task<IEnumerable<Departamento>> GetAll();
+        Task<Departamento> GetById(int id);
+        Task Add(Departamento departamento);
+        Task Update(Departamento departamento);
+        Task Delete(int id);
     }
 }

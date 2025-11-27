@@ -1,0 +1,26 @@
+﻿@model GestionDeInventario.Models.Departamento
+
+@{
+    ViewData["Title"] = "Eliminar Departamento";
+}
+
+<div class="container mt-4 p-4 bg-dark text-white rounded shadow">
+    <h2 class="mb-4 text-danger">¿Eliminar este Departamento?</h2>
+
+    <div class="mb-3">
+        <strong>ID:</strong> @Model.idDepartamento
+    </div>
+    <div class="mb-3">
+        <strong>Nombre:</strong> @Model.nombre
+    </div>
+    <div class="mb-3">
+        <strong>Descripción:</strong> @Model.descripcion
+    </div>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="idDepartamento" />
+
+        <button type="submit" class="btn btn-danger me-2">Eliminar</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

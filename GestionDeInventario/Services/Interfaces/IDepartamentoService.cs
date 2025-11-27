@@ -1,8 +1,8 @@
 ﻿using GestionDeInventario.Models;
 
-namespace GestionDeInventario.Services.Interfaces
+namespace GestionDeInventario.Repository.Interfaces
 {
-    public interface IDepartamentoService
+    public interface IDepartamentoRepository
     {
         Task<IEnumerable<Departamento>> GetAll();
         Task<Departamento> GetById(int id);

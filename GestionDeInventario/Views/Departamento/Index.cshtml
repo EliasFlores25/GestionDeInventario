@@ -1,0 +1,38 @@
+﻿@model IEnumerable<GestionDeInventario.Models.Departamento>
+
+@{
+    ViewData["Title"] = "Departamentos";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-white">Lista de Departamentos</h2>
+        <a asp-action="Create" class="btn btn-success shadow">➕ Crear Nuevo</a>
+    </div>
+
+    <table class="table table-dark table-hover rounded shadow">
+        <thead class="thead-light">
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.idDepartamento</td>
+                    <td>@item.nombre</td>
+                    <td>@item.descripcion</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.idDepartamento" class="btn btn-warning btn-sm">✏️ Editar</a>
+                        <a asp-action="Delete" asp-route-id="@item.idDepartamento" class="btn btn-danger btn-sm">🗑️ Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

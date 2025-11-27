@@ -1,6 +1,6 @@
 ﻿using GestionDeInventario.Models;
+using GestionDeInventario.Repository.Interfaces;
 using GestionDeInventario.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GestionDeInventario.Controllers
