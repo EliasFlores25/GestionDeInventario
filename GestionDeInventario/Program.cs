@@ -22,6 +22,8 @@ builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
 builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
+builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
+builder.Services.AddScoped<IDepartamentoService, DepartamentoService>();
 
 var app = builder.Build();
 

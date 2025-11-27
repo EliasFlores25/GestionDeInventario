@@ -11,5 +11,7 @@ namespace GestionDeInventario.Data
         //public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Empleado> Empleados { get; set; }
         public DbSet<Producto> Productos { get; set; }
+        public DbSet<Departamento> Departamento { get; set; } = null!;
+
     }
 }
