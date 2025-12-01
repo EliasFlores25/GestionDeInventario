@@ -18,7 +18,7 @@ namespace GestionDeInventario.Controllers
             _productoService = productoService;
         }
 
-        public async Task<IActionResult> Index(string nombre,int? cantidadStock, int registros = 5)
+        public async Task<IActionResult> Index(string nombre,int? cantidadStock, int registros = 0)
         {
             
             IQueryable<ProductoResponseDTO> query = _productoService.GetQueryable();

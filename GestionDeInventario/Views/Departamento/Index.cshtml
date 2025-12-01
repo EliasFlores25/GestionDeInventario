@@ -4,7 +4,7 @@
 
 @{
     ViewData["Title"] = "Gestión de Departamentos";
-    // Eliminada variable rowsPerPage: El valor se toma del select y el controlador usa un default (5).
+    int rowsPerPage = 5; // Valor por defecto de registros, lo usaremos en el script
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -479,12 +479,10 @@
 
 @section Scripts {
     <script>
+        // MANTENEMOS EL SCRIPT DE PAGINACIÓN ORIGINAL SIN CAMBIOS FUNCIONALES
         $(document).ready(function() {
-
-            // CAMBIO 6: Leer el valor de "registros" del dropdown para la paginación de JS
-            const recordsDropdown = document.querySelector('select[name="registros"]');
-            const rowsPerPage = recordsDropdown ? parseInt(recordsDropdown.value) : 10;
-
+            // Se asegura que rowsPerPage sea un número
+            const rowsPerPage = @rowsPerPage;
             const $table = $('#mytable');
             const $rows = $table.find('tbody tr');
 
