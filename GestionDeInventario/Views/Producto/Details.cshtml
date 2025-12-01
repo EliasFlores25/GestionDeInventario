@@ -3,98 +3,122 @@
 @{
     ViewData["Title"] = "Detalles del Producto";
 }
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
     /* --------------------------------------------------
-         * ------------------ DISEÑO MODERNO Y PROFESIONAL ------------------
+         * ------------------ DISEÑO MODERNO Y PROFESIONAL (Temas del Index/Create) ------------------
          * -------------------------------------------------- */
     :root {
-        --color-primario: #004d99; /* Azul Corporativo Profundo */
-        --color-acento: #1abc9c; /* Verde/Turquesa para acentos */
-        --color-fondo-claro: #f8f9fa; /* Fondo muy claro */
-        --color-texto-oscuro: #34495e; /* Gris pizarra para texto */
-        --color-borde: #dee2e6; /* Borde de tabla y separación */
-        --color-peligro: #e74c3c; /* Rojo para eliminar */
-        --color-advertencia: #f39c12; /* Naranja/Amarillo para advertencia/edición */
+        --color-primario: #0A192F; /* Azul Marino Profundo (Títulos) */
+        --color-secundario: #1F364D; /* Azul Marino más claro (Labels) */
+        --color-acento: #FFC107; /* Amarillo Dorado/Naranja (Acento de Éxito / Subrayado) */
+        --color-fondo-claro: #F4F7F9; /* Fondo muy claro, casi blanco */
+        --color-texto-oscuro: #333C48; /* Gris carbón para texto general */
+        --color-borde-suave: #E0E4E7; /* Borde de separación */
+        --color-warning-base: #FFC107; /* Amarillo para Editar */
+        --color-danger-base: #DC3545; /* Rojo para Eliminar */
     }
 
     body {
         background-color: var(--color-fondo-claro);
+        font-family: 'Inter', sans-serif;
     }
 
     /* Contenedor principal para la vista de detalles */
     .details-container {
-        max-width: 1200px;
+        max-width: 1000px;
         margin: 40px auto;
         background-color: white;
         padding: 40px;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--color-borde-suave);
     }
 
     /* Encabezado principal */
     h1 {
         color: var(--color-primario);
-        border-left: 5px solid var(--color-acento);
-        padding-left: 15px;
+        padding-left: 0;
         margin-bottom: 5px;
-        font-size: 2.2rem;
-        font-weight: 700;
+        font-size: 2.5rem;
+        font-weight: 800;
+        position: relative;
         display: flex;
         align-items: center;
     }
 
         h1 i {
-            margin-right: 10px;
-            font-size: 1.8rem;
-            color: var(--color-acento); /* Ícono de caja abierto en color acento */
+            margin-right: 15px;
+            font-size: 2.2rem;
+            color: var(--color-acento); /* Icono de acento dorado */
+        }
+
+        h1::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: var(--color-acento); /* Subrayado dorado */
+            margin-top: 5px;
+            border-radius: 2px;
+            position: absolute;
+            bottom: -15px;
+            left: 0;
         }
 
     h4 {
         color: var(--color-texto-oscuro);
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: 400;
         margin-bottom: 30px;
-        padding-left: 20px;
-    }
-
-    hr {
-        border-top: 1px solid var(--color-borde);
-        margin-bottom: 30px;
+        padding-left: 0; /* Aseguramos la alineación */
+        opacity: 0.8;
+        margin-top: 20px;
     }
 
     /* ------------------ ESTILOS DE LISTA DE DETALLES (DL) ------------------ */
     dl.row {
-        padding: 0 20px;
+        padding: 0;
+        border: 1px solid var(--color-borde-suave);
+        border-radius: 8px;
+        background-color: #fcfcfc;
     }
+
+        dl.row > * {
+            /* Asegura que todos los dt/dd estén dentro del borde */
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
+        }
 
         dl.row dt {
             font-weight: 700;
-            color: var(--color-primario); /* Labels en azul primario */
-            padding-top: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed var(--color-borde);
+            color: var(--color-secundario); /* Labels en azul oscuro */
+            padding-top: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--color-borde-suave);
         }
 
         dl.row dd {
-            padding-top: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed var(--color-borde);
+            padding-top: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--color-borde-suave);
             color: var(--color-texto-oscuro);
         }
 
-            /* Último elemento de la lista sin borde inferior */
+            /* Quitar el borde inferior al último par */
             dl.row dt:last-child,
             dl.row dd:last-child {
                 border-bottom: none;
             }
+
 
     /* ------------------ ESTILOS DE BOTONES DE ACCIÓN ------------------ */
     .button-container {
         margin-top: 40px;
         display: flex;
         gap: 15px;
-        padding-left: 20px;
+        padding-left: 0;
     }
 
         .button-container a {
@@ -103,41 +127,40 @@
             border-radius: 8px;
             text-decoration: none;
             transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+            color: white; /* Asegura el color del texto de los botones */
         }
 
-    /* Botón Editar (Warning) */
+    /* Botón Editar (Warning - Dorado) */
     .btn-warning {
-        background-color: var(--color-advertencia);
-        border-color: var(--color-advertencia);
-        color: white;
+        background-color: var(--color-acento);
+        border-color: var(--color-acento);
+        color: var(--color-primario); /* Texto oscuro para contraste */
     }
 
         .btn-warning:hover {
-            background-color: #d38c11;
-            border-color: #d38c11;
+            background-color: #E6B300;
+            border-color: #E6B300;
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
+            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
         }
 
-    /* Botón Eliminar (Danger) */
+    /* Botón Eliminar (Danger - Rojo) */
     .btn-danger {
-        background-color: var(--color-peligro);
-        border-color: var(--color-peligro);
-        color: white;
+        background-color: var(--color-danger-base);
+        border-color: var(--color-danger-base);
     }
 
         .btn-danger:hover {
-            background-color: #c0392b;
-            border-color: #c0392b;
+            background-color: #C82333;
+            border-color: #C82333;
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
         }
 
-    /* Botón Volver (Secondary) */
+    /* Botón Volver (Secondary - Gris) */
     .btn-secondary {
         background-color: #6c757d;
         border-color: #6c757d;
-        color: white;
     }
 
         .btn-secondary:hover {
@@ -158,13 +181,16 @@
         }
 
         h1 {
-            font-size: 1.8rem;
-            padding-left: 10px;
+            font-size: 2rem;
         }
 
+            h1 i {
+                font-size: 1.8rem;
+            }
+
         h4 {
-            font-size: 1.1rem;
-            padding-left: 15px;
+            font-size: 1rem;
+            margin-top: 15px;
         }
 
         .button-container {
@@ -179,7 +205,7 @@
             }
 
         dl.row dt, dl.row dd {
-            padding: 5px 0;
+            padding: 10px 1rem !important;
             font-size: 0.95rem;
         }
     }
@@ -187,13 +213,15 @@
 </style>
 
 <div class="details-container">
-    <h1><i class="fas fa-box-open"></i> @ViewData["Title"]</h1>
-    <h4>Información del Producto</h4>
-    <hr />
+    <!-- Título principal: Usamos 'bi-box-seam-fill' por ser un ícono de inventario/producto -->
+    <h1><i class="bi bi-box-seam-fill"></i> @ViewData["Title"]</h1>
+    <h4>Información detallada del producto: @Model.nombre</h4>
+    <!-- Eliminamos el <hr /> ya que h1::after lo sustituye -->
 
-    <div class="row">
-        <div class="col-lg-10 col-md-12">
+    <div class="row mt-5">
+        <div class="col-lg-12 col-md-12">
             <dl class="row">
+                <!-- Nombre -->
                 <dt class="col-sm-4">
                     Nombre
                 </dt>
@@ -201,7 +229,7 @@
                     @Html.DisplayFor(model => model.nombre)
                 </dd>
 
-
+                <!-- Descripción -->
                 <dt class="col-sm-4">
                     Descripción
                 </dt>
@@ -209,6 +237,7 @@
                     @Html.DisplayFor(model => model.descripcion)
                 </dd>
 
+                <!-- Cantidad en Stock -->
                 <dt class="col-sm-4">
                     Cantidad en Stock
                 </dt>
@@ -216,6 +245,7 @@
                     @Html.DisplayFor(model => model.cantidadStock)
                 </dd>
 
+                <!-- Unidad de Medida -->
                 <dt class="col-sm-4">
                     Unidad de Medida
                 </dt>
@@ -223,6 +253,7 @@
                     @Html.DisplayFor(model => model.unidadMedida)
                 </dd>
 
+                <!-- Precio Unitario -->
                 <dt class="col-sm-4">
                     Precio Unitario
                 </dt>
@@ -230,6 +261,7 @@
                     @Html.DisplayFor(model => model.precio)
                 </dd>
 
+                <!-- Estado -->
                 <dt class="col-sm-4">
                     Estado
                 </dt>
@@ -237,6 +269,7 @@
                     @Html.DisplayFor(model => model.estado)
                 </dd>
 
+                <!-- ID de Producto (como último detalle) -->
                 <dt class="col-sm-4">
                     ID de Producto
                 </dt>
@@ -250,9 +283,16 @@
 
     <div class="button-container">
 
-        <a asp-action="Edit" asp-route-id="@Model?.idProducto" class="btn btn-warning"><i class="fas fa-edit"></i> Editar</a>
+        <a asp-action="Edit" asp-route-id="@Model?.idProducto" class="btn btn-warning">
+            <i class="bi bi-pencil-square"></i> Editar Producto
+        </a>
 
-        <a asp-action="Delete" asp-route-id="@Model?.idProducto" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Eliminar</a>
-        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver a la Lista</a>
+        <a asp-action="Delete" asp-route-id="@Model?.idProducto" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Eliminar Producto
+        </a>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a la Lista
+        </a>
     </div>
 </div>

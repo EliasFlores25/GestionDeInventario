@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using GestionDeInventario.Data;
 using GestionDeInventario.Models;
 using GestionDeInventario.Repository.Interfaces;
@@ -15,70 +14,34 @@ namespace GestionDeInventario.Repository.Implementations
 
         public DepartamentoRepository(AppDbContext context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _context = context;
         }
-
-        public async Task<IEnumerable<Departamento>> GetAll()
+        public IQueryable<Departamento> GetQueryable()
         {
-            return await _context.Departamento
-                                 .AsNoTracking()
-                                 .OrderBy(d => d.nombre)
-                                 .ToListAsync();
+            return _context.Departamentos.AsNoTracking();
         }
-
-        public async Task<Departamento> GetById(int id)
+        public async Task<List<Departamento>> GetAllAsync()
+         => await _context.Departamentos.AsNoTracking().ToListAsync();
+        public async Task<Departamento?> GetByIdAsync(int idDepartamento)
+            => await _context.Departamentos.FindAsync(idDepartamento);
+        public async Task<Departamento> AddAsync(Departamento entity)
         {
-            var departamento = await _context.Departamento
-                                            .AsNoTracking()
-                                            .FirstOrDefaultAsync(d => d.idDepartamento == id);
-
-            if (departamento == null)
-                throw new KeyNotFoundException($"Departamento con id {id} no encontrado.");
-
-            return departamento;
-        }
-
-        public async Task Add(Departamento departamento)
-        {
-            if (departamento is null)
-                throw new ArgumentNullException(nameof(departamento));
-
-            _context.Departamento.Add(departamento);
+            _context.Departamentos.Add(entity);
             await _context.SaveChangesAsync();
+            return entity;
         }
-
-        public async Task Update(Departamento departamento)
+        public async Task<bool> UpdateAsync(Departamento entity)
         {
-            if (departamento is null)
-                throw new ArgumentNullException(nameof(departamento));
-
-            var exists = await _context.Departamento
-                                       .AnyAsync(d => d.idDepartamento == departamento.idDepartamento);
-
-            if (!exists)
-                throw new KeyNotFoundException($"No existe un departamento con id {departamento.idDepartamento} para actualizar.");
-
-            _context.Entry(departamento).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                throw new InvalidOperationException("Error de concurrencia al actualizar el departamento.", ex);
-            }
+            _context.Departamentos .Update(entity);
+            return await _context.SaveChangesAsync() > 0;
         }
-
-        public async Task Delete(int id)
+        public async Task<bool> DeleteAsync(int idDepartamento)
         {
-            var departamento = await _context.Departamento.FindAsync(id);
-
-            if (departamento == null)
-                throw new KeyNotFoundException($"Departamento con id {id} no encontrado para eliminar.");
-
-            _context.Departamento.Remove(departamento);
-            await _context.SaveChangesAsync();
+            var existing = await _context.Departamentos.FindAsync(idDepartamento);
+            if (existing == null) return false;
+            _context.Departamentos.Remove(existing);
+            return await _context.SaveChangesAsync() > 0;
         }
+      
     }
 }

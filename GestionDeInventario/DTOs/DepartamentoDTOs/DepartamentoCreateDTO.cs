@@ -6,7 +6,7 @@ namespace GestionDeInventario.DTOs.DepartamentoDTOs
     {
         [Required(ErrorMessage = "El nombre del departamento es obligatorio.")]
         public string nombre { get; set; }
-
-        public string? descripcion { get; set; }
+        [Required(ErrorMessage = "La descripción del departamento es obligatoria.")]
+        public string descripcion { get; set; }
     }
 }

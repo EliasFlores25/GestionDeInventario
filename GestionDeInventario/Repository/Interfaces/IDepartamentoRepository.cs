@@ -2,12 +2,13 @@
 
 namespace GestionDeInventario.Repository.Interfaces
 {
-    public interface IDepartamentoService
+    public interface IDepartamentoRepository
     {
-        Task<IEnumerable<Departamento>> GetAll();
-        Task<Departamento> GetById(int id);
-        Task Add(Departamento departamento);
-        Task Update(Departamento departamento);
-        Task Delete(int id);
+        IQueryable<Departamento> GetQueryable();
+        Task<List<Departamento>> GetAllAsync();
+        Task<Departamento?> GetByIdAsync(int idDepartamento);
+        Task<Departamento> AddAsync(Departamento entity);
+        Task<bool> UpdateAsync(Departamento entity);
+        Task<bool> DeleteAsync(int idDepartamento);
     }
 }

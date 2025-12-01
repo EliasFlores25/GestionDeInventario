@@ -1,41 +1,86 @@
-﻿using GestionDeInventario.Models;
+﻿using GestionDeInventario.DTOs.DepartamentoDTOs;
+using GestionDeInventario.DTOs.ProductoDTOs;
+using GestionDeInventario.Models;
 using GestionDeInventario.Repository.Interfaces;
+using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
 
 namespace GestionDeInventario.Services.Implementations
 {
     public class DepartamentoService : IDepartamentoService
     {
-        private readonly IDepartamentoRepository _repository;
-
-        public DepartamentoService(IDepartamentoRepository repository)
+        private readonly IDepartamentoRepository _repo;
+        public DepartamentoService(IDepartamentoRepository repo)
         {
-            _repository = repository;
+            _repo = repo;
+        }
+        private DepartamentoResponseDTO MapToResponseDTO(Departamento x)
+        {
+            return new DepartamentoResponseDTO
+            {
+                idDepartamento = x.idDepartamento,
+                nombre = x.nombre,
+                descripcion = x.descripcion,
+            };
         }
 
-        public async Task<IEnumerable<Departamento>> GetAll()
+        public IQueryable<DepartamentoResponseDTO> GetQueryable()
         {
-            return await _repository.GetAll();
+            return _repo.GetQueryable().Select(x => new DepartamentoResponseDTO
+            {
+                idDepartamento = x.idDepartamento,
+                nombre = x.nombre,
+                descripcion = x.descripcion,
+            });
+        }
+        public async Task<List<DepartamentoResponseDTO>> GetAllAsync() =>
+           (await _repo.GetAllAsync()).Select(MapToResponseDTO).ToList();
+
+        public async Task<DepartamentoResponseDTO> GetByIdAsync(int idDepartamento)
+        {
+            var x = await _repo.GetByIdAsync(idDepartamento);
+            if (x == null)
+            {
+                throw new NotFoundException($"Departamento con ID {idDepartamento} no encontrado.");
+            }
+            return MapToResponseDTO(x);
         }
 
-        public async Task<Departamento> GetById(int id)
+        public async Task<DepartamentoResponseDTO> AddAsync(DepartamentoCreateDTO dto)
         {
-            return await _repository.GetById(id);
+            var entity = new Departamento
+            {
+                nombre = dto.nombre,
+                descripcion = dto.descripcion,
+            };
+            var saved = await _repo.AddAsync(entity);
+
+            return MapToResponseDTO(saved);
         }
 
-        public async Task Add(Departamento departamento)
+        public async Task<bool> UpdateAsync(int idDepartamento, DepartamentoUpdateDTO dto)
         {
-            await _repository.Add(departamento);
+            var current = await _repo.GetByIdAsync(idDepartamento);
+
+            if (current == null)
+            {
+                throw new NotFoundException($"Departamento con ID {idDepartamento} no encontrado para la actualización.");
+            }
+            current.nombre = dto.nombre.Trim();
+            current.descripcion = dto.descripcion.Trim();
+
+            return await _repo.UpdateAsync(current);
         }
 
-        public async Task Update(Departamento departamento)
+        public async Task<bool> DeleteAsync(int idDepartamento)
         {
-            await _repository.Update(departamento);
-        }
+            bool wasDeleted = await _repo.DeleteAsync(idDepartamento);
 
-        public async Task Delete(int id)
-        {
-            await _repository.Delete(id);
+            if (!wasDeleted)
+            {
+                throw new NotFoundException($"Departamento con ID {idDepartamento} no existe para ser eliminado.");
+            }
+            return true;
         }
     }
 }

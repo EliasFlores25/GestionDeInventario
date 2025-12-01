@@ -4,69 +4,87 @@
     ViewData["Title"] = "Editar Producto";
 }
 
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
     /* --------------------------------------------------
-         * ------------------ DISEÑO MODERNO Y PROFESIONAL (Basado en Create.cshtml) ------------------
+         * ------------------ DISEÑO MODERNO Y PROFESIONAL (Azul Marino y Dorado) ------------------
          * -------------------------------------------------- */
     :root {
-        --color-primario: #004d99; /* Azul Corporativo Profundo */
-        --color-acento: #1abc9c; /* Verde/Turquesa para acentos y éxito */
-        --color-fondo-claro: #f8f9fa; /* Fondo muy claro */
-        --color-texto-oscuro: #34495e; /* Gris pizarra para texto */
-        --color-borde: #dee2e6; /* Borde de tabla y separación */
+        --color-primario: #0A192F; /* Azul Marino Profundo (Títulos, Botón Primario) */
+        --color-secundario: #1F364D; /* Azul Marino más claro (Labels) */
+        --color-acento: #FFC107; /* Amarillo Dorado (Acento de Foco/Subrayado) */
+        --color-fondo-claro: #F4F7F9; /* Fondo muy claro, casi blanco */
+        --color-texto-oscuro: #333C48; /* Gris carbón para texto general */
+        --color-borde-suave: #E0E4E7; /* Borde de separación */
+        --color-peligro: #e74c3c; /* Rojo para errores */
     }
 
     body {
         background-color: var(--color-fondo-claro);
+        font-family: 'Inter', sans-serif;
     }
 
     /* Contenedor principal del formulario */
     .form-container {
-        max-width: 1200px;
-        margin: 40px auto 20px auto; /* Menos margen inferior para el enlace de volver */
+        max-width: 1000px;
+        margin: 40px auto;
         background-color: white;
         padding: 40px;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--color-borde-suave);
     }
 
     /* Encabezado principal */
     h1 {
         color: var(--color-primario);
-        border-left: 5px solid var(--color-acento);
-        padding-left: 15px;
+        padding-left: 0;
         margin-bottom: 5px;
-        font-size: 2.2rem;
-        font-weight: 700;
+        font-size: 2.5rem;
+        font-weight: 800;
+        position: relative;
         display: flex;
         align-items: center;
     }
 
         h1 i {
-            margin-right: 10px;
-            font-size: 1.8rem;
-            color: var(--color-primario); /* Mantener el color del ícono principal */
+            margin-right: 15px;
+            font-size: 2.2rem;
+            color: var(--color-acento); /* Icono de acento dorado */
+        }
+
+        h1::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: var(--color-acento); /* Subrayado dorado */
+            margin-top: 5px;
+            border-radius: 2px;
+            position: absolute;
+            bottom: -15px;
+            left: 0;
         }
 
     h4 {
         color: var(--color-texto-oscuro);
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: 400;
         margin-bottom: 30px;
-        padding-left: 20px;
+        padding-left: 0;
+        opacity: 0.8;
+        margin-top: 20px;
     }
 
     hr {
-        border-top: 1px solid var(--color-borde);
-        margin-bottom: 30px;
+        /* Se elimina ya que h1::after lo sustituye visualmente */
+        display: none;
     }
 
     /* ------------------ ESTILOS DE FORMULARIO ------------------ */
     .control-label {
-        font-weight: 600;
-        color: var(--color-texto-oscuro);
+        font-weight: 700;
+        color: var(--color-secundario); /* Labels en azul marino más claro */
         margin-bottom: 6px;
     }
 
@@ -74,7 +92,7 @@
     .form-select,
     textarea.form-control {
         border-radius: 8px;
-        border: 1px solid var(--color-borde);
+        border: 1px solid var(--color-borde-suave);
         padding: 10px 15px;
         transition: border-color 0.3s, box-shadow 0.3s;
     }
@@ -83,7 +101,8 @@
         .form-select:focus,
         textarea.form-control:focus {
             border-color: var(--color-acento);
-            box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.25);
+            /* Sombra de enfoque con el color dorado */
+            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
         }
 
     /* Validaciones */
@@ -91,12 +110,15 @@
         font-size: 0.85rem;
         margin-top: 4px;
         display: block;
+        color: var(--color-peligro) !important;
     }
 
     .alert-danger {
-        border-left: 5px solid #e74c3c;
+        border-left: 5px solid var(--color-peligro);
         border-radius: 8px;
         font-weight: 600;
+        background-color: #fceceb; /* Fondo suave para el error */
+        color: var(--color-texto-oscuro);
     }
 
     /* ------------------ ESTILOS DE BOTONES ------------------ */
@@ -106,7 +128,7 @@
         gap: 15px;
     }
 
-    /* Botón Guardar Cambios (Primario) */
+    /* Botón Guardar Cambios (Primario - Azul Marino) */
     .btn-primary {
         background-color: var(--color-primario);
         border-color: var(--color-primario);
@@ -114,16 +136,17 @@
         font-weight: 600;
         border-radius: 8px;
         transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        color: white;
     }
 
         .btn-primary:hover {
-            background-color: #003366;
-            border-color: #003366;
+            background-color: #071324; /* Tono más oscuro de Primario */
+            border-color: #071324;
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 77, 153, 0.2);
+            box-shadow: 0 4px 10px rgba(10, 25, 47, 0.3);
         }
 
-    /* Botón Cancelar (Secundario) */
+    /* Botón Cancelar (Secundario - Gris) */
     .btn-secondary {
         background-color: #6c757d;
         border-color: #6c757d;
@@ -143,21 +166,27 @@
         margin-right: 8px;
     }
 
-    /* Enlace "Volver a la Lista" */
-    .mt-3 a {
-        color: var(--color-primario);
-        text-decoration: none;
-        font-weight: 600;
-        display: inline-block;
-        padding: 10px 15px;
-        border-radius: 8px;
-        transition: background-color 0.3s;
+    /* Enlace "Volver a la Lista" debajo del formulario */
+    .link-container {
+        padding: 15px;
+        max-width: 1000px; /* Coincide con el form-container */
+        margin: 20px auto 40px auto;
     }
 
-        .mt-3 a:hover {
-            background-color: rgba(0, 77, 153, 0.05); /* Un ligero fondo al pasar el mouse */
-            color: #003366;
+        .link-container a {
+            color: var(--color-primario);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
         }
+
+            .link-container a:hover {
+                background-color: rgba(10, 25, 47, 0.05); /* Un ligero fondo al pasar el mouse */
+                color: #071324;
+            }
 
     /* ------------------ RESPONSIVENESS (MÓVIL) ------------------ */
     @@media screen and (max-width: 767px) {
@@ -168,13 +197,20 @@
         }
 
         h1 {
-            font-size: 1.8rem;
-            padding-left: 10px;
+            font-size: 2rem;
         }
 
+            h1 i {
+                font-size: 1.8rem;
+            }
+
+            h1::after {
+                width: 50px;
+            }
+
         h4 {
-            font-size: 1.1rem;
-            padding-left: 15px;
+            font-size: 1rem;
+            margin-top: 15px;
         }
 
         .form-actions {
@@ -191,47 +227,52 @@
 </style>
 
 <div class="form-container">
-    <h1><i class="fas fa-edit"></i> @ViewData["Title"]</h1>
+    <!-- Icono de edición (bi-pencil-square) y título -->
+    <h1><i class="bi bi-pencil-square"></i> @ViewData["Title"]</h1>
     <h4>Actualizar Datos del Producto</h4>
-    <hr />
 
     <div class="row">
-        <div class="col-lg-8 col-md-10">
+        <div class="col-lg-10 col-md-12">
+            <!-- Summary de Validación de Modelo -->
             <form asp-action="Edit">
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
+                <!-- Campo oculto para el ID -->
                 <input type="hidden" asp-for="idProducto" />
 
                 <div class="row">
-                    <div class="col-md-6 form-group mb-3">
+                    <!-- Nombre del Producto -->
+                    <div class="col-md-6 form-group mb-4">
                         <label asp-for="nombre" class="control-label">Nombre del Producto</label>
                         <input asp-for="nombre" class="form-control" placeholder="Ej: Guantes de Nitrilo Azules" />
                         <span asp-validation-for="nombre" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-6 form-group mb-3">
+                    <!-- Unidad de Medida -->
+                    <div class="col-md-6 form-group mb-4">
                         <label asp-for="unidadMedida" class="control-label">Unidad de Medida</label>
                         <input asp-for="unidadMedida" class="form-control" placeholder="Ej: Pares, Cajas, Litros" />
                         <span asp-validation-for="unidadMedida" class="text-danger"></span>
                     </div>
                 </div>
 
-                <div class="form-group mb-3">
+                <!-- Descripción -->
+                <div class="form-group mb-4">
                     <label asp-for="descripcion" class="control-label">Descripción</label>
-
-                    <textarea asp-for="descripcion" class="form-control" rows="3" placeholder="Detalles de material, tamaño, uso, etc."></textarea>
+                    <textarea asp-for="descripcion" class="form-control" rows="4" placeholder="Detalles de material, tamaño, uso, etc."></textarea>
                     <span asp-validation-for="descripcion" class="text-danger"></span>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 form-group mb-3">
-
+                    <!-- Cantidad en Stock -->
+                    <div class="col-md-6 form-group mb-4">
                         <label asp-for="cantidadStock" class="control-label">Cantidad en Stock</label>
                         <input asp-for="cantidadStock" type="number" class="form-control" />
                         <span asp-validation-for="cantidadStock" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-6 form-group mb-3">
+                    <!-- Precio Unitario -->
+                    <div class="col-md-6 form-group mb-4">
                         <label asp-for="precio" class="control-label">Precio Unitario</label>
                         <input asp-for="precio" type="number" step="0.01" class="form-control" />
                         <span asp-validation-for="precio" class="text-danger"></span>
@@ -239,9 +280,11 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 form-group mb-3">
+                    <!-- Estado -->
+                    <div class="col-md-6 form-group mb-4">
                         <label asp-for="estado" class="control-label">Estado</label>
-                        <select asp-for="estado" class="form-control">
+                        <select asp-for="estado" class="form-select">
+                            <!-- Usar form-select en lugar de form-control para selects -->
                             <option value="Disponible">Disponible</option>
                             <option value="Agotado">Agotado</option>
                         </select>
@@ -249,17 +292,21 @@
                     </div>
                 </div>
 
-                <div class="form-group form-actions mt-4">
-                    <button type="submit" value="Guardar" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
-                    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times-circle"></i> Cancelar</a>
+                <!-- Botones de Acción -->
+                <div class="form-group form-actions mt-5">
+                    <button type="submit" value="Guardar" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Guardar Cambios
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver a la Lista
+                    </a>
                 </div>
             </form>
         </div>
     </div>
-</div>
-
-<div class="mt-3 form-container" style="padding: 15px; max-width: 1200px; margin: 0px auto 40px auto;">
-    <a asp-action="Index"><i class="fas fa-arrow-left"></i> Volver a la Lista de Productos</a>
 </div>
 
 @section Scripts {

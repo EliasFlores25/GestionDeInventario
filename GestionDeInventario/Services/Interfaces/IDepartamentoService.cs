@@ -1,14 +1,17 @@
-﻿using GestionDeInventario.Models;
+﻿using GestionDeInventario.DTOs.DepartamentoDTOs;
+using GestionDeInventario.DTOs.ProductoDTOs;
+using GestionDeInventario.Models;
 
 namespace GestionDeInventario.Repository.Interfaces
 {
-    public interface IDepartamentoRepository
+    public interface IDepartamentoService
     {
-        Task<IEnumerable<Departamento>> GetAll();
-        Task<Departamento> GetById(int id);
-        Task Add(Departamento departamento);
-        Task Update(Departamento departamento);
-        Task Delete(int id);
+        IQueryable<DepartamentoResponseDTO> GetQueryable();
+        Task<List<DepartamentoResponseDTO>> GetAllAsync();
+        Task<DepartamentoResponseDTO> GetByIdAsync(int idDepartamento);
+        Task<DepartamentoResponseDTO> AddAsync(DepartamentoCreateDTO dto);
+        Task<bool> UpdateAsync(int idDepartamento, DepartamentoUpdateDTO dto);
+        Task<bool> DeleteAsync(int idDepartamento);
     }
 }
 

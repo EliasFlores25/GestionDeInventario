@@ -18,7 +18,7 @@ namespace GestionDeInventario.Controllers
             _productoService = productoService;
         }
 
-        public async Task<IActionResult> Index(string nombre, int registros = 5)
+        public async Task<IActionResult> Index(string nombre,int? cantidadStock, int registros = 5)
         {
             
             IQueryable<ProductoResponseDTO> query = _productoService.GetQueryable();
@@ -27,7 +27,10 @@ namespace GestionDeInventario.Controllers
             {
                 query = query.Where(c => c.nombre.ToLower().Contains(nombre.ToLower()));
             }
-
+            if (cantidadStock.HasValue)
+            {
+                query = query.Where(c => c.cantidadStock == cantidadStock.Value);
+            }
             if (registros > 0)
             {
                 query = query.Take(registros);
@@ -37,15 +40,15 @@ namespace GestionDeInventario.Controllers
             {
                 List<ProductoResponseDTO> listaFiltrada = await query.ToListAsync();
 
-                ViewData["CurrentFilter"] = nombre;
+                ViewData["NombreFilter"] = nombre;
+                ViewData["StockFilter"] = cantidadStock;
                 ViewData["CurrentRecords"] = registros;
 
                 return View(listaFiltrada);
             }
             catch (Exception ex)
             {
-                TempData["MensajeError"] = "Ocurrió un error al cargar la lista de productos: " + ex.Message;
-                
+                TempData["MensajeError"] = "Ocurrió un error al cargar la lista de productos.";
                 return View(new List<ProductoResponseDTO>());
             }
         }
@@ -167,14 +170,14 @@ namespace GestionDeInventario.Controllers
             {
                 return RedirectToAction(nameof(Index));
             }
-            var empleado = await _productoService.GetByIdAsync(id.Value);
+            var producto = await _productoService.GetByIdAsync(id.Value);
 
-            if (empleado == null)
+            if (producto == null)
             {
-                TempData["MensajeError"] = "Error: El empleado solicitado no existe.";
+                TempData["MensajeError"] = "Error: El producto solicitado no existe.";
                 return RedirectToAction(nameof(Index));
             }
-            return View(empleado);
+            return View(producto);
         }
 
 

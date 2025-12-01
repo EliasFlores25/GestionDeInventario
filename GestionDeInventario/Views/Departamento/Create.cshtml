@@ -1,29 +1,241 @@
-﻿@model GestionDeInventario.Models.Departamento
+﻿@model GestionDeInventario.DTOs.DepartamentoDTOs.DepartamentoCreateDTO
 
 @{
-    ViewData["Title"] = "Crear Departamento";
+    ViewData["Title"] = "Crear Nuevo Departamento";
 }
 
-<div class="container mt-4 p-4 bg-dark text-white rounded shadow">
-    <h2 class="mb-4">Crear Nuevo Departamento</h2>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    :root {
+        --color-primario: #0A192F;
+        --color-secundario: #1F364D;
+        --color-acento: #FFC107;
+        --color-fondo-claro: #F4F7F9;
+        --color-texto-oscuro: #333C48;
+        --color-borde-suave: #E0E4E7;
+        --color-danger: #dc3545;
+        --color-success: #28a745;
+    }
 
-    <form asp-action="Create">
+    body {
+        background-color: var(--color-fondo-claro);
+        font-family: 'Inter', sans-serif;
+    }
 
-        <div class="form-group mb-3">
-            <label class="form-label">Nombre</label>
-            <input asp-for="nombre" class="form-control" />
-            <span asp-validation-for="nombre" class="text-danger"></span>
+    .form-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        background-color: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--color-borde-suave);
+    }
+
+    h1 {
+        color: var(--color-primario);
+        padding-left: 0;
+        margin-bottom: 5px;
+        font-size: 2.5rem;
+        font-weight: 800;
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+        h1 i {
+            margin-right: 15px;
+            font-size: 2.2rem;
+            color: var(--color-acento);
+        }
+
+        h1::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: var(--color-acento);
+            margin-top: 5px;
+            border-radius: 2px;
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+        }
+
+    h4 {
+        color: var(--color-texto-oscuro);
+        font-size: 1.1rem;
+        font-weight: 400;
+        margin-bottom: 30px;
+        padding-left: 0;
+        opacity: 0.8;
+        margin-top: 20px;
+    }
+
+    .separator {
+        border-top: 1px solid var(--color-borde-suave);
+        margin-bottom: 30px;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: var(--color-secundario);
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 8px;
+        border: 1px solid var(--color-borde-suave);
+        padding: 12px 15px;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--color-acento);
+            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+        }
+
+    .text-danger {
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: block;
+        color: var(--color-danger) !important;
+    }
+
+    .alert-danger {
+        border-left: 5px solid var(--color-danger);
+        border-radius: 8px;
+        font-weight: 600;
+        background-color: #f8d7da;
+        color: var(--color-danger);
+    }
+
+    .form-actions {
+        margin-top: 40px;
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn-create-submit {
+        background-color: var(--color-primario);
+        border-color: var(--color-primario);
+        padding: 10px 25px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        color: white;
+    }
+
+        .btn-create-submit:hover {
+            background-color: var(--color-secundario);
+            border-color: var(--color-secundario);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(10, 25, 47, 0.2);
+        }
+
+    .btn-cancel {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+        padding: 10px 25px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: background-color 0.3s;
+    }
+
+        .btn-cancel:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+
+    .btn i {
+        margin-right: 8px;
+    }
+
+    @@media screen and (max-width: 767px) {
+        .form-container {
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+
+            h1 i {
+                font-size: 1.8rem;
+            }
+
+            h1::after {
+                bottom: -10px;
+            }
+
+        h4 {
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+            .form-actions .btn {
+                width: 100%;
+                text-align: center;
+            }
+    }
+
+</style>
+
+<div class="form-container">
+    <h1><i class="bi bi-building"></i> @ViewData["Title"]</h1>
+    <h4>Registre el nombre y la descripción del nuevo departamento en el sistema.</h4>
+    <div class="separator"></div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-12 col-md-12">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row">
+                    <div class="col-12 form-group mb-4">
+                        <label asp-for="nombre" class="control-label">Nombre del Departamento</label>
+                        <input asp-for="nombre" class="form-control" placeholder="Ej: Gerencia de Operaciones" />
+                        <span asp-validation-for="nombre" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 form-group mb-4">
+                        <label asp-for="descripcion" class="control-label">Descripción Detallada</label>
+                        <textarea asp-for="descripcion" class="form-control" rows="3" placeholder="Ej: Unidad responsable de la planificación, supervisión y ejecución de procesos operativos diarios."></textarea>
+                        <span asp-validation-for="descripcion" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group form-actions">
+                    <button type="submit" class="btn btn-primary btn-create-submit">
+                        <i class="bi bi-cloud-arrow-up"></i> Guardar Departamento
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary btn-cancel">
+                        <i class="bi bi-x-circle"></i> Cancelar y Volver a Lista
+                    </a>
+                </div>
+
+            </form>
         </div>
-
-        <div class="form-group mb-3">
-            <label class="form-label">Descripción</label>
-            <textarea asp-for="descripcion" class="form-control"></textarea>
-            <span asp-validation-for="descripcion" class="text-danger"></span>
-        </div>
-
-        <div class="d-flex">
-            <button type="submit" class="btn btn-success me-2">Guardar</button>
-            <a asp-action="Index" class="btn btn-secondary">Volver</a>
-        </div>
-    </form>
+    </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
