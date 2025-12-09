@@ -10,13 +10,10 @@ namespace GestionDeInventario.Models
     {
         [Key]
         public int idDepartamento { get; set; }
-
-        [Required]
-        [StringLength(100)]
         public string nombre { get; set; }
-
-        [StringLength(250)]
         public string? descripcion { get; set; }
+        public ICollection<Empleado> Empleados { get; set; } = new List<Empleado>();
+
     }
 }
 

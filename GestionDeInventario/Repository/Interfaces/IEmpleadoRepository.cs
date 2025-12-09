@@ -6,9 +6,9 @@ namespace GestionDeInventario.Repository.Interfaces
     {
         IQueryable<Empleado> GetQueryable();
         Task<List<Empleado>> GetAllAsync();
-        Task<Empleado?> GetByIdAsync(int id);
+        Task<Empleado?> GetByIdAsync(int idEmpleado);
         Task<Empleado> AddAsync(Empleado entity);
         Task<bool> UpdateAsync(Empleado entity);
-        Task<bool> DeleteAsync(int id);
+        Task<bool> DeleteAsync(int idEmpleado);
     }
 }

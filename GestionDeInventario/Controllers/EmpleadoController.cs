@@ -1,6 +1,9 @@
-﻿using GestionDeInventario.Models;
+﻿using GestionDeInventario.DTOs.EmpleadoDTOs;
+using GestionDeInventario.Repository.Interfaces;
+using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace GestionDeInventario.Controllers
@@ -8,142 +11,276 @@ namespace GestionDeInventario.Controllers
     public class EmpleadoController : Controller
     {
         private readonly IEmpleadoService _empleadoService;
-        public EmpleadoController(IEmpleadoService empleadoService)
+        private readonly IDepartamentoService _departamentoService;
+        public EmpleadoController(IEmpleadoService empleadoService, IDepartamentoService departamentoService)
         {
             _empleadoService = empleadoService;
+            _departamentoService = departamentoService;
         }
-        // GET: /Empleado/ (Lista de empleados con búsqueda y paginación)
-        public async Task<IActionResult> Index(string nombre, int registros = 10)
+        private async Task PopulateDropdowns()
         {
-            // 1. OBTENER LA CONSULTA BASE (IQueryable)
-            // Esto NO ejecuta una consulta SQL. Simplemente prepara la base.
-            IQueryable<Empleado> query = _empleadoService.GetQueryable();
-
-            // 2. APLICAR FILTRO POR NOMBRE
-            if (!string.IsNullOrEmpty(nombre))
-            {
-                query = query.Where(c => c.nombre.Contains(nombre));
-            }
-            // 3. APLICAR LÍMITE DE REGISTROS (PAGINACIÓN SIMPLE)
-            if (registros > 0)
-            {
-                // El método Take añade una cláusula TOP/LIMIT a la sentencia SQL.
-                query = query.Take(registros);
-            }
-            // 4. EJECUTAR LA CONSULTA FINAL
-            // SOLO AQUÍ se contacta a la base de datos con una ÚNICA y OPTIMIZADA consulta SQL.
-            List<Empleado> listaFiltrada = await query.ToListAsync();
-
-            // 5. MANTENER LOS VALORES EN LA VISTA
-            // Esto es para que el usuario vea los filtros que aplicó.
-            ViewData["CurrentFilter"] = nombre;
-            ViewData["CurrentRecords"] = registros;
-
-            // 6. DEVOLVER LA VISTA
-            return View(listaFiltrada);
+            var departamentos = await _departamentoService.GetAllAsync();
+            ViewBag.departamentoId = new SelectList(departamentos, "idDepartamento", "nombre");
         }
-
-
-        // GET: /Empleado/Details/5 (Muestra los detalles de un empleado por ID)
-        public async Task<IActionResult> Details(int id)
+        private async Task PopulateDepartamentoNamesViewBag()
         {
-            // 1. Llama al servicio para obtener la categoría por ID
-            Empleado? empleado = await _empleadoService.GetByIdAsync(id);
+            var departamentos = await _departamentoService.GetAllAsync();
 
-            // 2. Verifica si la categoría existe
-            if (empleado == null)
+            var departamentosList = departamentos.Select(d => new SelectListItem
             {
-                return NotFound(); // Retorna error 404 si no se encuentra
-            }
-            // 3. Envía el objeto a la vista "Details.cshtml"
-            return View(empleado);
-        }
+                Value = d.idDepartamento.ToString(),
+                Text = d.nombre
+            }).ToList();
+            departamentosList.Insert(0, new SelectListItem { Value = "", Text = "Todos los Departamentos" });
+            ViewBag.departamentoId = departamentosList;
 
-        // GET: /Empleado/Crear (Muestra el formulario vacío)
-        public IActionResult Create()
+            ViewBag.DepartamentosNombres = departamentos.ToDictionary(d => d.idDepartamento, d => d.nombre);
+
+        }
+        public async Task<IActionResult> Index(string nombre, string apellido, string genero, int? departamentoId, int pageNumber = 1, int pageSize = 5)
         {
-            return View();
-        }
+            await PopulateDepartamentoNamesViewBag();
+            IQueryable<EmpleadoResponseDTO> query = _empleadoService.GetQueryable();
 
-        // POST: /Empleado/Crear (Recibe los datos del formulario)
+            string? n_nombre = nombre?.ToLower();
+            string? n_apellido = apellido?.ToLower();
+            string? n_genero = genero?.ToLower();
+
+            if (!string.IsNullOrWhiteSpace(n_nombre))
+            {
+                query = query.Where(c => c.nombre.ToLower().Contains(n_nombre));
+            }
+
+            if (!string.IsNullOrWhiteSpace(n_apellido))
+            {
+                query = query.Where(c => c.apellido.ToLower().Contains(n_apellido));
+            }
+
+            if (!string.IsNullOrWhiteSpace(n_genero))
+            {
+                query = query.Where(c => c.genero.ToLower() == n_genero);
+            }
+
+            if (departamentoId.HasValue && departamentoId.Value > 0)
+            {
+                query = query.Where(c => c.departamentoId == departamentoId.Value);
+            }
+
+            try
+            {
+                int totalRegistros = await query.CountAsync();
+                int totalPages = (int)Math.Ceiling((double)totalRegistros / pageSize);
+
+                pageNumber = Math.Max(1, Math.Min(pageNumber, totalPages > 0 ? totalPages : 1));
+
+                var listaPaginada = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                ViewBag.CurrentNombreEmpleado = nombre;
+                ViewBag.CurrentApellidoEmpleado = apellido;
+                ViewBag.CurrentGenero = genero;
+                ViewBag.CurrentDepartamentoId = departamentoId;
+
+                ViewBag.PageNumber = pageNumber;
+                ViewBag.TotalPages = totalPages;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalRegistros = totalRegistros;
+                ViewBag.HasPreviousPage = pageNumber > 1;
+                ViewBag.HasNextPage = pageNumber < totalPages;
+
+                if (!string.IsNullOrWhiteSpace(nombre) || !string.IsNullOrWhiteSpace(apellido) || !string.IsNullOrWhiteSpace(genero) || departamentoId.HasValue && departamentoId.Value > 0)
+                {
+                    ViewData["IsFilterApplied"] = true;
+                }
+                return View(listaPaginada);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Ocurrió un error al cargar la lista de empleados: " + ex.Message;
+                await PopulateDepartamentoNamesViewBag();
+
+                ViewBag.PageNumber = 1;
+                ViewBag.TotalPages = 1;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalRegistros = 0;
+                ViewBag.HasPreviousPage = false;
+                ViewBag.HasNextPage = false;
+
+                return View(new List<EmpleadoResponseDTO>());
+            }
+        }
+        public async Task<IActionResult> Create()
+        {
+            await PopulateDropdowns();
+            return View(new EmpleadoCreateDTO());
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Empleado empleado)
+        public async Task<IActionResult> Create(EmpleadoCreateDTO empleadoDto)
         {
-            Empleado empleadoCreado = await _empleadoService.AddAsync(empleado);
-
-            if (empleadoCreado != null && empleadoCreado.idEmpleado > 0)
+            if (!ModelState.IsValid)
             {
-                TempData["MensajeExito"] = "OK: El empleado se ha creado exitosamente.";
+                await PopulateDropdowns();
+                return View(empleadoDto);
+            }
+            try
+            {
+                var nuevoEmpleado = await _empleadoService.AddAsync(empleadoDto);
+                if (nuevoEmpleado == null)
+                {
+                    ModelState.AddModelError("", "No se pudo crear el empleado.");
+                    await PopulateDropdowns();
+                    return View(empleadoDto);
+                }
+                TempData["Ok"] = "Empleado creado con éxito.";
                 return RedirectToAction(nameof(Index));
             }
-            ModelState.AddModelError(string.Empty, "Error: No se pudo crear el empleado. Verifica los datos.");
-            return View(empleado);
+            catch (BusinessRuleException brex)
+            {
+                ModelState.AddModelError(string.Empty, brex.Message);
+                await PopulateDropdowns();
+                return View(empleadoDto);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al crear el empleado: " + ex.Message);
+                await PopulateDropdowns();
+                return View(empleadoDto);
+            }
         }
-
-        // GET: /Empleado/Editar/5 (Muestra el formulario con datos existentes)
         public async Task<IActionResult> Edit(int id)
         {
-            Empleado? empleado = await _empleadoService.GetByIdAsync(id);
+            try
+            {
+                var empleadoDto = await _empleadoService.GetByIdAsync(id);
+                if (empleadoDto == null)
+                {
+                    return NotFound();
+                }
+                var updateDto = new EmpleadoUptadeDTO
+                {
+                    nombre = empleadoDto.nombre,
+                    apellido = empleadoDto.apellido,
+                    edad = empleadoDto.edad,
+                    genero = empleadoDto.genero,
+                    telefono = empleadoDto.telefono,
+                    direccion = empleadoDto.direccion,
+                    departamentoId = empleadoDto.departamentoId,
+                    estado = empleadoDto.estado,
+                };
+                await PopulateDropdowns();
+                return View(updateDto);
+            }
+            catch (NotFoundException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "No se pudo cargar el empleado para edición.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, EmpleadoUptadeDTO empleado)
+        {
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropdowns();
+                return View(empleado);
+            }
+            try
+            {
+                var success = await _empleadoService.UpdateAsync(id, empleado);
+                if (success)
+                {
+                    TempData["Ok"] = "Empleado actualizado con éxito.";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("", "La actualización no se pudo completar. El registro no existe o el servicio falló.");
+                }
+            }
+            catch (NotFoundException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (BusinessRuleException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("", "Error al actualizar el empleado. Verifique si el ID coincide o si la sesión es válida.");
+            }
+            await PopulateDropdowns();
+            return View(empleado);
+        }
+        public async Task<IActionResult> Details(int id)
+        {
+            var empleado = await _empleadoService.GetByIdAsync(id);
+            var departamentos = await _departamentoService.GetAllAsync();
 
+            ViewBag.DepartamentoNombres = departamentos?.ToDictionary(d => d.idDepartamento, d => d.nombre) ?? new Dictionary<int, string>();
             if (empleado == null)
             {
                 return NotFound();
             }
             return View(empleado);
         }
-
-        // POST: /Empleado/Editar/5 (Recibe los datos actualizados del formulario)
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Empleado empleado)
+        public async Task<IActionResult> Delete(int id)
         {
-            bool exito = await _empleadoService.UpdateAsync(empleado.idEmpleado, empleado);
-
-            if (exito)
+            try
             {
-                TempData["MensajeExito"] = "OK: El empleado se ha actualizado exitosamente.";
-                return RedirectToAction(nameof(Index));
+                var empleado = await _empleadoService.GetByIdAsync(id);
+                var departamento = await _departamentoService.GetAllAsync();
+                ViewBag.DepartamentoNombres = departamento?.ToDictionary(d => d.idDepartamento, d => d.nombre) ?? new Dictionary<int, string>();
+                return View(empleado);
             }
-            ModelState.AddModelError(string.Empty, "Error: No se pudo actualizar el empleado. Verifique la existencia y los datos.");
-            return View(empleado);
-        }
-
-
-        // 1. MÉTODO HTTP GET: Muestra la vista de confirmación.
-        // Es el que necesitas para que la URL /Categoria/Delete/1 funcione.
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            var empleado = await _empleadoService.GetByIdAsync(id.Value);
-
-            if (empleado == null)
+            catch (NotFoundException)
             {
                 TempData["MensajeError"] = "Error: El empleado solicitado no existe.";
                 return RedirectToAction(nameof(Index));
             }
-            return View(empleado);
         }
-       
-        //
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            bool exito = await _empleadoService.DeleteAsync(id);
+            try
+            {
+                await _empleadoService.DeleteAsync(id);
+                TempData["MensajeExito"] = "Empleado eliminado con éxito.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (NotFoundException)
+            {
+                TempData["MensajeError"] = "Error: El empleado ya no existe o fue eliminado.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al eliminar el empleado: " + ex.Message);
 
-            if (exito)
-            {
-                TempData["MensajeExito"] = "OK: El empleado se ha eliminado exitosamente.";
+                try
+                {
+                    var empleado = await _empleadoService.GetByIdAsync(id);
+                    var departamento = await _departamentoService.GetAllAsync();
+                    ViewBag.DepartamentoNombres = departamento?.ToDictionary(d => d.idDepartamento, d => d.nombre) ?? new Dictionary<int, string>();
+                    return View("Delete", empleado);
+                }
+                catch (NotFoundException)
+                {
+                    TempData["MensajeError"] = "Error interno: El empleado fue eliminado antes de mostrar el error.";
+                    return RedirectToAction(nameof(Index));
+                }
             }
-            else
-            {
-                TempData["MensajeError"] = "Error: No se pudo eliminar el empleado. Es posible que no exista.";
-            }
-            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -1,10 +1,6 @@
 ﻿using GestionDeInventario.DTOs.DepartamentoDTOs;
-using GestionDeInventario.DTOs.ProductoDTOs;
-using GestionDeInventario.Models;
 using GestionDeInventario.Repository.Interfaces;
 using GestionDeInventario.Services.Exceptions;
-using GestionDeInventario.Services.Implementations;
-using GestionDeInventario.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

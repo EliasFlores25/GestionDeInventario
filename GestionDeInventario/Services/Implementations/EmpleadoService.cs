@@ -1,38 +1,21 @@
-﻿using GestionDeInventario.Models;
+﻿using GestionDeInventario.DTOs.EmpleadoDTOs;
+using GestionDeInventario.Models;
 using GestionDeInventario.Repository.Interfaces;
+using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
 
 namespace GestionDeInventario.Services.Implementations
 {
     public class EmpleadoService : IEmpleadoService
     {
-        private readonly IEmpleadoRepository _empleadoRepository;
-        public EmpleadoService(IEmpleadoRepository empleadoRepository)
+        private readonly IEmpleadoRepository _repo;
+        public EmpleadoService(IEmpleadoRepository repo)
         {
-            _empleadoRepository = empleadoRepository;
+            _repo = repo;
         }
-        public IQueryable<Empleado> GetQueryable()
+        private EmpleadoResponseDTO MapToResponseDTO(Empleado x)
         {
-            return _empleadoRepository.GetQueryable();
-        }
-        public async Task<List<Empleado>> GetAllAsync() =>
-    (await _empleadoRepository.GetAllAsync()).Select(x => new Empleado
-    {
-        idEmpleado = x.idEmpleado,
-        nombre = x.nombre,
-        apellido = x.apellido,
-        edad = x.edad,
-        genero = x.genero,
-        telefono = x.telefono,
-        direccion = x.direccion,
-        departamentoId = x.departamentoId,
-        estado = x.estado,
-    }).ToList();
-
-        public async Task<Empleado?> GetByIdAsync(int id)
-        {
-            var x = await _empleadoRepository.GetByIdAsync(id);
-            return x == null ? null : new Empleado
+            return new EmpleadoResponseDTO
             {
                 idEmpleado = x.idEmpleado,
                 nombre = x.nombre,
@@ -45,50 +28,84 @@ namespace GestionDeInventario.Services.Implementations
                 estado = x.estado,
             };
         }
-        public async Task<Empleado> AddAsync(Empleado empleado)
+        public IQueryable<EmpleadoResponseDTO> GetQueryable()
         {
+            return _repo.GetQueryable().Select(x => new EmpleadoResponseDTO
+            {
+                idEmpleado = x.idEmpleado,
+                nombre = x.nombre,
+                apellido = x.apellido,
+                edad = x.edad,
+                genero = x.genero,
+                telefono = x.telefono,
+                direccion = x.direccion,
+                departamentoId = x.departamentoId,
+                estado = x.estado,
+            });
+        }
+        public async Task<List<EmpleadoResponseDTO>> GetAllAsync() =>
+            (await _repo.GetAllAsync()).Select(MapToResponseDTO).ToList();
+        public async Task<EmpleadoResponseDTO> GetByIdAsync(int idEmpleado)
+        {
+            var x = await _repo.GetByIdAsync(idEmpleado);
+            if (x == null)
+            {
+                throw new NotFoundException($"Empleado con ID {idEmpleado} no encontrado.");
+            }
+            return MapToResponseDTO(x);
+        }
+        public async Task<EmpleadoResponseDTO> AddAsync(EmpleadoCreateDTO dto)
+        {
+            if (dto.edad < 18 || dto.edad > 100)
+            {
+                throw new BusinessRuleException("La edad debe ser igual o mayor a 18 y menor o igual a 100 años.");
+            }
+
             var entity = new Empleado
             {
-                nombre = empleado.nombre.Trim(),
-                apellido = empleado.apellido.Trim(),
-                edad = empleado.edad,
-                genero = empleado.genero.Trim(),
-                telefono = empleado.telefono.Trim(),
-                direccion = empleado.direccion.Trim(),
-                departamentoId = empleado.departamentoId,
-                estado = empleado.estado.Trim()
+                nombre = dto.nombre,
+                apellido = dto.apellido,
+                edad = dto.edad,
+                genero = dto.genero,
+                telefono = dto.telefono,
+                direccion = dto.direccion,
+                departamentoId = dto.departamentoId,
+                estado = dto.estado,
             };
-            var saved = await _empleadoRepository.AddAsync(entity);
-            return new Empleado
+
+            var saved = await _repo.AddAsync(entity);
+
+            return MapToResponseDTO(saved);
+        }
+        public async Task<bool> UpdateAsync(int idEmpleado, EmpleadoUptadeDTO dto)
+        {
+            var current = await _repo.GetByIdAsync(idEmpleado);
+
+            if (dto.edad < 18 || dto.edad > 100)
             {
-                idEmpleado = saved.idEmpleado,
-                nombre = saved.nombre,
-                apellido = saved.apellido,
-                edad = saved.edad,
-                genero = saved.genero,
-                telefono = saved.telefono,
-                direccion = saved.direccion,
-                departamentoId = saved.departamentoId,
-                estado = saved.estado
-            };
+                throw new BusinessRuleException("La edad debe ser igual o mayor a 18 y menor o igual a 100 años.");
+            }
+
+            current.nombre = dto.nombre.Trim();
+            current.apellido = dto.apellido.Trim();
+            current.edad = dto.edad;
+            current.genero = dto.genero.Trim();
+            current.telefono = dto.telefono.Trim();
+            current.direccion = dto.direccion.Trim();
+            current.departamentoId = dto.departamentoId;
+            current.estado = dto.estado.Trim();
+
+            return await _repo.UpdateAsync(current);
         }
-        public async Task<bool> UpdateAsync(int id, Empleado empleado)
+        public async Task<bool> DeleteAsync(int idEmpleado)
         {
-            var current = await _empleadoRepository.GetByIdAsync(id);
-            if (current == null) return false;
-            current.nombre = empleado.nombre.Trim();
-            current.apellido = empleado.apellido.Trim();
-            current.edad = empleado.edad;
-            current.genero = empleado.genero.Trim();
-            current.telefono = empleado.telefono.Trim();
-            current.direccion = empleado.direccion.Trim();
-            current.departamentoId = empleado.departamentoId;
-            current.estado = empleado.estado.Trim();
-            return await _empleadoRepository.UpdateAsync(current);
-        }
-        public async Task<bool> DeleteAsync(int id)
-        {
-            return await _empleadoRepository.DeleteAsync(id);
+            bool wasDeleted = await _repo.DeleteAsync(idEmpleado);
+
+            if (!wasDeleted)
+            {
+                throw new NotFoundException($"Empleado con ID {idEmpleado} no existe para ser eliminado.");
+            }
+            return true;
         }
     }
 }

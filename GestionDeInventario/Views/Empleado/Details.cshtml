@@ -1,72 +1,315 @@
-﻿@model GestionDeInventario.Models.Empleado
+﻿@model GestionDeInventario.DTOs.EmpleadoDTOs.EmpleadoResponseDTO
 
 @{
     ViewData["Title"] = "Detalles del Empleado";
+    var departamentoNombres = ViewBag.departamentoNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
 }
-<div class="details-container">
-    <h1><i class="fas fa-info-circle"></i> Detalles del Empleado</h1>
-    <h4>Información del Empleado</h4>
-    <hr />
 
-    <div class="row">
-        <div class="col-lg-10 col-md-12">
-            <dl class="row">
-                <dt class="col-sm-3">
-                    Nombre
-                </dt>
-                <dd class="col-sm-9">
-                    @Html.DisplayFor(model => model.nombre)
-                </dd>
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --success: #10b981;
+        --danger: #ef4444;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
+    }
 
-                <dt class="col-sm-3">
-                    Apellido
-                </dt>
-                <dd class="col-sm-9">
-                    @Html.DisplayFor(model => model.apellido)
-                </dd>
+    .container-details {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 80px);
+    }
 
-                <dt class="col-sm-3">
-                    Edad
-                </dt>
-                <dd class="col-sm-9">
-                    @Html.DisplayFor(model => model.edad)
-                </dd>
-                <dt class="col-sm-3">
-                    Genero
-                </dt>
-                <dd class="col-sm-9">
-                    @Html.DisplayFor(model => model.genero)
-                </dd>
-                <dt class="col-sm-3">
-                    Telefono
-                </dt>
-                <dd class="col-sm-9">
-                    @Html.DisplayFor(model => model.telefono)
-                </dd>
-                <dt class="col-sm-3">
-                    Dirección
-                </dt>
-                <dd class="col-sm-9">
-                    @Html.DisplayFor(model => model.direccion)
-                </dd>
-                <dt class="col-sm-3">
-                    Codigo de departamento
-                </dt>
-                <dd class="col-sm-9">
-                    @Html.DisplayFor(model => model.departamentoId)
-                </dd>
-                <dt class="col-sm-3">
-                    Estado
-                </dt>
-                <dd class="col-sm-9">
-                    @Html.DisplayFor(model => model.estado)
-                </dd>
-            </dl>
+    .details-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border-top: 5px solid var(--primary);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .details-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+        .details-header h1 {
+            color: var(--dark);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+            .details-header h1 i {
+                color: var(--primary);
+            }
+
+        .details-header h4 {
+            color: var(--text-light);
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+        }
+
+    .section-title {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-item {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 3px solid var(--primary);
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: var(--text-light);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .detail-label i {
+            font-size: 0.9em;
+        }
+
+    .detail-value {
+        color: var(--dark);
+        font-size: 1rem;
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .badge {
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+        }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
+        }
+
+    .btn-secondary {
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+    .full-width-item {
+        grid-column: 1 / -1;
+    }
+
+        .full-width-item .detail-value {
+            line-height: 1.6;
+        }
+
+    @@media (max-width: 768px) {
+        .container-details {
+            padding: 1rem;
+        }
+
+        .details-card {
+            padding: 1.5rem;
+        }
+
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+    }
+
+    @@media (max-width: 576px) {
+        .details-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .details-card {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container-details">
+    <div class="details-card">
+        <div class="details-header">
+            <h1><i class="fas fa-user-circle"></i> Detalles del Empleado</h1>
+            <h4>Información personal y laboral de @Model.nombre @Model.apellido</h4>
         </div>
-    </div>
 
-    <div class="button-container">
-        <a asp-action="Edit" asp-route-id="@Model?.idEmpleado" class="btn btn-edit"><i class="fas fa-edit"></i> Editar</a>
-        <a asp-action="Index" class="btn btn-back"><i class="fas fa-arrow-left"></i> Volver a la Lista</a>
+        <!-- Datos Personales -->
+        <div class="section-title">
+            <i class="fas fa-id-card"></i> Datos Personales
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-fingerprint"></i> ID</div>
+                <div class="detail-value">@Model.idEmpleado</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-user"></i> Nombre</div>
+                <div class="detail-value">@Model.nombre</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-user-tag"></i> Apellido</div>
+                <div class="detail-value">@Model.apellido</div>
+            </div>
+        </div>
+
+        <!-- Información Básica y Contacto -->
+        <div class="section-title">
+            <i class="fas fa-info-circle"></i> Información Básica y Contacto
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-birthday-cake"></i> Edad</div>
+                <div class="detail-value">@Model.edad años</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas @(Model.genero == "Masculino" ? "fa-mars" : "fa-venus")"></i> Género
+                </div>
+                <div class="detail-value">@Model.genero</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-phone"></i> Teléfono</div>
+                <div class="detail-value">@Model.telefono</div>
+            </div>
+            <div class="detail-item full-width-item">
+                <div class="detail-label"><i class="fas fa-map-marker-alt"></i> Dirección</div>
+                <div class="detail-value">@Model.direccion</div>
+            </div>
+        </div>
+
+        <!-- Asignación de Roles y Ubicación -->
+        <div class="section-title">
+            <i class="fas fa-briefcase"></i> Asignación de Roles y Ubicación
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-building"></i> Departamento</div>
+                <div class="detail-value">
+                    @departamentoNombres.GetValueOrDefault(Model.departamentoId, "No asignado")
+                </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-circle"></i> Estado</div>
+                <div class="detail-value">
+                    <span class="badge @(Model.estado == "Activo" ? "badge-success" : "badge-danger")">
+                        @Model.estado
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a la Lista
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.idEmpleado" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Editar Empleado
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.idEmpleado" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Eliminar
+            </a>
+        </div>
     </div>
 </div>

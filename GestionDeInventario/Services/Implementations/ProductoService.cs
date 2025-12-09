@@ -3,7 +3,6 @@ using GestionDeInventario.Models;
 using GestionDeInventario.Repository.Interfaces;
 using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
-using System.Linq;
 
 namespace GestionDeInventario.Services.Implementations
 {
@@ -115,7 +114,7 @@ namespace GestionDeInventario.Services.Implementations
             {
                 throw new NotFoundException($"Producto con ID {idProducto} no existe para ser eliminado.");
             }
-            return true; 
+            return true;
+        }
     }
-}
 }

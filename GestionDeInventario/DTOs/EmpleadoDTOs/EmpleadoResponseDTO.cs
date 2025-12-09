@@ -1,26 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using GestionDeInventario.Models;
+using System.ComponentModel.DataAnnotations;
 
-namespace GestionDeInventario.Models
+namespace GestionDeInventario.DTOs.EmpleadoDTOs
 {
-    [Table("Empleado")]
-    public class Empleado
+    public class EmpleadoResponseDTO
     {
-        [Key]
         public int idEmpleado { get; set; }
         public string nombre { get; set; }
-
         public string apellido { get; set; }
-
         public int edad { get; set; }
-
         public string genero { get; set; }
-
         public string telefono { get; set; }
-
         public string direccion { get; set; }
+        public Departamento departamento { get; set; }
         public int departamentoId { get; set; }
-        public Departamento departamento { get; set; } = null!;
         public string estado { get; set; }
     }
 }

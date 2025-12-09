@@ -1,154 +1,658 @@
-﻿@model IEnumerable<GestionDeInventario.Models.Empleado>
+﻿@model IEnumerable<GestionDeInventario.DTOs.EmpleadoDTOs.EmpleadoResponseDTO>
+@using Microsoft.AspNetCore.Mvc.Rendering
+
 @{
     ViewData["Title"] = "Gestión de Empleados";
-
-    var buscarEmpleado = new Empleado();
+    var departamentoNombres = ViewBag.DepartamentosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var departamentosList = ViewBag.departamentoId as List<SelectListItem> ?? new List<SelectListItem>();
+    int pageNumber = ViewBag.PageNumber ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalRegistros = ViewBag.TotalRegistros ?? 0;
 }
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="text-primary">Listado de Empledos</h1>
-    <a asp-action="Create" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Crear Nuevo Empleado
-    </a>
-</div>
 
-<div class="search-container">
-    <form asp-action="Index">
-        <table id="Tabla">
-            <tr>
-                <td>
-                    <div class="row">
-                        <div class="form-group col-mb-4">
-                            <label class="control-label">Nombre del Empleado</label>
-                            <input name="nombre" class="form-control" placeholder="Ej: Jose Perez" />
-                        </div>
+<style>
+    :root {
+        --primary: #2563eb;
+        --success: #10b981;
+        --danger: #ef4444;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+    }
 
-                        <div class="form-group col-md-4 d-flex align-items-end">
-                            <button type="submit" class="btn btn-dark mr-2">
-                                <i class="bi bi-search"></i> Buscar
-                            </button>
-                            <a asp-action="Index" class="btn btn-secondary">
-                                <i class="bi bi-x-circle"></i> Limpiar
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="form-group col-md-6">
-                        <div class="row">
-                            <label class="control-label">Cant. Registros</label>
-                            <select name="registros" class="form-control">
-                                <option value="10">10</option>
-                                <option value="20">20</option>
-                                <option value="30">30</option>
-                                <option value="40">40</option>
-                                <option value="50">50</option>
-                                <option value="0">Todos</option>
-                            </select>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </form>
-</div>
-@if (TempData["MensajeExito"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["MensajeExito"]
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-}
-@if (TempData["MensajeError"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["MensajeError"]
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-}
-<div class="table-responsive">
-    <table class="table table-striped table-hover" id="mytable">
-        <thead class="thead-dark">
-            <tr>
-                <th>@Html.DisplayNameFor(model => model.nombre)</th>
-                <th>@Html.DisplayNameFor(model => model.apellido)</th>
-                <th>@Html.DisplayNameFor(model => model.edad)</th>
-                <th>@Html.DisplayNameFor(model => model.genero)</th>
-                <th>@Html.DisplayNameFor(model => model.telefono)</th>
-                <th>@Html.DisplayNameFor(model => model.direccion)</th>
-                <th>@Html.DisplayNameFor(model => model.departamentoId)</th>
-                <th>@Html.DisplayNameFor(model => model.estado)</th>
-                <th class="text-center">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    
-                    <td>@Html.DisplayFor(modelItem => item.nombre)</td>
-                    <td>@Html.DisplayFor(modelItem => item.apellido)</td>
-                    <td>@Html.DisplayFor(modelItem => item.edad)</td>
-                    <td>@Html.DisplayFor(modelItem => item.genero)</td>
-                    <td>@Html.DisplayFor(modelItem => item.telefono)</td>
-                    <td>@Html.DisplayFor(modelItem => item.direccion)</td>
-                    <td>@Html.DisplayFor(modelItem => item.departamentoId)</td>
-                    <td>@Html.DisplayFor(modelItem => item.estado)</td>
-                    <td class="text-center" style="min-width: 250px;">
-                        <div class="btn-group" role="group">
-                            <a asp-action="Edit" asp-route-id="@item.idEmpleado" class="btn btn-warning btn-sm" title="Editar">
-                                <i class="bi bi-pencil"></i> Editar
-                            </a>
-                            <a asp-action="Details" asp-route-id="@item.idEmpleado" class="btn btn-info btn-sm" title="Detalles">
-                                <i class="bi bi-eye"></i> Detalles
-                            </a>
-                            <a asp-action="Delete" asp-route-id="@item.idEmpleado" class="btn btn-danger btn-sm" title="Eliminar">
-                                <i class="bi bi-trash"></i> Eliminar
-                            </a>
-                        </div>
-                    </td>
-                   
-                </tr>
+    .container-empleados {
+        padding: 1rem;
+        background: var(--light);
+        min-height: 100vh;
+    }
+
+    .header {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+    .btn-secondary {
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+    .btn-sm {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .filters {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.5rem;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+    .alert {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border-left: 4px solid var(--success);
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid var(--danger);
+    }
+
+    .table-desktop {
+        display: none;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow-x: auto;
+    }
+
+        .table-desktop table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        .table-desktop th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .table-desktop td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .table-desktop tr:hover {
+            background: #f8fafc;
+        }
+
+    .td-direccion {
+        display: block;
+        max-width: 250px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+        color: var(--primary);
+    }
+
+        .td-direccion:hover {
+            color: #1d4ed8;
+        }
+
+    .cards-mobile {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--primary);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .card-info {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 0.9rem;
+        color: var(--dark);
+        word-break: break-word;
+    }
+
+    .direccion-mobile {
+        max-height: 20px;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        padding-right: 20px;
+    }
+
+        .direccion-mobile::after {
+            content: '...';
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            background: white;
+            padding-left: 5px;
+        }
+
+        .direccion-mobile.expanded {
+            max-height: none;
+            white-space: pre-wrap;
+        }
+
+            .direccion-mobile.expanded::after {
+                display: none;
             }
-        </tbody>
-    </table>
+
+    .card-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+        padding: 1rem;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .page-link {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 0.5rem;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        background: white;
+        color: var(--dark);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .page-link:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        .page-link.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .page-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6b7280;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .modal-direccion {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    @@media (min-width: 768px) {
+        .container-empleados {
+            padding: 1.5rem;
+        }
+
+        .table-desktop {
+            display: block;
+        }
+
+        .cards-mobile {
+            display: none;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .table-desktop {
+            display: none;
+        }
+
+        .cards-mobile {
+            display: grid;
+        }
+
+        .header {
+            padding: 0.75rem;
+        }
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .card-info {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="container-empleados">
+    <div class="header">
+        <h1><i class="fas fa-users"></i> @ViewData["Title"]</h1>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Nuevo Empleado</a>
+            <button class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#filters">
+                <i class="fas fa-filter"></i> Filtros
+            </button>
+        </div>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> @ViewBag.Error</div>
+    }
+    @if (TempData["Ok"] != null)
+    {
+        <div class="alert alert-success"><i class="fas fa-check-circle"></i> @TempData["Ok"]</div>
+    }
+
+    <div class="filters collapse" id="filters">
+        <form asp-action="Index" method="get">
+            <input type="hidden" name="page" value="1" />
+            <div class="filter-grid">
+                <input type="text" class="form-control" name="nombre" placeholder="Nombre" value="@ViewBag.CurrentNombreEmpleado">
+                <input type="text" class="form-control" name="apellido" placeholder="Apellido" value="@ViewBag.CurrentApellidoEmpleado">
+                <select class="form-control" name="departamentoId">
+                    <option value="">Todos los departamentos</option>
+                    @foreach (var item in departamentosList)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentDepartamentoId?.ToString())">@item.Text</option>
+                    }
+                </select>
+                <select class="form-control" name="genero">
+                    <option value="">Todos los géneros</option>
+                    <option value="Masculino" selected="@("Masculino" == ViewBag.CurrentGenero)">Masculino</option>
+                    <option value="Femenino" selected="@("Femenino" == ViewBag.CurrentGenero)">Femenino</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-desktop">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Edad</th>
+                    <th>Género</th>
+                    <th>Teléfono</th>
+                    <th>Dirección</th>
+                    <th>Departamento</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.nombre</td>
+                            <td>@item.apellido</td>
+                            <td>@item.edad</td>
+                            <td>
+                                <i class="fas @(item.genero == "Masculino" ? "fa-mars text-primary" : "fa-venus text-danger")"></i>
+                                @item.genero
+                            </td>
+                            <td>@item.telefono</td>
+                            <td>
+                                <span class="td-direccion" onclick="mostrarDireccion('@Html.Raw(item.direccion.Replace("'", "\\'"))')">
+                                    @item.direccion
+                                </span>
+                            </td>
+                            <td>@departamentoNombres.GetValueOrDefault(item.departamentoId, "N/A")</td>
+                            <td>
+                                <span class="badge @(item.estado == "Activo" ? "badge-success" : "badge-danger")">
+                                    @item.estado
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <a asp-action="Edit" asp-route-id="@item.idEmpleado" class="btn btn-secondary btn-sm" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.idEmpleado" class="btn btn-secondary btn-sm" title="Detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.idEmpleado" class="btn btn-secondary btn-sm" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="empty-state">
+                            <i class="fas fa-users-slash fa-2x mb-2"></i>
+                            <p>No hay empleados registrados</p>
+                            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-user-plus"></i> Crear Primer Empleado</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="cards-mobile">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <strong>@item.nombre @item.apellido</strong>
+                            <div class="text-muted small mt-1">
+                                <i class="fas fa-building"></i> @departamentoNombres.GetValueOrDefault(item.departamentoId, "N/A")
+                            </div>
+                        </div>
+                        <span class="badge @(item.estado == "Activo" ? "badge-success" : "badge-danger")">@item.estado</span>
+                    </div>
+                    <div class="card-info">
+                        <div class="info-item"><span class="info-label">Edad</span><span class="info-value">@item.edad años</span></div>
+                        <div class="info-item">
+                            <span class="info-label">Género</span>
+                            <span class="info-value">
+                                <i class="fas @(item.genero == "Masculino" ? "fa-mars text-primary" : "fa-venus text-danger")"></i> @item.genero
+                            </span>
+                        </div>
+                        <div class="info-item"><span class="info-label">Teléfono</span><span class="info-value">@item.telefono</span></div>
+                        <div class="info-item">
+                            <span class="info-label">Dirección</span>
+                            <div class="info-value direccion-mobile" onclick="this.classList.toggle('expanded')">@item.direccion</div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a asp-action="Edit" asp-route-id="@item.idEmpleado" class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></a>
+                        <a asp-action="Details" asp-route-id="@item.idEmpleado" class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i></a>
+                        <a asp-action="Delete" asp-route-id="@item.idEmpleado" class="btn btn-secondary btn-sm"><i class="fas fa-trash"></i></a>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-users-slash fa-2x mb-2"></i>
+                <p>No hay empleados registrados</p>
+                <a asp-action="Create" class="btn btn-primary"><i class="fas fa-user-plus"></i> Crear Primer Empleado</a>
+            </div>
+        }
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <div class="pagination-container">
+            <nav>
+                <ul class="pagination">
+                    @if (pageNumber > 1)
+                    {
+                        <li>
+                            <a class="page-link" asp-action="Index" asp-route-page="@(pageNumber - 1)"
+                               asp-route-nombre="@ViewBag.CurrentNombreEmpleado" asp-route-apellido="@ViewBag.CurrentApellidoEmpleado"
+                               asp-route-departamentoId="@ViewBag.CurrentDepartamentoId" asp-route-genero="@ViewBag.CurrentGenero">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        if (i == 1 || i == totalPages || (i >= pageNumber - 2 && i <= pageNumber + 2))
+                        {
+                            <li>
+                                <a class="page-link @(i == pageNumber ? "active" : "")" asp-action="Index" asp-route-page="@i"
+                                   asp-route-nombre="@ViewBag.CurrentNombreEmpleado" asp-route-apellido="@ViewBag.CurrentApellidoEmpleado"
+                                   asp-route-departamentoId="@ViewBag.CurrentDepartamentoId" asp-route-genero="@ViewBag.CurrentGenero">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                        else if (i == pageNumber - 3 || i == pageNumber + 3)
+                        {
+                            <li><span class="page-link disabled">...</span></li>
+                        }
+                    }
+                    @if (pageNumber < totalPages)
+                    {
+                        <li>
+                            <a class="page-link" asp-action="Index" asp-route-page="@(pageNumber + 1)"
+                               asp-route-nombre="@ViewBag.CurrentNombreEmpleado" asp-route-apellido="@ViewBag.CurrentApellidoEmpleado"
+                               asp-route-departamentoId="@ViewBag.CurrentDepartamentoId" asp-route-genero="@ViewBag.CurrentGenero">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
 </div>
 
 @section Scripts {
     <script>
+        function mostrarDireccion(direccion) {
+            direccion = direccion.replace(/\\'/g, "'");
+            const modal = $(`
+                <div class="modal-direccion">
+                    <div class="modal-content">
+                        <h4><i class="fas fa-map-marker-alt"></i> Dirección Completa</h4>
+                        <p style="word-break: break-word; white-space: pre-wrap;">${direccion}</p>
+                        <button class="btn btn-primary" onclick="$(this).closest('.modal-direccion').remove()">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                    </div>
+                </div>
+            `);
+            modal.on('click', e => { if (e.target === modal[0]) modal.remove(); });
+            $('body').append(modal);
+        }
+
         $(document).ready(function() {
-            // Configuración básica de paginación
-            const rowsPerPage = 5;
-            const $table = $('#mytable');
-            const $rows = $table.find('tbody tr');
-            const pageCount = Math.ceil($rows.length / rowsPerPage);
-            let currentPage = 1;
+            setTimeout(() => $('.alert').fadeOut(300, function() { $(this).remove(); }), 4000);
 
-            function showPage(page) {
-                $rows.hide();
-                $rows.slice((page-1)*rowsPerPage, page*rowsPerPage).show();
-            }
+            $('#filters').on('show.bs.collapse', function() {
+                $('[data-bs-target="#filters"] i').removeClass('fa-filter').addClass('fa-times');
+            }).on('hide.bs.collapse', function() {
+                $('[data-bs-target="#filters"] i').removeClass('fa-times').addClass('fa-filter');
+            });
 
-            // Crear controles de paginación
-            const $pagination = $('<div class="pagination-controls"></div>').insertAfter($table);
-
-            for(let i = 1; i <= pageCount; i++) {
-                $('<button class="btn btn-dark btn-sm">'+i+'</button>')
-                    .appendTo($pagination)
-                    .click(function() {+
-                        currentPage = i;+++++++++++
-                        showPage(currentPage);
-                        $('.pagination-controls button').removeClass('active');
-                        $(this).addClass('active');
-                    });
-            }
-
-            // Mostrar primera página
-            showPage(1);
-            $('.pagination-controls button:first').addClass('active');
+            $(document).on('click', '.page-link', function(e) {
+                if (!$(this).hasClass('disabled') && !$(this).hasClass('active')) {
+                    $('html, body').animate({ scrollTop: $('.container-empleados').offset().top - 20 }, 300);
+                }
+            });
         });
     </script>
-    }
+}

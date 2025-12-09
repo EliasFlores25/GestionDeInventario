@@ -1,89 +1,312 @@
-﻿@model GestionDeInventario.Models.Empleado
+﻿@model GestionDeInventario.DTOs.EmpleadoDTOs.EmpleadoCreateDTO
 
 @{
-    ViewData["Title"] = "Crear Empleado";
+    ViewData["Title"] = "Crear Nuevo Empleado";
 }
 
-<div class="form-container">
-    <h1><i class="fas fa-user-plus"></i> Crear Empleado</h1>
-    <h4>Ingrese los Datos del Nuevo Empleado</h4>
-    <hr />
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --success: #10b981;
+        --danger: #ef4444;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
+    }
 
-    <div class="row">
-        <div class="col-lg-10 col-md-12">
-            <form asp-action="Create">
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    .container-create {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 80px);
+    }
 
-                <div class="row">
-                    <div class="col-md-6 form-group mb-3">
-                        <label asp-for="nombre" class="control-label">Nombre</label>
-                        <input asp-for="nombre" class="form-control" placeholder="Ej: Nayib Alexander" />
-                        <span asp-validation-for="nombre" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6 form-group mb-3">
-                        <label asp-for="apellido" class="control-label">Apellido</label>
-                        <input asp-for="apellido" class="form-control" placeholder="Ej: Bukele Gonzales" />
-                        <span asp-validation-for="apellido" class="text-danger"></span>
+    .create-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border-top: 5px solid var(--primary);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .create-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+        .create-header h1 {
+            color: var(--dark);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+            .create-header h1 i {
+                color: var(--primary);
+            }
+
+        .create-header h4 {
+            color: var(--text-light);
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+        }
+
+    .section-title {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        background: white;
+    }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .validation-error {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid var(--danger);
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+        }
+
+    .btn-secondary {
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+    @@media (max-width: 768px) {
+        .container-create {
+            padding: 1rem;
+        }
+
+        .create-card {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+    }
+
+    @@media (max-width: 576px) {
+        .create-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .create-card {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container-create">
+    <div class="create-card">
+        <div class="create-header">
+            <h1><i class="fas fa-user-plus"></i> @ViewData["Title"]</h1>
+            <h4>Completa los datos personales y de asignación laboral del nuevo empleado.</h4>
+        </div>
+
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="alert-danger"></div>
+
+            <!-- Sección 1: Datos Personales -->
+            <div class="section-title">
+                <i class="fas fa-id-card"></i> Datos Personales
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="nombre">Nombre(s)</label>
+                        <input asp-for="nombre" class="form-control" placeholder="Ej: Luis Antonio" />
+                        <span asp-validation-for="nombre" class="validation-error"></span>
                     </div>
                 </div>
-
-                <div class="row">
-                    <div class="col-md-6 form-group mb-3">
-                        <label asp-for="edad" class="control-label">Edad</label>
-                        <input asp-for="edad" class="form-control" placeholder="Ej: 25 años" />
-                        <span asp-validation-for="edad" class="text-danger"></span>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="apellido">Apellido(s)</label>
+                        <input asp-for="apellido" class="form-control" placeholder="Ej: Vásquez García" />
+                        <span asp-validation-for="apellido" class="validation-error"></span>
                     </div>
-                    <div class="col-md-6 form-group mb-3">
-                        <label asp-for="genero" class="control-label">Genero</label>
-                        <select asp-for="genero" class="form-control">
-                            <option value="">-- Seleccione el Genero --</option>
+                </div>
+            </div>
+
+            <!-- Sección 2: Información Básica y Contacto -->
+            <div class="section-title">
+                <i class="fas fa-info-circle"></i> Información Básica y Contacto
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="edad">Edad</label>
+                        <input asp-for="edad" type="number" class="form-control" placeholder="Ej: 25" />
+                        <span asp-validation-for="edad" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="genero">Género</label>
+                        <select asp-for="genero" class="form-select">
+                            <option value="">-- Seleccione Género --</option>
                             <option value="Masculino">Masculino</option>
                             <option value="Femenino">Femenino</option>
                         </select>
-                        <span asp-validation-for="genero" class="text-danger"></span>
+                        <span asp-validation-for="genero" class="validation-error"></span>
                     </div>
                 </div>
-
-                <div class="row">
-                    <div class="col-md-6 form-group mb-3">
-                        <label asp-for="telefono" class="control-label">Teléfono</label>
-                        <input asp-for="telefono" class="form-control" placeholder="Ej: 1234-5678" />
-                        <span asp-validation-for="telefono" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6 form-group mb-3">
-                        <label asp-for="direccion" class="control-label">Dirección</label>
-                        <input asp-for="direccion" class="form-control" placeholder="Ej: Sonsonate" />
-                        <span asp-validation-for="direccion" class="text-danger"></span>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="telefono">Teléfono</label>
+                        <input asp-for="telefono" class="form-control" placeholder="Ej: 5555-1234" />
+                        <span asp-validation-for="telefono" class="validation-error"></span>
                     </div>
                 </div>
-
-                <div class="row">
-                    <div class="col-md-6 form-group mb-4">
-                        <label asp-for="departamentoId" class="control-label">Departamento</label>
-                        <input asp-for="departamentoId" class="form-control" placeholder="Ej: 1" />
-                        <span asp-validation-for="departamentoId" class="text-danger"></span>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="direccion">Dirección</label>
+                        <textarea asp-for="direccion" class="form-control" placeholder="Ej: Av. Principal, #100"></textarea>
+                        <span asp-validation-for="direccion" class="validation-error"></span>
                     </div>
-                    <div class="col-md-6 form-group mb-4">
-                        <label asp-for="estado" class="control-label">Estado</label>
-                        <select asp-for="estado" class="form-control">
-                            <option value="">-- Seleccione el Estado --</option>
+                </div>
+            </div>
+
+            <!-- Sección 3: Asignación de Roles y Ubicación -->
+            <div class="section-title">
+                <i class="fas fa-briefcase"></i> Asignación de Roles y Ubicación
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="departamentoId">Departamento</label>
+                        <select asp-for="departamentoId" class="form-select" asp-items="ViewBag.departamentoId">
+                            <option value="">-- Seleccionar Departamento --</option>
+                        </select>
+                        <span asp-validation-for="departamentoId" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="estado">Estado Actual</label>
+                        <select asp-for="estado" class="form-select">
+                            <option value="">-- Seleccionar Estado --</option>
                             <option value="Activo">Activo</option>
                             <option value="Inactivo">Inactivo</option>
                         </select>
-                        <span asp-validation-for="estado" class="text-danger"></span>
+                        <span asp-validation-for="estado" class="validation-error"></span>
                     </div>
                 </div>
+            </div>
 
-                <div class="form-group form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Crear Empleado
-                    </button>
-                    <a asp-action="Index" class="btn btn-secondary">
-                        <i class="fas fa-times-circle"></i> Cancelar
-                    </a>
-                </div>
-            </form>
-        </div>
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a la Lista
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Crear Empleado
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 

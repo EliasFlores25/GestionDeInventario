@@ -18,8 +18,8 @@ namespace GestionDeInventario.Repository.Implementations
         }
         public async Task<List<Empleado>> GetAllAsync()
           => await _context.Empleados.AsNoTracking().ToListAsync();
-        public async Task<Empleado?> GetByIdAsync(int id)
-            => await _context.Empleados.FindAsync(id);
+        public async Task<Empleado?> GetByIdAsync(int idEmpleado)
+            => await _context.Empleados.FindAsync(idEmpleado);
         public async Task<Empleado> AddAsync(Empleado entity)
         {
             _context.Empleados.Add(entity);
@@ -31,9 +31,9 @@ namespace GestionDeInventario.Repository.Implementations
             _context.Empleados.Update(entity);
             return await _context.SaveChangesAsync() > 0;
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int idEmpleado)
         {
-            var existing = await _context.Empleados.FindAsync(id);
+            var existing = await _context.Empleados.FindAsync(idEmpleado);
             if (existing == null) return false;
             _context.Empleados.Remove(existing);
             return await _context.SaveChangesAsync() > 0;
