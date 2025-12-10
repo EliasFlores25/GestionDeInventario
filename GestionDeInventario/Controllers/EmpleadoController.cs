@@ -249,6 +249,7 @@ namespace GestionDeInventario.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

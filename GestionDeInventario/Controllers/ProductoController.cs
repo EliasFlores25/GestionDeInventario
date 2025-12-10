@@ -1,5 +1,9 @@
-﻿using GestionDeInventario.DTOs.ProductoDTOs;
+﻿using GestionDeInventario.DTOs.EmpleadoDTOs;
+using GestionDeInventario.DTOs.ProductoDTOs;
+using GestionDeInventario.Models;
+using GestionDeInventario.Repository.Interfaces;
 using GestionDeInventario.Services.Exceptions;
+using GestionDeInventario.Services.Implementations;
 using GestionDeInventario.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,38 +18,55 @@ namespace GestionDeInventario.Controllers
         {
             _productoService = productoService;
         }
-
-        public async Task<IActionResult> Index(string nombre,int? cantidadStock, int registros = 0)
+        public async Task<IActionResult> Index(string nombre, string estado, int pageNumber = 1, int pageSize = 5)
         {
-            
             IQueryable<ProductoResponseDTO> query = _productoService.GetQueryable();
+            string? n_nombre = nombre?.ToLower();
+            string? n_estado = estado?.ToLower();
 
-            if (!string.IsNullOrEmpty(nombre))
+            if (!string.IsNullOrWhiteSpace(n_nombre))
             {
-                query = query.Where(c => c.nombre.ToLower().Contains(nombre.ToLower()));
+                query = query.Where(c => c.nombre.ToLower().Contains(n_nombre));
             }
-            if (cantidadStock.HasValue)
+            if (!string.IsNullOrWhiteSpace(n_estado))
             {
-                query = query.Where(c => c.cantidadStock == cantidadStock.Value);
-            }
-            if (registros > 0)
-            {
-                query = query.Take(registros);
+                query = query.Where(c => c.estado.ToLower().Contains(n_estado));
             }
 
             try
             {
-                List<ProductoResponseDTO> listaFiltrada = await query.ToListAsync();
+                int totalRegistros = await query.CountAsync();
+                int totalPages = (int)Math.Ceiling((double)totalRegistros / pageSize);
+                pageNumber = Math.Max(1, Math.Min(pageNumber, totalPages > 0 ? totalPages : 1));
+                var listaPaginada = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+                ViewBag.CurrentNombreEmpleado = nombre;
+                ViewBag.CurrentApellidoEmpleado = estado;
+                ViewBag.PageNumber = pageNumber;
+                ViewBag.TotalPages = totalPages;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalRegistros = totalRegistros;
+                ViewBag.HasPreviousPage = pageNumber > 1;
+                ViewBag.HasNextPage = pageNumber < totalPages;
 
-                ViewData["NombreFilter"] = nombre;
-                ViewData["StockFilter"] = cantidadStock;
-                ViewData["CurrentRecords"] = registros;
-
-                return View(listaFiltrada);
+                if (!string.IsNullOrWhiteSpace(nombre) || !string.IsNullOrWhiteSpace(estado))
+                {
+                    ViewData["IsFilterApplied"] = true;
+                }
+                return View(listaPaginada);
             }
             catch (Exception ex)
             {
-                TempData["MensajeError"] = "Ocurrió un error al cargar la lista de productos.";
+                TempData["Error"] = "Ocurrió un error al cargar la lista de productos: " + ex.Message;
+                ViewBag.PageNumber = 1;
+                ViewBag.TotalPages = 1;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalRegistros = 0;
+                ViewBag.HasPreviousPage = false;
+                ViewBag.HasNextPage = false;
+
                 return View(new List<ProductoResponseDTO>());
             }
         }
@@ -63,34 +84,38 @@ namespace GestionDeInventario.Controllers
             {
                 return View(dto);
             }
-
             try
             {
-                await _productoService.AddAsync(dto);
-
-                TempData["SuccessMessage"] = "Producto creado exitosamente.";
+                var nuevoProducto = await _productoService.AddAsync(dto);
+                if (nuevoProducto == null)
+                {
+                    ModelState.AddModelError("", "No se pudo crear el empleado.");
+                    return View(dto);
+                }
+                TempData["Ok"] = "Producto creado con éxito.";
                 return RedirectToAction(nameof(Index));
             }
             catch (BusinessRuleException ex)
             {
-                ModelState.AddModelError("", ex.Message);
+                ModelState.AddModelError(string.Empty, ex.Message);
                 return View(dto);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Error al crear el producto. Inténtelo de nuevo.";
-               
+                ModelState.AddModelError("", "Error al crear el empleado: " + ex.Message);
                 return View(dto);
             }
         }
-       
+
         public async Task<IActionResult> Edit(int id)
         {
             try
             {
-              
                 var productoDto = await _productoService.GetByIdAsync(id);
-
+                if (productoDto == null)
+                {
+                    return NotFound();
+                }
                 var updateDto = new ProductoUpdateDTO
                 {
                     nombre = productoDto.nombre,
@@ -100,11 +125,9 @@ namespace GestionDeInventario.Controllers
                     precio = productoDto.precio,
                     estado = productoDto.estado
                 };
-
-                ViewBag.IdProducto = id;
                 return View(updateDto);
             }
-            
+
             catch (NotFoundException ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
@@ -123,16 +146,20 @@ namespace GestionDeInventario.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.IdProducto = id;
                 return View(dto);
             }
-
             try
             {
-                await _productoService.UpdateAsync(id, dto);
-
-                TempData["SuccessMessage"] = "Producto actualizado exitosamente.";
-                return RedirectToAction(nameof(Index));
+                var success = await _productoService.UpdateAsync(id, dto);
+                if (success)
+                {
+                    TempData["Ok"] = "Producto actualizado con éxito.";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("", "La actualización no se pudo completar. El registro no existe o el servicio falló.");
+                }
             }
             catch (NotFoundException ex)
             {
@@ -142,41 +169,38 @@ namespace GestionDeInventario.Controllers
             catch (BusinessRuleException ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                ViewBag.IdProducto = id;
-                return View(dto);
             }
+            catch (Exception)
+            {
+                ModelState.AddModelError("", "Error al actualizar el producto. Verifique si el ID coincide o si la sesión es válida.");
+            }
+            return View(dto);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            try
-            {
-                ProductoResponseDTO producto = await _productoService.GetByIdAsync(id);
-
-                return View(producto);
-            }
-            catch (NotFoundException)
-            {
-                return NotFound();
-            }
-        }
-
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            var producto = await _productoService.GetByIdAsync(id.Value);
+            var producto = await _productoService.GetByIdAsync(id);
 
             if (producto == null)
             {
-                TempData["MensajeError"] = "Error: El producto solicitado no existe.";
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
             return View(producto);
         }
 
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var producto = await _productoService.GetByIdAsync(id);
+                return View(producto);
+            }
+            catch (NotFoundException)
+            {
+                TempData["MensajeError"] = "Error: El producto solicitado no existe.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -185,18 +209,28 @@ namespace GestionDeInventario.Controllers
             try
             {
                 await _productoService.DeleteAsync(id);
-                TempData["SuccessMessage"] = "Producto eliminado exitosamente.";
+                TempData["MensajeExito"] = "Producto eliminado con éxito.";
+                return RedirectToAction(nameof(Index));
             }
-            catch (NotFoundException ex)
+            catch (NotFoundException)
             {
-                TempData["ErrorMessage"] = ex.Message;
+                TempData["MensajeError"] = "Error: El producto ya no existe o fue eliminado.";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Error al intentar eliminar el producto.";
+                ModelState.AddModelError("", "Error al eliminar el producto: " + ex.Message);
+                try
+                {
+                    var producto = await _productoService.GetByIdAsync(id);
+                    return View("Delete", producto);
+                }
+                catch (NotFoundException)
+                {
+                    TempData["MensajeError"] = "Error interno: El producto fue eliminado antes de mostrar el error.";
+                    return RedirectToAction(nameof(Index));
+                }
             }
-
-            return RedirectToAction(nameof(Index));
         }
     }
 }

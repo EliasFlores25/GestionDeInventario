@@ -3,6 +3,7 @@ using GestionDeInventario.Models;
 using GestionDeInventario.Repository.Interfaces;
 using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace GestionDeInventario.Services.Implementations
 {
@@ -58,6 +59,13 @@ namespace GestionDeInventario.Services.Implementations
 
         public async Task<ProductoResponseDTO> AddAsync(ProductoCreateDTO dto)
         {
+            var existeProducto = await _repo.GetQueryable()
+                                            .AnyAsync(p => p.nombre.ToLower() == dto.nombre.ToLower());
+            if (existeProducto)
+            {
+                // Lanzar una excepción si el nombre ya está en uso
+                throw new BusinessRuleException($"Ya existe un producto registrado con el nombre '{dto.nombre}'. Por favor, elija un nombre diferente.");
+            }
             if (dto.precio <= 0)
             {
                 throw new BusinessRuleException("El precio unitario debe ser mayor que cero.");

@@ -1,13 +1,22 @@
-﻿namespace GestionDeInventario.DTOs.ProductoDTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace GestionDeInventario.DTOs.ProductoDTOs
 {
     public class ProductoUpdateDTO
     {
        public int idProducto { get; set; }
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
         public string nombre { get; set; }
+        [Required(ErrorMessage = "La descripción es obligatoria.")]
+        [StringLength(255, MinimumLength = 10, ErrorMessage = "La descripción debe tener entre 10 y 255 caracteres.")]
         public string descripcion { get; set; }
+        [Required(ErrorMessage = "La cantidad en stock es obligatoria.")]
         public int cantidadStock { get; set; }
+        [Required(ErrorMessage = "La unidad de medida es obligatoria.")]
         public string unidadMedida { get; set; }
+        [Required(ErrorMessage = "El precio es obligatorio.")]
         public decimal precio { get; set; }
+        [Required(ErrorMessage = "El estado es obligatorio.")]
         public string estado { get; set; }
     }
 }

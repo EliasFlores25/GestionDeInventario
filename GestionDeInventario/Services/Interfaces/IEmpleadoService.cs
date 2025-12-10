@@ -1,6 +1,4 @@
 ﻿using GestionDeInventario.DTOs.EmpleadoDTOs;
-using GestionDeInventario.DTOs.ProductoDTOs;
-using GestionDeInventario.Models;
 
 namespace GestionDeInventario.Services.Interfaces
 {

@@ -580,7 +580,7 @@
                     @if (pageNumber > 1)
                     {
                         <li>
-                            <a class="page-link" asp-action="Index" asp-route-page="@(pageNumber - 1)"
+                            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber - 1)"
                                asp-route-nombre="@ViewBag.CurrentNombreEmpleado" asp-route-apellido="@ViewBag.CurrentApellidoEmpleado"
                                asp-route-departamentoId="@ViewBag.CurrentDepartamentoId" asp-route-genero="@ViewBag.CurrentGenero">
                                 <i class="fas fa-chevron-left"></i>
@@ -592,7 +592,7 @@
                         if (i == 1 || i == totalPages || (i >= pageNumber - 2 && i <= pageNumber + 2))
                         {
                             <li>
-                                <a class="page-link @(i == pageNumber ? "active" : "")" asp-action="Index" asp-route-page="@i"
+                                <a class="page-link @(i == pageNumber ? "active" : "")" asp-action="Index" asp-route-pageNumber="@i"
                                    asp-route-nombre="@ViewBag.CurrentNombreEmpleado" asp-route-apellido="@ViewBag.CurrentApellidoEmpleado"
                                    asp-route-departamentoId="@ViewBag.CurrentDepartamentoId" asp-route-genero="@ViewBag.CurrentGenero">
                                     @i
@@ -607,7 +607,7 @@
                     @if (pageNumber < totalPages)
                     {
                         <li>
-                            <a class="page-link" asp-action="Index" asp-route-page="@(pageNumber + 1)"
+                            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber + 1)"
                                asp-route-nombre="@ViewBag.CurrentNombreEmpleado" asp-route-apellido="@ViewBag.CurrentApellidoEmpleado"
                                asp-route-departamentoId="@ViewBag.CurrentDepartamentoId" asp-route-genero="@ViewBag.CurrentGenero">
                                 <i class="fas fa-chevron-right"></i>
