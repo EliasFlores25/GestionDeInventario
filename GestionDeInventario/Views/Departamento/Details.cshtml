@@ -4,257 +4,272 @@
     ViewData["Title"] = "Detalles del Departamento";
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
-    /* --------------------------------------------------
-         * ------------------ DISEÑO MODERNO Y PROFESIONAL (Temas del Index/Create) ------------------
-         * -------------------------------------------------- */
     :root {
-        --color-primario: #0A192F; /* Azul Marino Profundo (Títulos) */
-        --color-secundario: #1F364D; /* Azul Marino más claro (Labels) */
-        --color-acento: #FFC107; /* Amarillo Dorado/Naranja (Acento de Éxito / Subrayado) */
-        --color-fondo-claro: #F4F7F9; /* Fondo muy claro, casi blanco */
-        --color-texto-oscuro: #333C48; /* Gris carbón para texto general */
-        --color-borde-suave: #E0E4E7; /* Borde de separación */
-        --color-warning-base: #FFC107; /* Amarillo para Editar */
-        --color-danger-base: #DC3545; /* Rojo para Eliminar */
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
     }
 
-    body {
-        background-color: var(--color-fondo-claro);
-        font-family: 'Inter', sans-serif;
+    .container-details {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 80px);
     }
 
-    /* Contenedor principal para la vista de detalles */
-    .details-container {
-        max-width: 1000px;
-        margin: 40px auto;
-        background-color: white;
-        padding: 40px;
+    .details-card {
+        background: white;
         border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        border: 1px solid var(--color-borde-suave);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border-top: 5px solid var(--primary);
+        max-width: 800px;
+        margin: 0 auto;
     }
 
-    /* Encabezado principal */
-    h1 {
-        color: var(--color-primario);
-        padding-left: 0;
-        margin-bottom: 5px;
-        font-size: 2.5rem;
-        font-weight: 800;
-        position: relative;
-        display: flex;
-        align-items: center;
+    .details-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
     }
 
-        h1 i {
-            margin-right: 15px;
-            font-size: 2.2rem;
-            color: var(--color-acento); /* Icono de acento dorado */
-        }
-
-        h1::after {
-            content: '';
-            display: block;
-            width: 80px;
-            height: 4px;
-            background-color: var(--color-acento); /* Subrayado dorado */
-            margin-top: 5px;
-            border-radius: 2px;
-            position: absolute;
-            bottom: -15px;
-            left: 0;
-        }
-
-    h4 {
-        color: var(--color-texto-oscuro);
-        font-size: 1.1rem;
-        font-weight: 400;
-        margin-bottom: 30px;
-        padding-left: 0; /* Aseguramos la alineación */
-        opacity: 0.8;
-        margin-top: 20px;
-    }
-
-    /* ------------------ ESTILOS DE LISTA DE DETALLES (DL) ------------------ */
-    dl.row {
-        padding: 0;
-        border: 1px solid var(--color-borde-suave);
-        border-radius: 8px;
-        background-color: #fcfcfc;
-    }
-
-        dl.row > * {
-            /* Asegura que todos los dt/dd estén dentro del borde */
-            padding-left: 1.5rem !important;
-            padding-right: 1.5rem !important;
-        }
-
-        dl.row dt {
+        .details-header h1 {
+            color: var(--dark);
+            font-size: 1.75rem;
             font-weight: 700;
-            color: var(--color-secundario); /* Labels en azul oscuro */
-            padding-top: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px dashed var(--color-borde-suave);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
         }
 
-        dl.row dd {
-            padding-top: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px dashed var(--color-borde-suave);
-            color: var(--color-texto-oscuro);
-        }
-
-            /* Quitar el borde inferior al último par */
-            dl.row dt:last-child,
-            dl.row dd:last-child {
-                border-bottom: none;
+            .details-header h1 i {
+                color: var(--primary);
             }
 
+        .details-header h4 {
+            color: var(--text-light);
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+        }
 
-    /* ------------------ ESTILOS DE BOTONES DE ACCIÓN ------------------ */
-    .button-container {
-        margin-top: 40px;
+    .section-title {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--primary);
         display: flex;
-        gap: 15px;
-        padding-left: 0;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-        .button-container a {
-            padding: 10px 25px;
-            font-weight: 600;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
-            color: white; /* Asegura el color del texto de los botones */
-        }
-
-    /* Botón Editar (Warning - Dorado) */
-    .btn-warning {
-        background-color: var(--color-acento);
-        border-color: var(--color-acento);
-        color: var(--color-primario); /* Texto oscuro para contraste */
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
     }
 
-        .btn-warning:hover {
-            background-color: #E6B300;
-            border-color: #E6B300;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+    .detail-item {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 3px solid var(--primary);
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: var(--text-light);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .detail-label i {
+            font-size: 0.9em;
         }
 
-    /* Botón Eliminar (Danger - Rojo) */
+    .detail-value {
+        color: var(--dark);
+        font-size: 1rem;
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .badge {
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+        }
+
     .btn-danger {
-        background-color: var(--color-danger-base);
-        border-color: var(--color-danger-base);
+        background: var(--danger);
+        color: white;
     }
 
         .btn-danger:hover {
-            background-color: #C82333;
-            border-color: #C82333;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
         }
 
-    /* Botón Volver (Secondary - Gris) */
     .btn-secondary {
-        background-color: #6c757d;
-        border-color: #6c757d;
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
     }
 
         .btn-secondary:hover {
-            background-color: #5a6268;
-            border-color: #5a6268;
+            background: #f3f4f6;
+            border-color: #d1d5db;
         }
 
-    .button-container a i {
-        margin-right: 8px;
+    .full-width-item {
+        grid-column: 1 / -1;
     }
 
-    /* ------------------ RESPONSIVENESS (MÓVIL) ------------------ */
-    @@media screen and (max-width: 767px) {
-        .details-container {
-            padding: 20px;
-            margin: 20px auto;
-            border-radius: 10px;
+        .full-width-item .detail-value {
+            line-height: 1.6;
+            white-space: pre-wrap;
         }
 
-        h1 {
-            font-size: 2rem;
+    @@media (max-width: 768px) {
+        .container-details {
+            padding: 1rem;
         }
 
-            h1 i {
-                font-size: 1.8rem;
-            }
-
-        h4 {
-            font-size: 1rem;
-            margin-top: 15px;
+        .details-card {
+            padding: 1.5rem;
         }
 
-        .button-container {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
             flex-direction: column;
-            gap: 10px;
-            padding-left: 0;
         }
 
-            .button-container a {
+            .form-actions .btn {
                 width: 100%;
-                text-align: center;
+                justify-content: center;
             }
-
-        dl.row dt, dl.row dd {
-            padding: 10px 1rem !important;
-            font-size: 0.95rem;
-        }
     }
 
+    @@media (max-width: 576px) {
+        .details-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .details-card {
+            padding: 1rem;
+        }
+    }
 </style>
 
-<div class="details-container">
-    <h1><i class="bi bi-building"></i> @ViewData["Title"]</h1>
-    <h4>Información detallada del departamento: @Model.nombre</h4>
-    <div class="row mt-5">
-        <div class="col-lg-12 col-md-12">
-            <dl class="row">
-                <dt class="col-sm-4">
-                    Nombre
-                </dt>
-                <dd class="col-sm-8">
-                    @Html.DisplayFor(model => model.nombre)
-                </dd>
-
-                <dt class="col-sm-4">
-                    Descripción
-                </dt>
-                <dd class="col-sm-8">
-                    @Html.DisplayFor(model => model.descripcion)
-                </dd>
-
-                <dt class="col-sm-4">
-                    ID de Departamento
-                </dt>
-                <dd class="col-sm-8">
-                    @Html.DisplayFor(model => model.idDepartamento)
-                </dd>
-
-            </dl>
+<div class="container-details">
+    <div class="details-card">
+        <div class="details-header">
+            <h1><i class="fas fa-building"></i> Detalles del Departamento</h1>
+            <h4>Información completa del departamento @Model.nombre</h4>
         </div>
-    </div>
 
-    <div class="button-container">
+        <!-- Información del Departamento -->
+        <div class="section-title">
+            <i class="fas fa-info-circle"></i> Información del Departamento
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-fingerprint"></i> ID</div>
+                <div class="detail-value">@Model.idDepartamento</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-building"></i> Nombre</div>
+                <div class="detail-value">@Model.nombre</div>
+            </div>
+        </div>
 
-        <a asp-action="Edit" asp-route-id="@Model?.idDepartamento" class="btn btn-warning">
-            <i class="bi bi-pencil-square"></i> Editar Departamento
-        </a>
+        <!-- Descripción -->
+        <div class="section-title">
+            <i class="fas fa-align-left"></i> Descripción
+        </div>
+        <div class="detail-item full-width-item">
+            <div class="detail-label"><i class="fas fa-file-alt"></i> Descripción Completa</div>
+            <div class="detail-value">@Model.descripcion</div>
+        </div>
 
-        <a asp-action="Delete" asp-route-id="@Model?.idDepartamento" class="btn btn-danger">
-            <i class="bi bi-trash"></i> Eliminar Departamento
-        </a>
-
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Volver a la Lista
-        </a>
+        <!-- Botones de Acción -->
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a la Lista
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.idDepartamento" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Editar Departamento
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.idDepartamento" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Eliminar
+            </a>
+        </div>
     </div>
 </div>

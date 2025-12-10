@@ -4,267 +4,240 @@
     ViewData["Title"] = "Editar Departamento";
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
-    /* --------------------------------------------------
-         * ------------------ DISEÑO MODERNO Y PROFESIONAL (Azul Marino y Dorado) ------------------
-         * -------------------------------------------------- */
     :root {
-        --color-primario: #0A192F; /* Azul Marino Profundo (Títulos, Botón Primario) */
-        --color-secundario: #1F364D; /* Azul Marino más claro (Labels) */
-        --color-acento: #FFC107; /* Amarillo Dorado (Acento de Foco/Subrayado) */
-        --color-fondo-claro: #F4F7F9; /* Fondo muy claro, casi blanco */
-        --color-texto-oscuro: #333C48; /* Gris carbón para texto general */
-        --color-borde-suave: #E0E4E7; /* Borde de separación */
-        --color-peligro: #e74c3c; /* Rojo para errores */
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --warning: #f59e0b;
+        --warning-dark: #d97706;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
     }
 
-    body {
-        background-color: var(--color-fondo-claro);
-        font-family: 'Inter', sans-serif;
+    .container-edit {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 80px);
     }
 
-    /* Contenedor principal del formulario */
-    .form-container {
-        max-width: 1000px;
-        margin: 40px auto;
-        background-color: white;
-        padding: 40px;
+    .edit-card {
+        background: white;
         border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        border: 1px solid var(--color-borde-suave);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border-top: 5px solid var(--warning);
+        max-width: 800px;
+        margin: 0 auto;
     }
 
-    /* Encabezado principal */
-    h1 {
-        color: var(--color-primario);
-        padding-left: 0;
-        margin-bottom: 5px;
-        font-size: 2.5rem;
-        font-weight: 800;
-        position: relative;
+    .edit-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+        .edit-header h1 {
+            color: var(--dark);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+            .edit-header h1 i {
+                color: var(--warning);
+            }
+
+        .edit-header h4 {
+            color: var(--text-light);
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+        }
+
+    .section-title {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--warning);
         display: flex;
         align-items: center;
+        gap: 0.5rem;
     }
 
-        h1 i {
-            margin-right: 15px;
-            font-size: 2.2rem;
-            color: var(--color-acento); /* Icono de acento dorado */
-        }
-
-        h1::after {
-            content: '';
-            display: block;
-            width: 80px;
-            height: 4px;
-            background-color: var(--color-acento); /* Subrayado dorado */
-            margin-top: 5px;
-            border-radius: 2px;
-            position: absolute;
-            bottom: -15px;
-            left: 0;
-        }
-
-    h4 {
-        color: var(--color-texto-oscuro);
-        font-size: 1.1rem;
-        font-weight: 400;
-        margin-bottom: 30px;
-        padding-left: 0;
-        opacity: 0.8;
-        margin-top: 20px;
+    .form-group {
+        margin-bottom: 1.25rem;
     }
 
-    hr {
-        /* Se elimina ya que h1::after lo sustituye visualmente */
-        display: none;
-    }
-
-    /* ------------------ ESTILOS DE FORMULARIO ------------------ */
-    .control-label {
-        font-weight: 700;
-        color: var(--color-secundario); /* Labels en azul marino más claro */
-        margin-bottom: 6px;
-    }
-
-    .form-control,
-    .form-select,
-    textarea.form-control {
-        border-radius: 8px;
-        border: 1px solid var(--color-borde-suave);
-        padding: 10px 15px;
-        transition: border-color 0.3s, box-shadow 0.3s;
-    }
-
-        .form-control:focus,
-        .form-select:focus,
-        textarea.form-control:focus {
-            border-color: var(--color-acento);
-            /* Sombra de enfoque con el color dorado */
-            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
-        }
-
-    /* Validaciones */
-    .text-danger {
-        font-size: 0.85rem;
-        margin-top: 4px;
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
         display: block;
-        color: var(--color-peligro) !important;
+        font-size: 0.95rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        background: white;
+    }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--warning);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .validation-error {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: block;
     }
 
     .alert-danger {
-        border-left: 5px solid var(--color-peligro);
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+        padding: 1rem 1.25rem;
         border-radius: 8px;
-        font-weight: 600;
-        background-color: #fceceb; /* Fondo suave para el error */
-        color: var(--color-texto-oscuro);
+        margin-bottom: 1.5rem;
     }
 
-    /* ------------------ ESTILOS DE BOTONES ------------------ */
     .form-actions {
-        margin-top: 40px;
         display: flex;
-        gap: 15px;
+        gap: 1rem;
+        justify-content: flex-start;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
     }
 
-    /* Botón Guardar Cambios (Primario - Azul Marino) */
-    .btn-primary {
-        background-color: var(--color-primario);
-        border-color: var(--color-primario);
-        padding: 10px 25px;
-        font-weight: 600;
+    .btn {
+        padding: 0.75rem 1.5rem;
         border-radius: 8px;
-        transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        border: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-warning {
+        background: var(--warning);
         color: white;
     }
 
-        .btn-primary:hover {
-            background-color: #071324; /* Tono más oscuro de Primario */
-            border-color: #071324;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(10, 25, 47, 0.3);
+        .btn-warning:hover {
+            background: var(--warning-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2);
         }
 
-    /* Botón Cancelar/Volver (Secundario - Gris) */
     .btn-secondary {
-        background-color: #6c757d;
-        border-color: #6c757d;
-        color: white;
-        padding: 10px 25px;
-        font-weight: 600;
-        border-radius: 8px;
-        transition: background-color 0.3s;
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
     }
 
         .btn-secondary:hover {
-            background-color: #5a6268;
-            border-color: #5a6268;
+            background: #f3f4f6;
+            border-color: #d1d5db;
         }
 
-    .btn i {
-        margin-right: 8px;
-    }
-
-    /* Enlace "Volver a la Lista" debajo del formulario */
-    .link-container {
-        padding: 15px;
-        max-width: 1000px; /* Coincide con el form-container */
-        margin: 20px auto 40px auto;
-    }
-
-        .link-container a {
-            color: var(--color-primario);
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-block;
-            padding: 10px 15px;
-            border-radius: 8px;
-            transition: background-color 0.3s;
+    @@media (max-width: 768px) {
+        .container-edit {
+            padding: 1rem;
         }
 
-            .link-container a:hover {
-                background-color: rgba(10, 25, 47, 0.05); /* Un ligero fondo al pasar el mouse */
-                color: #071324;
-            }
-
-    /* ------------------ RESPONSIVENESS (MÓVIL) ------------------ */
-    @@media screen and (max-width: 767px) {
-        .form-container {
-            padding: 20px;
-            margin: 20px auto;
-            border-radius: 10px;
-        }
-
-        h1 {
-            font-size: 2rem;
-        }
-
-            h1 i {
-                font-size: 1.8rem;
-            }
-
-            h1::after {
-                width: 50px;
-            }
-
-        h4 {
-            font-size: 1rem;
-            margin-top: 15px;
+        .edit-card {
+            padding: 1.5rem;
         }
 
         .form-actions {
             flex-direction: column;
-            gap: 10px;
         }
 
             .form-actions .btn {
                 width: 100%;
-                text-align: center;
+                justify-content: center;
             }
     }
 
+    @@media (max-width: 576px) {
+        .edit-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .edit-card {
+            padding: 1rem;
+        }
+    }
 </style>
 
-<div class="form-container">
-    <h1><i class="bi bi-pencil-square"></i> @ViewData["Title"]</h1>
-    <h4>Actualizar Datos del Departamento</h4>
-
-    <div class="row">
-        <div class="col-lg-10 col-md-12">
-            <form asp-action="Edit">
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
-
-                <input type="hidden" asp-for="idDepartamento" />
-
-                <div class="row">
-                    <div class="col-md-12 form-group mb-4">
-                        <label asp-for="nombre" class="control-label">Nombre del Departamento</label>
-                        <input asp-for="nombre" class="form-control" placeholder="Ej: Recursos Humanos, Logística, Ventas" />
-                        <span asp-validation-for="nombre" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="form-group mb-4">
-                    <label asp-for="descripcion" class="control-label">Descripción</label>
-                    <textarea asp-for="descripcion" class="form-control" rows="4" placeholder="Breve descripción de las funciones principales del departamento."></textarea>
-                    <span asp-validation-for="descripcion" class="text-danger"></span>
-                </div>
-
-                <!-- Botones de Acción -->
-                <div class="form-group form-actions mt-5">
-                    <button type="submit" value="Guardar" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Guardar Cambios
-                    </button>
-                    <a asp-action="Index" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </a>
-                    <a asp-action="Index" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Volver a la Lista
-                    </a>
-                </div>
-            </form>
+<div class="container-edit">
+    <div class="edit-card">
+        <div class="edit-header">
+            <h1><i class="fas fa-edit"></i> @ViewData["Title"]</h1>
+            <h4>Actualización de información del departamento</h4>
         </div>
+
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert-danger"></div>
+            <input type="hidden" asp-for="idDepartamento" />
+
+            <!-- Sección: Información del Departamento -->
+            <div class="section-title">
+                <i class="fas fa-info-circle"></i> Información del Departamento
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="nombre">Nombre del Departamento</label>
+                <input asp-for="nombre" class="form-control" placeholder="Ej: Gerencia de Operaciones" />
+                <span asp-validation-for="nombre" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="descripcion">Descripción</label>
+                <textarea asp-for="descripcion" class="form-control" placeholder="Ej: Unidad responsable de la planificación, supervisión y ejecución de procesos operativos diarios."></textarea>
+                <span asp-validation-for="descripcion" class="validation-error"></span>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a la Lista
+                </a>
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
