@@ -1,4 +1,4 @@
-﻿using GestionDeInventario.DTOs.ProductoDTOs;
+﻿using GestionDeInventario.DTOs.UsuarioDTOs;
 using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -8,19 +8,18 @@ using Microsoft.EntityFrameworkCore;
 namespace GestionDeInventario.Controllers
 {
     [Authorize(Roles = "Administrador")]
-    public class ProductoController : Controller
+    public class UsuarioController : Controller
     {
-        private readonly IProductoService _productoService;
-
-        public ProductoController(IProductoService productoService)
+        private readonly IUsuarioService _usuarioService;
+        public UsuarioController(IUsuarioService usuarioService)
         {
-            _productoService = productoService;
+            _usuarioService = usuarioService;
         }
-        public async Task<IActionResult> Index(string nombre, string estado, int pageNumber = 1, int pageSize = 5)
+        public async Task<IActionResult> Index(string nombre, string tipoRol, int pageNumber = 1, int pageSize = 5)
         {
-            IQueryable<ProductoResponseDTO> query = _productoService.GetQueryable();
+            IQueryable<UsuarioResponseDTO> query = _usuarioService.GetQueryable();
             string? n_nombre = nombre?.ToLower();
-            string? n_estado = estado?.ToLower();
+            string? n_estado = tipoRol?.ToLower();
 
             if (!string.IsNullOrWhiteSpace(n_nombre))
             {
@@ -28,9 +27,8 @@ namespace GestionDeInventario.Controllers
             }
             if (!string.IsNullOrWhiteSpace(n_estado))
             {
-                query = query.Where(c => c.estado.ToLower().Contains(n_estado));
+                query = query.Where(c => c.tipoRol.ToLower().Contains(n_estado));
             }
-
             try
             {
                 int totalRegistros = await query.CountAsync();
@@ -41,15 +39,14 @@ namespace GestionDeInventario.Controllers
                     .Take(pageSize)
                     .ToListAsync();
                 ViewBag.CurrentNombreEmpleado = nombre;
-                ViewBag.CurrentApellidoEmpleado = estado;
+                ViewBag.CurrentApellidoEmpleado = tipoRol;
                 ViewBag.PageNumber = pageNumber;
                 ViewBag.TotalPages = totalPages;
                 ViewBag.PageSize = pageSize;
                 ViewBag.TotalRegistros = totalRegistros;
                 ViewBag.HasPreviousPage = pageNumber > 1;
                 ViewBag.HasNextPage = pageNumber < totalPages;
-
-                if (!string.IsNullOrWhiteSpace(nombre) || !string.IsNullOrWhiteSpace(estado))
+                if (!string.IsNullOrWhiteSpace(nombre) || !string.IsNullOrWhiteSpace(tipoRol))
                 {
                     ViewData["IsFilterApplied"] = true;
                 }
@@ -57,7 +54,7 @@ namespace GestionDeInventario.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Ocurrió un error al cargar la lista de productos: " + ex.Message;
+                TempData["Error"] = "Ocurrió un error al cargar la lista de usuarios: " + ex.Message;
                 ViewBag.PageNumber = 1;
                 ViewBag.TotalPages = 1;
                 ViewBag.PageSize = pageSize;
@@ -65,63 +62,24 @@ namespace GestionDeInventario.Controllers
                 ViewBag.HasPreviousPage = false;
                 ViewBag.HasNextPage = false;
 
-                return View(new List<ProductoResponseDTO>());
+                return View(new List<UsuarioResponseDTO>());
             }
         }
-
-        public IActionResult Create()
-        {
-            return View(new ProductoCreateDTO());
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProductoCreateDTO dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(dto);
-            }
-            try
-            {
-                var nuevoProducto = await _productoService.AddAsync(dto);
-                if (nuevoProducto == null)
-                {
-                    ModelState.AddModelError("", "No se pudo crear el empleado.");
-                    return View(dto);
-                }
-                TempData["Ok"] = "Producto creado con éxito.";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (BusinessRuleException ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return View(dto);
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Error al crear el empleado: " + ex.Message);
-                return View(dto);
-            }
-        }
-
         public async Task<IActionResult> Edit(int id)
         {
             try
             {
-                var productoDto = await _productoService.GetByIdAsync(id);
-                if (productoDto == null)
+                var usuarioDto = await _usuarioService.GetByIdAsync(id);
+                if (usuarioDto == null)
                 {
                     return NotFound();
                 }
-                var updateDto = new ProductoUpdateDTO
+                var updateDto = new UsuarioUpdateDTO
                 {
-                    nombre = productoDto.nombre,
-                    descripcion = productoDto.descripcion,
-                    cantidadStock = productoDto.cantidadStock,
-                    unidadMedida = productoDto.unidadMedida,
-                    precio = productoDto.precio,
-                    estado = productoDto.estado
+                    nombre = usuarioDto.nombre,
+                    tipoRol = usuarioDto.tipoRol,
+                    email = usuarioDto.email,
+                    contraseña = usuarioDto.contraseña,
                 };
                 return View(updateDto);
             }
@@ -133,14 +91,13 @@ namespace GestionDeInventario.Controllers
             }
             catch (Exception)
             {
-                TempData["ErrorMessage"] = "No se pudo cargar el producto para edición.";
+                TempData["ErrorMessage"] = "No se pudo cargar el usuario para edición.";
                 return RedirectToAction(nameof(Index));
             }
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ProductoUpdateDTO dto)
+        public async Task<IActionResult> Edit(int id, UsuarioUpdateDTO dto)
         {
             if (!ModelState.IsValid)
             {
@@ -148,10 +105,10 @@ namespace GestionDeInventario.Controllers
             }
             try
             {
-                var success = await _productoService.UpdateAsync(id, dto);
+                var success = await _usuarioService.UpdateAsync(id, dto);
                 if (success)
                 {
-                    TempData["Ok"] = "Producto actualizado con éxito.";
+                    TempData["Ok"] = "Usuario actualizado con éxito.";
                     return RedirectToAction(nameof(Index));
                 }
                 else
@@ -170,62 +127,59 @@ namespace GestionDeInventario.Controllers
             }
             catch (Exception)
             {
-                ModelState.AddModelError("", "Error al actualizar el producto. Verifique si el ID coincide o si la sesión es válida.");
+                ModelState.AddModelError("", "Error al actualizar el usuario. Verifique si el ID coincide o si la sesión es válida.");
             }
             return View(dto);
         }
-
         public async Task<IActionResult> Details(int id)
         {
-            var producto = await _productoService.GetByIdAsync(id);
+            var usuario = await _usuarioService.GetByIdAsync(id);
 
-            if (producto == null)
+            if (usuario == null)
             {
                 return NotFound();
             }
-            return View(producto);
+            return View(usuario);
         }
-
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var producto = await _productoService.GetByIdAsync(id);
-                return View(producto);
+                var usuario = await _usuarioService.GetByIdAsync(id);
+                return View(usuario);
             }
             catch (NotFoundException)
             {
-                TempData["MensajeError"] = "Error: El producto solicitado no existe.";
+                TempData["MensajeError"] = "Error: El usuario solicitado no existe.";
                 return RedirectToAction(nameof(Index));
             }
         }
-
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             try
             {
-                await _productoService.DeleteAsync(id);
-                TempData["MensajeExito"] = "Producto eliminado con éxito.";
+                await _usuarioService.DeleteAsync(id);
+                TempData["MensajeExito"] = "Usuario eliminado con éxito.";
                 return RedirectToAction(nameof(Index));
             }
             catch (NotFoundException)
             {
-                TempData["MensajeError"] = "Error: El producto ya no existe o fue eliminado.";
+                TempData["MensajeError"] = "Error: El usuario ya no existe o fue eliminado.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Error al eliminar el producto: " + ex.Message);
+                ModelState.AddModelError("", "Error al eliminar el usuario: " + ex.Message);
                 try
                 {
-                    var producto = await _productoService.GetByIdAsync(id);
-                    return View("Delete", producto);
+                    var usuario = await _usuarioService.GetByIdAsync(id);
+                    return View("Delete", usuario);
                 }
                 catch (NotFoundException)
                 {
-                    TempData["MensajeError"] = "Error interno: El producto fue eliminado antes de mostrar el error.";
+                    TempData["MensajeError"] = "Error interno: El usuario fue eliminado antes de mostrar el error.";
                     return RedirectToAction(nameof(Index));
                 }
             }

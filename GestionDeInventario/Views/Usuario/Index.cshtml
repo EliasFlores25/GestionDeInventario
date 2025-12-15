@@ -1,8 +1,8 @@
-﻿@model IEnumerable<GestionDeInventario.DTOs.DepartamentoDTOs.DepartamentoResponseDTO>
+﻿@model IEnumerable<GestionDeInventario.DTOs.UsuarioDTOs.UsuarioResponseDTO>
 @using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
-    ViewData["Title"] = "Gestión de Departamentos";
+    ViewData["Title"] = "Gestión de Usuarios";
     int pageNumber = ViewBag.PageNumber ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalRegistros = ViewBag.TotalRegistros ?? 0;
@@ -13,14 +13,17 @@
         --primary: #2563eb;
         --success: #10b981;
         --danger: #ef4444;
+        --warning: #f59e0b;
         --dark: #1f2937;
         --light: #f8fafc;
         --border: #e5e7eb;
         --info: #3b82f6;
-        --warning: #f59e0b;
+        --admin: #8b5cf6;
+        --employee: #06b6d4;
+        --supervisor: #f97316;
     }
 
-    .container-departamentos {
+    .container-usuarios {
         padding: 1rem;
         background: var(--light);
         min-height: 100vh;
@@ -155,7 +158,7 @@
         .table-desktop table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            min-width: 1000px;
         }
 
         .table-desktop th {
@@ -178,9 +181,9 @@
             background: #f8fafc;
         }
 
-    .td-descripcion {
+    .td-email {
         display: block;
-        max-width: 300px;
+        max-width: 250px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -188,7 +191,7 @@
         color: var(--primary);
     }
 
-        .td-descripcion:hover {
+        .td-email:hover {
             color: #1d4ed8;
         }
 
@@ -216,7 +219,7 @@
 
     .card-info {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 0.75rem;
         margin-bottom: 1rem;
     }
@@ -239,7 +242,7 @@
         word-break: break-word;
     }
 
-    .descripcion-mobile {
+    .email-mobile {
         max-height: 20px;
         overflow: hidden;
         position: relative;
@@ -247,7 +250,7 @@
         padding-right: 20px;
     }
 
-        .descripcion-mobile::after {
+        .email-mobile::after {
             content: '...';
             position: absolute;
             right: 0;
@@ -256,12 +259,12 @@
             padding-left: 5px;
         }
 
-        .descripcion-mobile.expanded {
+        .email-mobile.expanded {
             max-height: none;
             white-space: pre-wrap;
         }
 
-            .descripcion-mobile.expanded::after {
+            .email-mobile.expanded::after {
                 display: none;
             }
 
@@ -282,19 +285,34 @@
         display: inline-block;
     }
 
-    .badge-success {
-        background: #d1fae5;
-        color: #065f46;
+    .badge-admin {
+        background: #ede9fe;
+        color: #7c3aed;
+        border: 1px solid #7c3aed;
     }
 
-    .badge-danger {
-        background: #fee2e2;
-        color: #991b1b;
+    .badge-employee {
+        background: #e0f2fe;
+        color: #0284c7;
+        border: 1px solid #0284c7;
     }
 
-    .badge-warning {
-        background: #fef3c7;
-        color: #92400e;
+    .badge-supervisor {
+        background: #fff7ed;
+        color: #ea580c;
+        border: 1px solid #ea580c;
+    }
+
+    .badge-user {
+        background: #f0f9ff;
+        color: #0ea5e9;
+        border: 1px solid #0ea5e9;
+    }
+
+    .badge-default {
+        background: #f3f4f6;
+        color: #6b7280;
+        border: 1px solid #d1d5db;
     }
 
     .pagination-container {
@@ -350,7 +368,7 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    .modal-descripcion {
+    .modal-email {
         position: fixed;
         top: 0;
         left: 0;
@@ -373,8 +391,14 @@
         overflow-y: auto;
     }
 
+    .password-hidden {
+        color: var(--text-light);
+        font-style: italic;
+        letter-spacing: 2px;
+    }
+
     @@media (min-width: 768px) {
-        .container-departamentos {
+        .container-usuarios {
             padding: 1.5rem;
         }
 
@@ -407,14 +431,17 @@
         .filter-grid {
             grid-template-columns: 1fr;
         }
+
+        .card-info {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
-<div class="container-departamentos">
+<div class="container-usuarios">
     <div class="header">
-        <h1><i class="fas fa-building"></i> @ViewData["Title"]</h1>
+        <h1><i class="fas fa-users-cog"></i> @ViewData["Title"]</h1>
         <div class="d-flex gap-2">
-            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Nuevo Departamento</a>
             <button class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#filters">
                 <i class="fas fa-filter"></i> Filtros
             </button>
@@ -442,7 +469,11 @@
         <form asp-action="Index" method="get">
             <input type="hidden" name="page" value="1" />
             <div class="filter-grid">
-                <input type="text" class="form-control" name="nombre" placeholder="Nombre del departamento" value="@ViewBag.CurrentNombre">
+                <input type="text" class="form-control" name="nombre" placeholder="Nombre del usuario" value="@ViewBag.CurrentNombre">
+                <select class="form-control" name="tipoRol">
+                    <option value="">Todos los roles</option>
+                    <option value="Administrador" selected="@("Administrador" == ViewBag.CurrentTipoRol)">Administrador</option>
+                </select>
             </div>
             <div class="filter-actions">
                 <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>
@@ -456,7 +487,9 @@
             <thead>
                 <tr>
                     <th>Nombre</th>
-                    <th>Descripción</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Contraseña</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -468,19 +501,32 @@
                         <tr>
                             <td style="font-weight: 600;">@item.nombre</td>
                             <td>
-                                <span class="td-descripcion" onclick="mostrarDescripcion('@Html.Raw(item.descripcion?.Replace("'", "\\'") ?? "")')">
-                                    @(item.descripcion?.Length > 50 ? item.descripcion.Substring(0, 50) + "..." : item.descripcion)
+                                <span class="td-email" onclick="mostrarEmail('@Html.Raw(item.email.Replace("'", "\\'"))')">
+                                    @item.email
                                 </span>
                             </td>
                             <td>
+                                @{
+                                    var badgeClass = item.tipoRol switch
+                                    {
+                                        "Administrador" => "badge-admin",
+                                        _ => "badge-default"
+                                    };
+                                }
+                                <span class="badge @badgeClass">
+                                    @item.tipoRol
+                                </span>
+                            </td>
+                            <td class="password-hidden">••••••••</td>
+                            <td>
                                 <div class="d-flex gap-1 justify-content-center">
-                                    <a asp-action="Edit" asp-route-id="@item.idDepartamento" class="btn btn-secondary btn-sm" title="Editar">
+                                    <a asp-action="Edit" asp-route-id="@item.idUsuario" class="btn btn-secondary btn-sm" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a asp-action="Details" asp-route-id="@item.idDepartamento" class="btn btn-secondary btn-sm" title="Detalles">
+                                    <a asp-action="Details" asp-route-id="@item.idUsuario" class="btn btn-secondary btn-sm" title="Detalles">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a asp-action="Delete" asp-route-id="@item.idDepartamento" class="btn btn-secondary btn-sm" title="Eliminar">
+                                    <a asp-action="Delete" asp-route-id="@item.idUsuario" class="btn btn-secondary btn-sm" title="Eliminar">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
@@ -491,10 +537,10 @@
                 else
                 {
                     <tr>
-                        <td colspan="4" class="empty-state">
-                            <i class="fas fa-building fa-2x mb-2"></i>
-                            <p>No hay departamentos registrados</p>
-                            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Crear Primer Departamento</a>
+                        <td colspan="6" class="empty-state">
+                            <i class="fas fa-users-slash fa-2x mb-2"></i>
+                            <p>No hay usuarios registrados</p>
+                            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-user-plus"></i> Crear Primer Usuario</a>
                         </td>
                     </tr>
                 }
@@ -507,22 +553,33 @@
         {
             foreach (var item in Model)
             {
+                var badgeClass = item.tipoRol switch
+                {
+                    "Administrador" => "badge-admin",
+                    _ => "badge-default"
+                };
+
                 <div class="card">
                     <div class="card-header">
                         <div>
                             <strong>@item.nombre</strong>
                         </div>
+                        <span class="badge @badgeClass">@item.tipoRol</span>
                     </div>
                     <div class="card-info">
                         <div class="info-item">
-                            <span class="info-label">Descripción</span>
-                            <div class="info-value descripcion-mobile" onclick="this.classList.toggle('expanded')">@item.descripcion</div>
+                            <span class="info-label">Email</span>
+                            <div class="info-value descripcion-mobile" onclick="this.classList.toggle('expanded')">@item.email</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Contraseña</span>
+                            <span class="info-value password-hidden">••••••••</span>
                         </div>
                     </div>
                     <div class="card-actions">
-                        <a asp-action="Edit" asp-route-id="@item.idDepartamento" class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></a>
-                        <a asp-action="Details" asp-route-id="@item.idDepartamento" class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i></a>
-                        <a asp-action="Delete" asp-route-id="@item.idDepartamento" class="btn btn-secondary btn-sm"><i class="fas fa-trash"></i></a>
+                        <a asp-action="Edit" asp-route-id="@item.idUsuario" class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></a>
+                        <a asp-action="Details" asp-route-id="@item.idUsuario" class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i></a>
+                        <a asp-action="Delete" asp-route-id="@item.idUsuario" class="btn btn-secondary btn-sm"><i class="fas fa-trash"></i></a>
                     </div>
                 </div>
             }
@@ -530,9 +587,9 @@
         else
         {
             <div class="empty-state">
-                <i class="fas fa-building fa-2x mb-2"></i>
-                <p>No hay departamentos registrados</p>
-                <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Crear Primer Departamento</a>
+                <i class="fas fa-users-slash fa-2x mb-2"></i>
+                <p>No hay usuarios registrados</p>
+                <a asp-action="Create" class="btn btn-primary"><i class="fas fa-user-plus"></i> Crear Primer Usuario</a>
             </div>
         }
     </div>
@@ -546,7 +603,7 @@
                     {
                         <li>
                             <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber - 1)"
-                               asp-route-nombre="@ViewBag.CurrentNombre">
+                               asp-route-nombre="@ViewBag.CurrentNombre" asp-route-tipoRol="@ViewBag.CurrentTipoRol">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                         </li>
@@ -557,7 +614,7 @@
                         {
                             <li>
                                 <a class="page-link @(i == pageNumber ? "active" : "")" asp-action="Index" asp-route-pageNumber="@i"
-                                   asp-route-nombre="@ViewBag.CurrentNombre">
+                                   asp-route-nombre="@ViewBag.CurrentNombre" asp-route-tipoRol="@ViewBag.CurrentTipoRol">
                                     @i
                                 </a>
                             </li>
@@ -571,7 +628,7 @@
                     {
                         <li>
                             <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber + 1)"
-                               asp-route-nombre="@ViewBag.CurrentNombre">
+                               asp-route-nombre="@ViewBag.CurrentNombre" asp-route-tipoRol="@ViewBag.CurrentTipoRol">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>
@@ -584,14 +641,14 @@
 
 @section Scripts {
     <script>
-        function mostrarDescripcion(descripcion) {
-            descripcion = descripcion.replace(/\\'/g, "'");
+        function mostrarEmail(email) {
+            email = email.replace(/\\'/g, "'");
             const modal = $(`
-                <div class="modal-descripcion">
+                <div class="modal-email">
                     <div class="modal-content">
-                        <h4><i class="fas fa-align-left"></i> Descripción Completa</h4>
-                        <p style="word-break: break-word; white-space: pre-wrap;">${descripcion}</p>
-                        <button class="btn btn-primary" onclick="$(this).closest('.modal-descripcion').remove()">
+                        <h4><i class="fas fa-envelope"></i> Email Completo</h4>
+                        <p style="word-break: break-word; white-space: pre-wrap;">${email}</p>
+                        <button class="btn btn-primary" onclick="$(this).closest('.modal-email').remove()">
                             <i class="fas fa-times"></i> Cerrar
                         </button>
                     </div>
@@ -612,7 +669,7 @@
 
             $(document).on('click', '.page-link', function(e) {
                 if (!$(this).hasClass('disabled') && !$(this).hasClass('active')) {
-                    $('html, body').animate({ scrollTop: $('.container-departamentos').offset().top - 20 }, 300);
+                    $('html, body').animate({ scrollTop: $('.container-usuarios').offset().top - 20 }, 300);
                 }
             });
         });

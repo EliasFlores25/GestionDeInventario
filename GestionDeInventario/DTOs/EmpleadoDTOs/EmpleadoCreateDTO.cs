@@ -5,6 +5,8 @@ namespace GestionDeInventario.DTOs.EmpleadoDTOs
     public class EmpleadoCreateDTO
     {
         [Required(ErrorMessage = "El nombre es obligatorio.")]
+        [StringLength(100, ErrorMessage = "El nombre no debe exceder los 100 caracteres.")]
+        [MinLength(2, ErrorMessage = "El nombre debe tener al menos 2 caracteres.")]
         public string nombre { get; set; }
 
         [Required(ErrorMessage = "El apellido es obligatorio.")]

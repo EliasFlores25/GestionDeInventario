@@ -1,0 +1,539 @@
+﻿@model GestionDeInventario.DTOs.UsuarioDTOs.UsuarioUpdateDTO
+
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --warning: #f59e0b;
+        --warning-dark: #d97706;
+        --success: #10b981;
+        --danger: #ef4444;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
+        --admin: #8b5cf6;
+        --employee: #06b6d4;
+        --supervisor: #f97316;
+        --user: #0ea5e9;
+    }
+
+    .container-edit {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .edit-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border-top: 5px solid var(--warning);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .edit-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+        .edit-header h1 {
+            color: var(--dark);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+            .edit-header h1 i {
+                color: var(--warning);
+            }
+
+        .edit-header h4 {
+            color: var(--text-light);
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+        }
+
+    .section-title {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--warning);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+        position: relative;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 3rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        background: white;
+    }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--warning);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+    .validation-error {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-warning {
+        background: var(--warning);
+        color: white;
+    }
+
+        .btn-warning:hover {
+            background: var(--warning-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2);
+        }
+
+    .btn-secondary {
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        font-size: 1rem;
+        z-index: 2;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-light);
+        cursor: pointer;
+        font-size: 1rem;
+        z-index: 3;
+    }
+
+        .password-toggle:hover {
+            color: var(--warning);
+        }
+
+    .password-strength {
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .strength-meter {
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        margin-top: 0.25rem;
+        overflow: hidden;
+    }
+
+    .strength-fill {
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .strength-text {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    .role-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    .badge-admin {
+        background: #ede9fe;
+        color: #7c3aed;
+        border: 1px solid #7c3aed;
+    }
+
+    .badge-employee {
+        background: #e0f2fe;
+        color: #0284c7;
+        border: 1px solid #0284c7;
+    }
+
+    .badge-supervisor {
+        background: #fff7ed;
+        color: #ea580c;
+        border: 1px solid #ea580c;
+    }
+
+    .badge-user {
+        background: #f0f9ff;
+        color: #0ea5e9;
+        border: 1px solid #0ea5e9;
+    }
+
+    @@media (max-width: 768px) {
+        .container-edit {
+            padding: 1rem;
+        }
+
+        .edit-card {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+    }
+
+    @@media (max-width: 576px) {
+        .edit-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .edit-card {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container-edit">
+    <div class="edit-card">
+        <div class="edit-header">
+            <h1><i class="fas fa-user-edit"></i> @ViewData["Title"]</h1>
+            <h4>Actualización de información del usuario</h4>
+        </div>
+
+        <form asp-action="Edit" method="post" id="editForm">
+            <div asp-validation-summary="ModelOnly" class="alert-danger"></div>
+            <input type="hidden" asp-for="idUsuario" />
+
+            <!-- Sección 1: Información Personal -->
+            <div class="section-title">
+                <i class="fas fa-user-circle"></i> Información Personal
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="nombre">Nombre Completo</label>
+                <div class="position-relative">
+                    <i class="fas fa-user input-icon"></i>
+                    <input asp-for="nombre" class="form-control" placeholder="Ej: Juan Pérez" />
+                </div>
+                <span asp-validation-for="nombre" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="email">Correo Electrónico</label>
+                <div class="position-relative">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input asp-for="email" class="form-control" placeholder="ejemplo@correo.com" />
+                </div>
+                <span asp-validation-for="email" class="validation-error"></span>
+            </div>
+
+            <!-- Sección 2: Credenciales y Rol -->
+            <div class="section-title">
+                <i class="fas fa-key"></i> Credenciales y Rol
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="tipoRol">Tipo de Rol</label>
+                <div class="position-relative">
+                    <i class="fas fa-user-tag input-icon"></i>
+                    <select asp-for="tipoRol" class="form-select">
+                        <option value="">Seleccione un rol</option>
+                        <option value="Administrador">Administrador @* <span class="role-badge badge-admin">Admin</span> *@</option>
+                    </select>
+                </div>
+                <span asp-validation-for="tipoRol" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="contraseña">Nueva Contraseña</label>
+                <div class="position-relative">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input asp-for="contraseña" type="password" class="form-control" placeholder="••••••••" id="passwordInput" />
+                    <button type="button" class="password-toggle" id="passwordToggle">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="contraseña" class="validation-error"></span>
+
+                <div class="password-strength">
+                    <div class="strength-text">Seguridad de contraseña: <span id="strengthText">Baja</span></div>
+                    <div class="strength-meter">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">Confirmar Contraseña</label>
+                <div class="position-relative">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" class="form-control" id="confirmPassword" placeholder="••••••••" />
+                    <button type="button" class="password-toggle" id="confirmPasswordToggle">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <span class="validation-error" id="confirmPasswordError"></span>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a la Lista
+                </a>
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Toggle para mostrar/ocultar contraseña principal
+            $('#passwordToggle').click(function () {
+                const passwordInput = $('#passwordInput');
+                const icon = $(this).find('i');
+
+                if (passwordInput.attr('type') === 'password') {
+                    passwordInput.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    passwordInput.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+
+            // Toggle para mostrar/ocultar confirmación de contraseña
+            $('#confirmPasswordToggle').click(function () {
+                const confirmInput = $('#confirmPassword');
+                const icon = $(this).find('i');
+
+                if (confirmInput.attr('type') === 'password') {
+                    confirmInput.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    confirmInput.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+
+            // Validar fortaleza de contraseña en tiempo real
+            $('#passwordInput').on('input', function() {
+                const password = $(this).val();
+                const strengthFill = $('#strengthFill');
+                const strengthText = $('#strengthText');
+
+                let strength = 0;
+                let text = 'Baja';
+                let color = '#ef4444'; // Rojo
+
+                // Verificar longitud
+                if (password.length >= 6) strength += 25;
+                if (password.length >= 8) strength += 25;
+
+                // Verificar caracteres especiales
+                if (/[A-Z]/.test(password)) strength += 15;
+                if (/[0-9]/.test(password)) strength += 15;
+                if (/[^A-Za-z0-9]/.test(password)) strength += 20;
+
+                // Determinar nivel de seguridad
+                if (strength >= 80) {
+                    text = 'Muy Alta';
+                    color = '#10b981'; // Verde
+                } else if (strength >= 60) {
+                    text = 'Alta';
+                    color = '#22c55e'; // Verde claro
+                } else if (strength >= 40) {
+                    text = 'Media';
+                    color = '#f59e0b'; // Amarillo
+                } else if (strength >= 20) {
+                    text = 'Baja';
+                    color = '#f97316'; // Naranja
+                } else {
+                    text = 'Muy Baja';
+                    color = '#ef4444'; // Rojo
+                }
+
+                strengthFill.css({
+                    'width': strength + '%',
+                    'background-color': color
+                });
+                strengthText.text(text).css('color', color);
+
+                // Validar coincidencia de contraseñas
+                validatePasswordMatch();
+            });
+
+            // Validar coincidencia de contraseñas
+            $('#confirmPassword').on('input', validatePasswordMatch);
+
+            function validatePasswordMatch() {
+                const password = $('#passwordInput').val();
+                const confirm = $('#confirmPassword').val();
+                const errorSpan = $('#confirmPasswordError');
+
+                if (confirm === '') {
+                    errorSpan.text('');
+                } else if (password !== confirm) {
+                    errorSpan.text('Las contraseñas no coinciden');
+                } else {
+                    errorSpan.text('');
+                }
+            }
+
+            // Validación antes de enviar el formulario
+            $('#editForm').on('submit', function (e) {
+                let isValid = true;
+
+                // Validar campos requeridos
+                $('.form-control').each(function () {
+                    if (!$(this).val().trim()) {
+                        $(this).addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+
+                // Validar selección de rol
+                if (!$('#tipoRol').val()) {
+                    $('#tipoRol').addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $('#tipoRol').removeClass('is-invalid');
+                }
+
+                // Validar coincidencia de contraseñas
+                const password = $('#passwordInput').val();
+                const confirm = $('#confirmPassword').val();
+                if (password !== confirm) {
+                    $('#confirmPasswordError').text('Las contraseñas no coinciden');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    $('.alert-danger').remove();
+                    $('#editForm').prepend(
+                        '<div class="alert-danger"><i class="fas fa-exclamation-circle"></i> Por favor, complete todos los campos requeridos correctamente.</div>'
+                    );
+
+                    // Desplazar al primer error
+                    $('html, body').animate({
+                        scrollTop: $('.alert-danger').offset().top - 100
+                    }, 500);
+                }
+            });
+
+            // Remover clases de error al escribir
+            $('.form-control, .form-select').on('input change', function () {
+                $(this).removeClass('is-invalid');
+            });
+
+            // Resaltar el rol actual en el select
+            const currentRole = $('#tipoRol').val();
+            if (currentRole) {
+                $('#tipoRol option[value="' + currentRole + '"]').prop('selected', true);
+            }
+        });
+    </script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

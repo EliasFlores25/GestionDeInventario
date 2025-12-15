@@ -1,5 +1,7 @@
 ﻿namespace GestionDeInventario.Services.Exceptions
 {
+
+    // Excepción personalizada para errores específicos de la lógica de negocio (dominio).
     public class DomainException : Exception
     {
         public DomainException(string message) : base(message){ }

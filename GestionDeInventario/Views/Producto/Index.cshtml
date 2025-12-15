@@ -438,7 +438,6 @@
     <div class="header">
         <h1><i class="fas fa-boxes"></i> @ViewData["Title"]</h1>
         <div class="d-flex gap-2">
-            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Nuevo Producto</a>
             <button class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#filters">
                 <i class="fas fa-filter"></i> Filtros
             </button>
@@ -580,9 +579,7 @@
                     <div class="card-info">
                         <div class="info-item">
                             <span class="info-label">Descripción</span>
-                            <div class="info-value descripcion-mobile" onclick="this.classList.toggle('expanded')">
-                                @item.descripcion
-                            </div>
+                            <div class="info-value descripcion-mobile" onclick="this.classList.toggle('expanded')">@item.descripcion</div>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Stock</span>

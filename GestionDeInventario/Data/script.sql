@@ -196,7 +196,9 @@ BEGIN
         -- Lanza un error que cancela la operación de inserción
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Error: No hay suficiente stock disponible para esta distribución. Operación cancelada.';
-    END IF;
+    END IF; 
+
+     
 END //
 
 -- T-5: Después de insertar (Disminuye stock)

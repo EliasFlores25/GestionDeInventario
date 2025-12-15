@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-namespace GestionDeInventario.Models
+
+namespace GestionDeInventario.DTOs.UsuarioDTOs
 {
-    [Table("Usuario")]
-    public class Usuario
+    public class UsuarioResponseDTO
     {
-     [Key]
         public int idUsuario { get; set; }
         public string nombre { get; set; }
         public string tipoRol { get; set; }

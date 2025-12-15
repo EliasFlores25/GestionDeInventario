@@ -3,6 +3,7 @@ using GestionDeInventario.DTOs.EmpleadoDTOs;
 using GestionDeInventario.Repository.Interfaces;
 using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GestionDeInventario.Controllers
 {
+[Authorize(Roles= "Administrador")]
     public class EmpleadoController : Controller
     {
         private readonly IEmpleadoService _empleadoService;
