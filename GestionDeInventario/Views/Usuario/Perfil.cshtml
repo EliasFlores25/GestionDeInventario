@@ -1,0 +1,449 @@
+﻿@using System.Security.Claims
+@{
+    ViewData["Title"] = "Mi Perfil";
+}
+
+<style>
+    .profile-container {
+        padding: 2rem 1rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 200px);
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+        border-top: 5px solid #2563eb;
+    }
+
+    .profile-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+        text-align: center;
+    }
+
+        .profile-header h1 {
+            color: #1f2937;
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+            .profile-header h1 i {
+                color: #2563eb;
+            }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: white;
+        font-size: 3rem;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        transition: transform 0.3s ease;
+    }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+
+    .profile-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-section {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 1.5rem;
+        border-left: 4px solid #2563eb;
+    }
+
+    .section-title {
+        color: #1f2937;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .section-title i {
+            color: #2563eb;
+        }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e5e7eb;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+        .info-item:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            padding: 0.75rem 0.5rem;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+    .info-label {
+        color: #6b7280;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 180px;
+    }
+
+    .info-value {
+        color: #1f2937;
+        font-weight: 500;
+        text-align: right;
+        word-break: break-word;
+        max-width: 200px;
+    }
+
+    .badge-role {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .badge-admin {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .badge-gerente {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+    }
+
+    .badge-empleado {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+
+    .badge-access {
+        background: #e0e7ff;
+        color: #3730a3;
+        border: 1px solid #c7d2fe;
+        font-size: 0.75rem;
+    }
+
+    .profile-actions {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #e5e7eb;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+        }
+
+    .btn-secondary {
+        background: white;
+        color: #1f2937;
+        border: 2px solid #e5e7eb;
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+    .system-info {
+        background: #f0f9ff;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border-left: 4px solid #2563eb;
+    }
+
+        .system-info h4 {
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .system-info ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .system-info li {
+            padding: 0.5rem 0;
+            color: #4b5563;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .system-info li i {
+                color: #10b981;
+            }
+
+    .copy-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: none;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    }
+
+    @@keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .profile-card {
+            padding: 1.5rem;
+        }
+
+        .profile-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .profile-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-actions {
+            flex-direction: column;
+        }
+
+            .profile-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
+
+        .info-value {
+            text-align: left;
+            max-width: 100%;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .profile-card {
+            padding: 1rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            font-size: 2.5rem;
+        }
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-card">
+        <!-- Avatar y título -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                @{
+                    var userName = User.Claims.FirstOrDefault(c => c.Type == "UserName" || c.Type == ClaimTypes.Name)?.Value ?? "Usuario";
+                    var firstLetter = userName.Substring(0, 1).ToUpper();
+                }
+                <span style="font-size: 2.5rem; font-weight: bold;">@firstLetter</span>
+            </div>
+            <h1><i class="fas fa-user"></i> Mi Perfil</h1>
+            <p class="text-muted">Información personal y datos de tu cuenta</p>
+        </div>
+
+        <!-- Notificación para copiar -->
+        <div class="copy-notification" id="copyNotification">
+            <i class="fas fa-check-circle me-2"></i> ¡Copiado al portapapeles!
+        </div>
+
+        <!-- Información personal -->
+        <div class="profile-info-grid">
+            <!-- Información de la cuenta -->
+            <div class="info-section">
+                <h3 class="section-title"><i class="fas fa-user-circle"></i> Información de la Cuenta</h3>
+
+                <div class="info-item" data-copy="@User.Claims.FirstOrDefault(c => c.Type == "UserName" || c.Type == ClaimTypes.Name)?.Value">
+                    <span class="info-label"><i class="fas fa-user"></i> Nombre:</span>
+                    <span class="info-value">@User.Claims.FirstOrDefault(c => c.Type == "UserName" || c.Type == ClaimTypes.Name)?.Value</span>
+                </div>
+
+                <div class="info-item" data-copy="@User.Claims.FirstOrDefault(c => c.Type == "UserEmail" || c.Type == ClaimTypes.Email)?.Value">
+                    <span class="info-label"><i class="fas fa-envelope"></i> Email:</span>
+                    <span class="info-value">@User.Claims.FirstOrDefault(c => c.Type == "UserEmail" || c.Type == ClaimTypes.Email)?.Value</span>
+                </div>
+
+                <div class="info-item" data-copy="@User.Claims.FirstOrDefault(c => c.Type == "UserId" || c.Type == ClaimTypes.NameIdentifier)?.Value">
+                    <span class="info-label"><i class="fas fa-id-card"></i> ID de Usuario:</span>
+                    <span class="info-value">@User.Claims.FirstOrDefault(c => c.Type == "UserId" || c.Type == ClaimTypes.NameIdentifier)?.Value</span>
+                </div>
+            </div>
+
+            <!-- Roles y permisos -->
+            <div class="info-section">
+                <h3 class="section-title"><i class="fas fa-shield-alt"></i> Roles y Permisos</h3>
+
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-user-tag"></i> Rol Principal:</span>
+                    <span class="info-value">
+                        @{
+                            var userRole = User.Claims.FirstOrDefault(c => c.Type == "UserRole" || c.Type == ClaimTypes.Role)?.Value ?? "Usuario";
+                            var badgeClass = userRole switch
+                            {
+                                "Administrador" => "badge-admin",
+                                _ => "badge-role"
+                            };
+                        }
+                        <span class="badge-role @badgeClass">@userRole</span>
+                    </span>
+                </div>
+
+                <div class="info-item" data-copy="@User.Claims.FirstOrDefault(c => c.Type == "LastLogin")?.Value">
+                    <span class="info-label"><i class="fas fa-sign-in-alt"></i> Último Acceso:</span>
+                    <span class="info-value">@User.Claims.FirstOrDefault(c => c.Type == "LastLogin")?.Value</span>
+                </div>
+
+                <div class="info-item" data-copy="@User.Claims.FirstOrDefault(c => c.Type == "AccountCreated")?.Value">
+                    <span class="info-label"><i class="fas fa-calendar-alt"></i> Cuenta Creada:</span>
+                    <span class="info-value">@User.Claims.FirstOrDefault(c => c.Type == "AccountCreated")?.Value</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="profile-actions">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Volver al Inicio
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Función para mostrar notificación de copiado
+            function showCopyNotification() {
+                const notification = $('#copyNotification');
+                notification.fadeIn(300);
+                setTimeout(() => {
+                    notification.fadeOut(300);
+                }, 2000);
+            }
+
+            // Copiar al portapapeles al hacer clic en info-item
+            $('.info-item[data-copy]').click(function() {
+                const textToCopy = $(this).data('copy');
+                if (textToCopy && textToCopy !== '') {
+                    navigator.clipboard.writeText(textToCopy).then(function() {
+                        showCopyNotification();
+                    }).catch(function(err) {
+                        console.error('Error al copiar: ', err);
+                        // Fallback para navegadores antiguos
+                        const textArea = document.createElement('textarea');
+                        textArea.value = textToCopy;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        showCopyNotification();
+                    });
+                }
+            });
+
+            // Función para mostrar mensaje de "próximamente"
+            function showComingSoon(feature) {
+                alert(`🚧 ${feature} - Próximamente\nEsta funcionalidad estará disponible en la próxima actualización.`);
+            }
+
+            // Agregar tooltips a los info-items
+            $('.info-item[data-copy]').attr('title', 'Click para copiar');
+
+            // Efecto hover en los info-items
+            $('.info-item').hover(
+                function() {
+                    $(this).css('background-color', '#f8fafc');
+                },
+                function() {
+                    $(this).css('background-color', '');
+                }
+            );
+        });
+    </script>
+}

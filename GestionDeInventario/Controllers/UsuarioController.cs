@@ -15,6 +15,11 @@ namespace GestionDeInventario.Controllers
         {
             _usuarioService = usuarioService;
         }
+        [Authorize]
+        public IActionResult Perfil()
+        {
+            return View();
+        }
         public async Task<IActionResult> Index(string nombre, string tipoRol, int pageNumber = 1, int pageSize = 5)
         {
             IQueryable<UsuarioResponseDTO> query = _usuarioService.GetQueryable();

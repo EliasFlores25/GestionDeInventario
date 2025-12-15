@@ -1,103 +1,210 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - GestionDeInventario</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/GestionDeInventario.styles.css" asp-append-version="true" />
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* Estilos básicos para evitar desbordamiento */
+        .navbar-nav {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.5rem 0;
+        }
+
+            .navbar-nav::-webkit-scrollbar {
+                display: none;
+            }
+
+        .nav-link {
+            padding: 0.5rem 0.75rem !important;
+            margin: 0 2px;
+        }
+
+            .nav-link i {
+                margin-right: 0.5rem;
+            }
+
+        /* Menú de usuario siempre visible */
+        .user-menu {
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        /* Breadcrumbs simples */
+        .breadcrumb-simple {
+            background: #f8f9fa;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .navbar-nav {
+                flex-direction: column;
+                overflow-x: visible;
+                width: 100%;
+            }
+
+            .nav-link {
+                padding: 0.75rem 1rem !important;
+                margin: 0.25rem 0;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GestionDeInventario</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <!-- Logo -->
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-boxes me-2"></i>Gestión Inventario
+                </a>
+
+                <!-- Botón toggle para móvil -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 
-                    <ul class="navbar-nav flex-grow-1">
-
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-
+                <!-- Contenido del navbar -->
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <!-- Menú principal -->
+                    <ul class="navbar-nav me-auto">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            @* Enlace para Empleados/Productos/Departamentos: Asumimos que Gerente y Administrador pueden ver *@
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                    <i class="fas fa-home"></i> Home
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Privacy">
+                                    <i class="fas fa-shield-alt"></i> Privacy
+                                </a>
+                            </li>
+
                             @if (User.IsInRole("Administrador") || User.IsInRole("Gerente") || User.IsInRole("Empleado"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Empleado" asp-action="Index">Empleados</a>
+                                    <a class="nav-link" asp-controller="Empleado" asp-action="Index">
+                                        <i class="fas fa-users"></i> Empleados
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Producto" asp-action="Index">Productos</a>
+                                    <a class="nav-link" asp-controller="Producto" asp-action="Index">
+                                        <i class="fas fa-boxes"></i> Productos
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Departamento" asp-action="Index">Departamentos</a>
+                                    <a class="nav-link" asp-controller="Departamento" asp-action="Index">
+                                        <i class="fas fa-building"></i> Departamentos
+                                    </a>
                                 </li>
                             }
 
-                            @* Enlace de Gestión de Usuarios: Solo para Administrador *@
                             @if (User.IsInRole("Administrador"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Usuario" asp-action="Index">Usuarios</a>
+                                    <a class="nav-link" asp-controller="Usuario" asp-action="Index">
+                                        <i class="fas fa-user-cog"></i> Usuarios
+                                    </a>
                                 </li>
                             }
                         }
                     </ul>
 
-                    <ul class="navbar-nav">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <span class="nav-link text-info">Hola, @User.Identity.Name</span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Logout">Cerrar Sesión</a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Login">Iniciar Sesión</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Register">Registrarse</a>
-                            </li>
-                        }
-                    </ul>
+                    <!-- Menú de usuario -->
+                    <div class="user-menu">
+                        <ul class="navbar-nav">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-user me-1"></i>@User.Identity.Name
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <a class="dropdown-item" asp-controller="Usuario" asp-action="Perfil">
+                                            <i class="fas fa-user me-2"></i>Mi Perfil
+                                        </a>
+                                        <li>
+                                            <a class="dropdown-item text-danger" asp-controller="Auth" asp-action="Logout">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Auth" asp-action="Login">
+                                        <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesión
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Auth" asp-action="Register">
+                                        <i class="fas fa-user-plus me-1"></i>Registrarse
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
 
-    <div class="container">
+    <div class="container mt-3">
         <main role="main" class="pb-3">
+            <!-- Breadcrumbs simples -->
+            @if (ViewContext.RouteData.Values["controller"]?.ToString() != "Home")
+            {
+                <nav class="breadcrumb-simple">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                    @if (ViewContext.RouteData.Values["controller"] != null)
+                    {
+                        <span class="mx-2">/</span>
+                        <a asp-controller="@ViewContext.RouteData.Values["controller"]" asp-action="Index" class="text-decoration-none">
+                            @ViewContext.RouteData.Values["controller"]
+                        </a>
+                    }
+                    @if (ViewContext.RouteData.Values["action"]?.ToString() != "Index")
+                    {
+                        <span class="mx-2">/</span>
+                        <span>@ViewData["Title"]</span>
+                    }
+                </nav>
+            }
+
+            <!-- Alertas -->
             @if (TempData["SuccessMessage"] != null)
             {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    @TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="alert alert-success alert-dismissible fade show">
+                    <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
             @if (TempData["ErrorMessage"] != null)
             {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    @TempData["ErrorMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
 
@@ -105,14 +212,70 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top py-3 mt-4">
         <div class="container">
-            &copy; 2025 - GestionDeInventario - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <i class="fas fa-copyright me-1"></i> @DateTime.Now.Year - GestionDeInventario
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">
+                        <i class="fas fa-shield-alt me-1"></i>Privacy
+                    </a>
+                </div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Auto-cerrar alertas
+            setTimeout(function() {
+                $('.alert-dismissible').alert('close');
+            }, 5000);
+
+            // Detectar vista CRUD y ocultar menú
+            var currentUrl = window.location.pathname.toLowerCase();
+            var currentAction = '@ViewContext.RouteData.Values["action"]'.toLowerCase();
+            var crudActions = ['create', 'edit', 'details', 'delete'];
+
+            if (crudActions.includes(currentAction) ||
+                currentUrl.includes('/create') ||
+                currentUrl.includes('/edit/') ||
+                currentUrl.includes('/details/') ||
+                currentUrl.includes('/delete/')) {
+
+                // Ocultar menú principal pero mantener usuario
+                $('.navbar-nav.me-auto').hide();
+
+                // Crear botón para mostrar menú
+                if (!$('#showMenuBtn').length) {
+                    $('.navbar-brand').after(
+                        '<button id="showMenuBtn" class="btn btn-sm btn-outline-primary ms-2">' +
+                        '<i class="fas fa-bars"></i> Menú' +
+                        '</button>'
+                    );
+
+                    $('#showMenuBtn').click(function() {
+                        $('.navbar-nav.me-auto').toggle();
+                    });
+                }
+            }
+
+            // Marcar enlace activo
+            var currentPath = window.location.pathname;
+            $('.nav-link').each(function() {
+                var linkPath = $(this).attr('href');
+                if (linkPath && currentPath === linkPath) {
+                    $(this).addClass('active');
+                }
+            });
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

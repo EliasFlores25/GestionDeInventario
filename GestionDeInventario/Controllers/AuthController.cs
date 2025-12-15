@@ -17,6 +17,7 @@ namespace GestionDeInventario.Controllers
         {
             _authService = authService;
         }
+
         // === ACCIÓN DE LOGIN (GET) ===
         // Muestra el formulario de inicio de sesión
         [HttpGet]
@@ -36,7 +37,8 @@ namespace GestionDeInventario.Controllers
                 ViewData["ReturnUrl"] = returnUrl;
                 return View(dto);
             }
-            // 1. Llama al Servicio para validar credenciales (Hashing/Verify)
+
+            // 1. Llama al Servicio para validar credenciales
             var usuarioDto = await _authService.LoginAsync(dto);
 
             if (usuarioDto == null)
@@ -45,26 +47,71 @@ namespace GestionDeInventario.Controllers
                 ViewData["ReturnUrl"] = returnUrl;
                 return View(dto);
             }
-            // 2. Crear Claims (Identidad del Usuario)
+
+            // 2. Crear Claims (Identidad del Usuario) - COMPLETO
             var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, usuarioDto.idUsuario.ToString()),
-                new Claim(ClaimTypes.Email, usuarioDto.email),
-                new Claim(ClaimTypes.Role, usuarioDto.tipoRol.ToString()), // El rol es vital para la autorización
-                new Claim(ClaimTypes.Name, usuarioDto.nombre)
-            };
+    {
+        // Claims estándar de .NET
+        new Claim(ClaimTypes.NameIdentifier, usuarioDto.idUsuario.ToString()),
+        new Claim(ClaimTypes.Email, usuarioDto.email),
+        new Claim(ClaimTypes.Role, usuarioDto.tipoRol),
+        new Claim(ClaimTypes.Name, usuarioDto.nombre),
+        
+        // Claims personalizados para fácil acceso
+        new Claim("UserId", usuarioDto.idUsuario.ToString()),
+        new Claim("UserEmail", usuarioDto.email),
+        new Claim("UserName", usuarioDto.nombre),
+        new Claim("UserRole", usuarioDto.tipoRol),
+        
+        // Claims para información de cuenta
+        new Claim("AccountCreated", DateTime.Now.ToString("dd/MM/yyyy")),
+        new Claim("LastLogin", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")),
+        new Claim("DisplayName", usuarioDto.nombre),
+        
+        // Claims específicos del sistema
+        new Claim("SystemAccess", "InventoryManagement"),
+        new Claim("Application", "GestionDeInventario"),
+        
+        // Claim para nivel de acceso basado en rol
+        new Claim("AccessLevel", GetAccessLevel(usuarioDto.tipoRol))
+    };
+
             var claimsIdentity = new ClaimsIdentity(
                 claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            // 3. Establecer la Sesión (Cookie)
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,new ClaimsPrincipal(claimsIdentity));
+            // 3. Propiedades de autenticación
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8),
+                IssuedUtc = DateTimeOffset.UtcNow,
+                AllowRefresh = true
+            };
 
-            // 4. Redirigir al usuario
-            if (Url.IsLocalUrl(returnUrl))
+            // 4. Establecer la Sesión (Cookie)
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+
+            // 5. Redirigir al usuario
+            if (Url.IsLocalUrl(returnUrl) && !string.IsNullOrEmpty(returnUrl))
             {
                 return Redirect(returnUrl);
             }
-            return RedirectToAction("Index", "Home"); // O a la página principal del inventario
+            return RedirectToAction("Index", "Home");
+        }
+
+        // Función auxiliar para nivel de acceso
+        private string GetAccessLevel(string role)
+        {
+            return role switch
+            {
+                "Administrador" => "Total",
+                "Gerente" => "Alto",
+                "Empleado" => "Medio",
+                _ => "Básico"
+            };
         }
         // === ACCIÓN DE LOGOUT ===
         public async Task<IActionResult> Logout()
@@ -112,5 +159,10 @@ namespace GestionDeInventario.Controllers
                 return View(dto);
             }
         }
+
+        
+
+
+
     }
 }
