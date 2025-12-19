@@ -1,5 +1,6 @@
 ﻿namespace GestionDeInventario.Services.Exceptions
 {
+    // Usamos BusinessRuleException porque es una violación de validación
     public class BusinessRuleException : Exception
     {
         // Constructor para el mensaje que explica la regla violada (ej: "El stock no puede ser negativo")

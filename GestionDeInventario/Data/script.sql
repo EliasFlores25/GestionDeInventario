@@ -1,53 +1,36 @@
 ﻿-- =======================================================
 -- 1. CONFIGURACIÓN INICIAL
 -- =======================================================
--- Establece el motor InnoDB para soporte de transacciones y claves foráneas
 SET default_storage_engine=InnoDB;
-
--- Define un nuevo delimitador para la creación de Triggers
-DELIMITER //
-
 
 -- =======================================================
 -- 2. CREACIÓN DE TABLAS
 -- =======================================================
 
--- -----------------------------------------------------
--- Table Proveedor
--- -----------------------------------------------------
 CREATE TABLE Proveedor (
     IdProveedor INT NOT NULL AUTO_INCREMENT,
     NombreEmpresa VARCHAR(100) NOT NULL,
     Direccion VARCHAR(255) NOT NULL,
     Telefono VARCHAR(15) NOT NULL,
     Email VARCHAR(100) NOT NULL,
-   Estado ENUM('Activo', 'Inactivo') NOT NULL,
+    Estado ENUM('Activo', 'Inactivo') NOT NULL,
     PRIMARY KEY (IdProveedor),
     UNIQUE INDEX idx_nombre_empresa_unico (NombreEmpresa)
 );
 
-
--- -----------------------------------------------------
--- Table Producto (Central de Inventario)
--- -----------------------------------------------------
 CREATE TABLE Producto (
     IdProducto INT NOT NULL AUTO_INCREMENT,
     Nombre VARCHAR(100) NOT NULL,
     Descripcion TEXT,
     CantidadStock INT NOT NULL DEFAULT 0,
     UnidadMedida VARCHAR(20) NOT NULL,
-    Precio DECIMAL(10, 2) NOT NULL,
-    Estado ENUM('Disponible', 'Agotado') NOT NULL,
+    Precio DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    Estado ENUM('Disponible', 'Agotado') NOT NULL DEFAULT 'Agotado',
     PRIMARY KEY (IdProducto),
     UNIQUE INDEX idx_nombre_producto_unico (Nombre),
-    -- Restricción para asegurar que el stock nunca sea negativo
     CHECK (CantidadStock >= 0)
 );
 
-
--- -----------------------------------------------------
--- Table Usuario
--- -----------------------------------------------------
 CREATE TABLE Usuario (
     IdUsuario INT NOT NULL AUTO_INCREMENT,
     Nombre VARCHAR(100) NOT NULL,
@@ -58,10 +41,6 @@ CREATE TABLE Usuario (
     PRIMARY KEY (IdUsuario)
 );
 
-
--- -----------------------------------------------------
--- Table Departamento
--- -----------------------------------------------------
 CREATE TABLE Departamento (
     IdDepartamento INT NOT NULL AUTO_INCREMENT,
     Nombre VARCHAR(100) NOT NULL,
@@ -70,10 +49,6 @@ CREATE TABLE Departamento (
     UNIQUE INDEX idx_nombre_depto_unico (Nombre)
 );
 
-
--- -----------------------------------------------------
--- Table Empleado
--- -----------------------------------------------------
 CREATE TABLE Empleado (
     IdEmpleado INT NOT NULL AUTO_INCREMENT,
     Nombre VARCHAR(100) NOT NULL,
@@ -85,16 +60,10 @@ CREATE TABLE Empleado (
     DepartamentoId INT NOT NULL,
     Estado ENUM('Activo', 'Inactivo') NOT NULL,
     PRIMARY KEY (IdEmpleado),
-    FOREIGN KEY (DepartamentoId) REFERENCES Departamento(IdDepartamento)
-        ON DELETE RESTRICT -- Impide eliminar un departamento si tiene empleados asociados
-        ON UPDATE CASCADE,
-        CHECK (Edad > 0)
+    FOREIGN KEY (DepartamentoId) REFERENCES Departamento(IdDepartamento) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CHECK (Edad > 0)
 );
 
-
--- -----------------------------------------------------
--- Table DetalleCompra (Entrada de stock)
--- -----------------------------------------------------
 CREATE TABLE DetalleCompra (
     IdDetalleCompra INT NOT NULL AUTO_INCREMENT,
     NumeroFactura VARCHAR(50) NOT NULL,
@@ -103,7 +72,6 @@ CREATE TABLE DetalleCompra (
     ProductoId INT NOT NULL,
     Cantidad INT NOT NULL,
     PrecioUnitarioCosto DECIMAL(10, 2) NOT NULL,
-    -- CAMPO CALCULADO: MontoTotal
     MontoTotal DECIMAL(10, 2) AS (Cantidad * PrecioUnitarioCosto) STORED, 
     FechaCompra DATE NOT NULL,
     PRIMARY KEY (IdDetalleCompra),
@@ -113,10 +81,6 @@ CREATE TABLE DetalleCompra (
     CHECK (Cantidad > 0)
 );
 
-
--- -----------------------------------------------------
--- Table DetalleDistribucion (Salida de stock)
--- -----------------------------------------------------
 CREATE TABLE DetalleDistribucion (
     IdDetalleDistribucion INT NOT NULL AUTO_INCREMENT,
     NumeroDistribucion VARCHAR(50) NOT NULL,
@@ -127,7 +91,6 @@ CREATE TABLE DetalleDistribucion (
     FechaSalida DATE NOT NULL,
     Motivo VARCHAR(255),
     PrecioCostoUnitario DECIMAL(10, 2),
-    -- CAMPO CALCULADO: MontoTotal
     MontoTotal DECIMAL(10, 2) AS (Cantidad * PrecioCostoUnitario) STORED,
     PRIMARY KEY (IdDetalleDistribucion),
     FOREIGN KEY (UsuarioId) REFERENCES Usuario(IdUsuario) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -136,114 +99,117 @@ CREATE TABLE DetalleDistribucion (
     CHECK (Cantidad > 0)
 );
 
-
 -- =======================================================
--- 3. TRIGGERS PARA EL MANEJO DE STOCK Y VALIDACIÓN
+-- 3. TRIGGERS ACTUALIZADOS (LÓGICA AUTOMÁTICA)
 -- =======================================================
+DELIMITER //
 
--- ====================
--- DETALLE COMPRA (ENTRADA DE STOCK)
--- ====================
+-- -----------------------------------------------------
+-- FLUJO DE COMPRAS (ENTRADAS)
+-- -----------------------------------------------------
 
--- T-1: Al insertar (Añade stock)
+-- T-1: Al insertar compra: Aumenta stock, actualiza precio en Producto y cambia estado
 CREATE TRIGGER trg_aumentar_stock_compra
 AFTER INSERT ON DetalleCompra
 FOR EACH ROW
 BEGIN
     UPDATE Producto
-    SET CantidadStock = CantidadStock + NEW.Cantidad
+    SET CantidadStock = CantidadStock + NEW.Cantidad,
+        Precio = NEW.PrecioUnitarioCosto, -- (Req 2) Actualiza precio del producto
+        Estado = 'Disponible'             -- (Req 1) Asegura disponibilidad
     WHERE IdProducto = NEW.ProductoId;
 END //
 
--- T-2: Al actualizar (Ajusta stock: Revierte OLD y aplica NEW)
+-- T-2: Al actualizar compra
 CREATE TRIGGER trg_actualizar_stock_compra
 AFTER UPDATE ON DetalleCompra
 FOR EACH ROW
 BEGIN
     UPDATE Producto
-    SET CantidadStock = CantidadStock - OLD.Cantidad + NEW.Cantidad
+    SET CantidadStock = CantidadStock - OLD.Cantidad + NEW.Cantidad,
+        Precio = NEW.PrecioUnitarioCosto,
+        Estado = IF((CantidadStock - OLD.Cantidad + NEW.Cantidad) > 0, 'Disponible', 'Agotado')
     WHERE IdProducto = NEW.ProductoId;
 END //
 
--- T-3: Al eliminar (Quita el stock si la compra se cancela o elimina)
+-- T-3: Al eliminar compra
 CREATE TRIGGER trg_eliminar_stock_compra
 AFTER DELETE ON DetalleCompra
 FOR EACH ROW
 BEGIN
     UPDATE Producto
-    SET CantidadStock = CantidadStock - OLD.Cantidad
+    SET CantidadStock = CantidadStock - OLD.Cantidad,
+        Estado = IF((CantidadStock - OLD.Cantidad) <= 0, 'Agotado', 'Disponible')
     WHERE IdProducto = OLD.ProductoId;
 END //
 
 
--- ====================
--- DETALLE DISTRIBUCIÓN (SALIDA DE STOCK)
--- ====================
+-- -----------------------------------------------------
+-- FLUJO DE DISTRIBUCIÓN (SALIDAS)
+-- -----------------------------------------------------
 
--- T-4: Antes de insertar (VALIDACIÓN: Impide stock negativo)
+-- T-4: Antes de insertar: Valida stock y ASIGNA PRECIO automático
 CREATE TRIGGER trg_validar_stock_distribucion
 BEFORE INSERT ON DetalleDistribucion
 FOR EACH ROW
 BEGIN
     DECLARE stock_actual INT;
+    DECLARE precio_ref DECIMAL(10,2);
 
-    SELECT CantidadStock INTO stock_actual
+    -- Bloqueo y obtención de datos actuales
+    SELECT CantidadStock, Precio INTO stock_actual, precio_ref
     FROM Producto
     WHERE IdProducto = NEW.ProductoId
-    FOR UPDATE; -- Bloquea la fila para prevenir problemas de concurrencia
+    FOR UPDATE;
 
+    -- Validación de stock
     IF stock_actual < NEW.Cantidad THEN
-        -- Lanza un error que cancela la operación de inserción
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Error: No hay suficiente stock disponible para esta distribución. Operación cancelada.';
+        SET MESSAGE_TEXT = 'Error: No hay suficiente stock disponible.';
     END IF; 
 
-     
+    -- (Req 3) Asigna el precio del producto a la distribución automáticamente
+    SET NEW.PrecioCostoUnitario = precio_ref;
 END //
 
--- T-5: Después de insertar (Disminuye stock)
+-- T-5: Después de insertar: Disminuye stock y actualiza estado si llega a 0
 CREATE TRIGGER trg_disminuir_stock_distribucion
 AFTER INSERT ON DetalleDistribucion
 FOR EACH ROW
 BEGIN
     UPDATE Producto
-    SET CantidadStock = CantidadStock - NEW.Cantidad
+    SET CantidadStock = CantidadStock - NEW.Cantidad,
+        Estado = IF((CantidadStock - NEW.Cantidad) <= 0, 'Agotado', 'Disponible') -- (Req 1)
     WHERE IdProducto = NEW.ProductoId;
 END //
 
--- T-6: Antes de actualizar (VALIDACIÓN: Impide stock negativo al modificar)
+-- T-6: Antes de actualizar distribución (Validación)
 CREATE TRIGGER trg_validar_stock_update_distribucion
 BEFORE UPDATE ON DetalleDistribucion
 FOR EACH ROW
 BEGIN
     DECLARE stock_temporal INT;
-
-    -- Solo validar si la cantidad a distribuir cambia
     IF OLD.Cantidad <> NEW.Cantidad THEN
-        
-        -- Calcula el stock teórico (Stock actual + la cantidad que ya se había retirado)
         SELECT CantidadStock + OLD.Cantidad INTO stock_temporal
         FROM Producto
         WHERE IdProducto = OLD.ProductoId;
 
-        -- Compara el stock teórico con la nueva cantidad a retirar
         IF stock_temporal < NEW.Cantidad THEN
             SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Error: La nueva cantidad a distribuir excede el stock disponible.';
+            SET MESSAGE_TEXT = 'Error: La nueva cantidad excede el stock disponible.';
         END IF;
     END IF;
 END //
 
--- T-7: Después de actualizar (Ajusta stock: Revierte OLD y aplica NEW)
+-- T-7: Después de actualizar distribución
 CREATE TRIGGER trg_actualizar_stock_distribucion
 AFTER UPDATE ON DetalleDistribucion
 FOR EACH ROW
 BEGIN
-    -- Lógica: Suma la cantidad anterior (OLD) y resta la nueva (NEW)
     UPDATE Producto
-    SET CantidadStock = CantidadStock + OLD.Cantidad - NEW.Cantidad
+    SET CantidadStock = CantidadStock + OLD.Cantidad - NEW.Cantidad,
+        Estado = IF((CantidadStock + OLD.Cantidad - NEW.Cantidad) <= 0, 'Agotado', 'Disponible')
     WHERE IdProducto = NEW.ProductoId;
 END //
 
--- Restaura el delimitador por defecto
 DELIMITER ;

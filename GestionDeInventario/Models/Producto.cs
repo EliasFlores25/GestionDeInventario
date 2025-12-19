@@ -14,5 +14,6 @@ namespace GestionDeInventario.Models
         public string unidadMedida { get; set; }
         public decimal precio { get; set; }
         public string estado { get; set; }
+        public ICollection<DetalleCompra> detalleCompras { get; set; } = new List<DetalleCompra>();
     }
 }

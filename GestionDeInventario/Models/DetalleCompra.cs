@@ -3,36 +3,23 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GestionDeInventario.Models
 {
+    [Table("DetalleCompra")]
     public class DetalleCompra
     {
         [Key]
-        public int IdDetalleCompra { get; set; }
+        public int idDetalleCompra { get; set; }
+        public string numeroFactura { get; set; }
+        public int cantidad { get; set; }
+        public decimal precioUnitarioCosto { get; set; }
+        
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)] // Campo calculado en la base de datos
+        public decimal montoTotal { get; set; } // Campo calculado en la base de datos
+        public DateTime fechaCompra { get; set; }
+        public int usuarioId { get; set; }
+        public Usuario usuario { get; set; } = null!;
+        public int productoId { get; set; }
+        public Producto producto { get; set; } = null!;
 
-        [Required]
-        public string NumeroFactura { get; set; }
-
-        [Required]
-        public int UsuarioId { get; set; }
-
-        [Required]
-        public int ProveedorId { get; set; }
-
-        [Required]
-        public int ProductoId { get; set; }
-
-        [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor a 0.")]
-        public int Cantidad { get; set; }
-
-        [Required]
-        [Column(TypeName = "decimal(10,2)")]
-        public decimal PrecioUnitarioCosto { get; set; }
-
-        // Campo calculado en la base de datos
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public decimal MontoTotal { get; private set; }
-
-        [Required]
-        public DateTime FechaCompra { get; set; }
+        public int proveedorId { get; set; }
     }
 }

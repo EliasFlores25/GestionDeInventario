@@ -1,5 +1,6 @@
 ﻿namespace GestionDeInventario.Services.Exceptions
 {
+    //DomainException: Es la base de todas.
 
     // Excepción personalizada para errores específicos de la lógica de negocio (dominio).
     public class DomainException : Exception

@@ -1,5 +1,8 @@
-﻿namespace GestionDeInventario.Services.Exceptions
+﻿using System.Runtime.ConstrainedExecution;
+
+namespace GestionDeInventario.Services.Exceptions
 {
+    //NotFoundException: Se usa cuando buscas un ID que no existe.
     public class NotFoundException : DomainException
     {
         // Constructor que acepta el mensaje específico (ej: "El Producto con ID 5 no existe")
