@@ -1,0 +1,197 @@
+﻿@model GestionDeInventario.DTOs.DetalleCompraDTOs.DetalleCompraReadDTO
+
+@{
+    ViewData["Title"] = "Eliminar Detalle de Compra";
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --danger: #ef4444;
+        --danger-dark: #dc2626;
+        --success: #10b981;
+        --dark: #1f2937;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
+    }
+
+    .container-delete {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .delete-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        padding: 2rem;
+        border-top: 5px solid var(--danger);
+        max-width: 850px;
+        margin: auto;
+    }
+
+    .delete-header h1 {
+        color: var(--danger);
+        font-size: 1.75rem;
+        font-weight: 700;
+        display: flex;
+        gap: .5rem;
+    }
+
+    .warning-alert {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid var(--danger);
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+        display: flex;
+        gap: .75rem;
+    }
+
+    .section-title {
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        padding-left: .75rem;
+        border-left: 3px solid var(--danger);
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+    }
+
+    .detail-item {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 3px solid var(--primary);
+    }
+
+    .detail-label {
+        font-size: .85rem;
+        font-weight: 600;
+        color: var(--text-light);
+        text-transform: uppercase;
+    }
+
+    .detail-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--dark);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        border-top: 2px solid var(--border);
+        padding-top: 1.5rem;
+    }
+
+    .btn {
+        padding: .75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        display: inline-flex;
+        gap: .5rem;
+        border: none;
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+        .btn-danger:hover {
+            background: var(--danger-dark);
+            box-shadow: 0 4px 8px rgba(220,38,38,.2);
+        }
+
+    .btn-secondary {
+        background: white;
+        border: 2px solid var(--border);
+    }
+
+    @@media (max-width: 768px) {
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="container-delete">
+    <div class="delete-card">
+        <div class="delete-header">
+            <h1><i class="fas fa-file-invoice-dollar"></i> @ViewData["Title"]</h1>
+            <p class="text-muted">Confirmación de eliminación del registro de compra</p>
+        </div>
+
+        <div class="warning-alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Advertencia:</strong> Esta acción eliminará permanentemente el detalle de compra
+                con factura <strong>@Model.NumeroFactura</strong>.
+                Esta acción no se puede deshacer.
+            </div>
+        </div>
+
+        <!-- Información de la Compra -->
+        <div class="section-title">Información de la Compra</div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label">ID Compra</div>
+                <div class="detail-value">@Model.IdDetalleCompra</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Número de Factura</div>
+                <div class="detail-value">@Model.NumeroFactura</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Fecha</div>
+                <div class="detail-value">@Model.FechaCompra.ToString("dd/MM/yyyy")</div>
+            </div>
+        </div>
+
+        <!-- Detalle del Producto -->
+        <div class="section-title">Detalle del Producto</div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label">Producto</div>
+                <div class="detail-value">@Model.ProductoId</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Cantidad</div>
+                <div class="detail-value">@Model.Cantidad</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Precio Unitario</div>
+                <div class="detail-value">$@Model.PrecioUnitarioCosto.ToString("N2")</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Monto Total</div>
+                <div class="detail-value">$@Model.MontoTotal.ToString("N2")</div>
+            </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="IdDetalleCompra" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash-alt"></i> Eliminar Permanentemente
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
