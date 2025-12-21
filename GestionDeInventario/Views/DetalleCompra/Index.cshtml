@@ -1,1 +1,124 @@
-﻿
+﻿@model IEnumerable<GestionDeInventario.DTOs.DetalleCompraDTOs.DetalleCompraResponseDTO>
+
+@{
+    ViewData["Title"] = "Gestión de Compras";
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --danger: #ef4444;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
+    }
+
+    .container-departamentos {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        min-height: 100vh;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    table {
+        width: 100%;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,.1);
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 1rem;
+        text-align: center;
+        border-bottom: 1px solid var(--border);
+    }
+
+    th {
+        background: var(--primary);
+        color: white;
+        font-weight: 600;
+    }
+
+    tr:hover {
+        background: #f1f5f9;
+    }
+
+    .btn {
+        padding: .4rem .7rem;
+        border-radius: 6px;
+        color: white;
+        text-decoration: none;
+        font-size: .85rem;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+    }
+
+    .btn-danger {
+        background: var(--danger);
+    }
+
+    .btn-secondary {
+        background: var(--dark);
+    }
+</style>
+
+<div class="container-departamentos">
+    <div class="header">
+        <h1><i class="fas fa-shopping-cart"></i> Gestión de Compras</h1>
+        <a asp-action="Create" class="btn btn-primary">Nueva Compra</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Factura</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Total</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.numeroFactura</td>
+                        <td>@item.productoNombre</td>
+                        <td>@item.cantidad</td>
+                        <td>$@item.precioUnitarioCosto</td>
+                        <td><strong>$@item.montoTotal</strong></td>
+                        <td>@item.fechaCompra.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.idDetalleCompra"
+                               class="btn btn-secondary">Ver</a>
+                            <a asp-action="Delete" asp-route-id="@item.idDetalleCompra"
+                               class="btn btn-danger">Eliminar</a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7">No hay compras registradas</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

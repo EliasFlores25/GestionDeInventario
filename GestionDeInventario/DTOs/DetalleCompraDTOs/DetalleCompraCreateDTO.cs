@@ -4,20 +4,25 @@ namespace GestionDeInventario.DTOs.DetalleCompraDTOs
 {
     public class DetalleCompraCreateDTO
     {
-        public string numeroFactura { get; set; }
+        [Required]
+        public string numeroFactura { get; set; } = null!;
 
-        public int usuarioId { get; set; }
-
-        public int proveedorId { get; set; }
-
+        [Required]
         public int productoId { get; set; }
 
+        [Required]
         public int cantidad { get; set; }
 
+        [Required]
         public decimal precioUnitarioCosto { get; set; }
 
-        public decimal montoTotal { get; private set; }
-
+        [Required]
         public DateTime fechaCompra { get; set; }
+
+        [Required]
+        public int usuarioId { get; set; }
+
+        [Required]
+        public int proveedorId { get; set; }
     }
 }

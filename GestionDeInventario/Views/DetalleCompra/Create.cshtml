@@ -1,5 +1,77 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model GestionDeInventario.DTOs.DetalleCompraDTOs.DetalleCompraCreateDTO
+
 @{
+    ViewData["Title"] = "Registrar Nueva Compra";
+}
+
+<div class="container-create">
+    <div class="create-card">
+        <div class="create-header">
+            <h1><i class="fas fa-cart-plus"></i> @ViewData["Title"]</h1>
+            <h4>Registra la información de la compra realizada.</h4>
+        </div>
+
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="alert-danger"></div>
+
+            <div class="section-title">
+                <i class="fas fa-info-circle"></i> Información de la Compra
+            </div>
+
+            <div class="form-group">
+                <label asp-for="numeroFactura" class="form-label">Número de Factura</label>
+                <input asp-for="numeroFactura" class="form-control" />
+                <span asp-validation-for="numeroFactura" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="productoId" class="form-label">Producto</label>
+                <select asp-for="productoId" asp-items="ViewBag.Productos" class="form-select">
+                    <option value="">Seleccione un producto</option>
+                </select>
+                <span asp-validation-for="productoId" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="proveedorId" class="form-label">Proveedor</label>
+                <select asp-for="proveedorId" asp-items="ViewBag.Proveedores" class="form-select">
+                    <option value="">Seleccione un proveedor</option>
+                </select>
+                <span asp-validation-for="proveedorId" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="cantidad" class="form-label">Cantidad</label>
+                <input asp-for="cantidad" type="number" class="form-control" />
+                <span asp-validation-for="cantidad" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="precioUnitarioCosto" class="form-label">Precio Unitario</label>
+                <input asp-for="precioUnitarioCosto" type="number" step="0.01" class="form-control" />
+                <span asp-validation-for="precioUnitarioCosto" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="fechaCompra" class="form-label">Fecha de Compra</label>
+                <input asp-for="fechaCompra" type="date" class="form-control" />
+                <span asp-validation-for="fechaCompra" class="validation-error"></span>
+            </div>
+
+            <div class="form-actions">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Registrar Compra
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

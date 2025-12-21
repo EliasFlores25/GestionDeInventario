@@ -1,0 +1,208 @@
+﻿@model GestionDeInventario.DTOs.DetalleCompraDTOs.DetalleCompraResponseDTO
+
+@{
+    ViewData["Title"] = "Detalles de la Compra";
+}
+
+<style>
+    /* ===== MISMO ESTILO QUE DEPARTAMENTO ===== */
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
+    }
+
+    .container-details {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .details-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border-top: 5px solid var(--primary);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .details-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+        .details-header h1 {
+            color: var(--dark);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+        .details-header h4 {
+            color: var(--text-light);
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+        }
+
+    .section-title {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .detail-item {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 3px solid var(--primary);
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: var(--text-light);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-value {
+        color: var(--dark);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+</style>
+
+<div class="container-details">
+    <div class="details-card">
+
+        <div class="details-header">
+            <h1><i class="fas fa-receipt"></i> Detalles de la Compra</h1>
+            <h4>Factura N.º @Model.numeroFactura</h4>
+        </div>
+
+        <!-- Información General -->
+        <div class="section-title">
+            <i class="fas fa-info-circle"></i> Información General
+        </div>
+
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-hashtag"></i> ID</div>
+                <div class="detail-value">@Model.idDetalleCompra</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-calendar"></i> Fecha de Compra</div>
+                <div class="detail-value">@Model.fechaCompra.ToString("dd/MM/yyyy")</div>
+            </div>
+        </div>
+
+        <!-- Producto -->
+        <div class="section-title">
+            <i class="fas fa-box"></i> Producto
+        </div>
+
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-tag"></i> Producto</div>
+                <div class="detail-value">@Model.productoNombre</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-sort-numeric-up"></i> Cantidad</div>
+                <div class="detail-value">@Model.cantidad</div>
+            </div>
+        </div>
+
+        <!-- Costos -->
+        <div class="section-title">
+            <i class="fas fa-dollar-sign"></i> Costos
+        </div>
+
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-money-bill"></i> Precio Unitario</div>
+                <div class="detail-value">$@Model.precioUnitarioCosto</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-calculator"></i> Monto Total</div>
+                <div class="detail-value"><strong>$@Model.montoTotal</strong></div>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.idDetalleCompra" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Eliminar
+            </a>
+        </div>
+
+    </div>
+</div>

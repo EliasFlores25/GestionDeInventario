@@ -12,8 +12,8 @@ namespace GestionDeInventario.Models
         public int cantidad { get; set; }
         public decimal precioUnitarioCosto { get; set; }
         
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)] // Campo calculado en la base de datos
-        public decimal montoTotal { get; set; } // Campo calculado en la base de datos
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)] 
+        public decimal montoTotal { get; set; } 
         public DateTime fechaCompra { get; set; }
         public int usuarioId { get; set; }
         public Usuario usuario { get; set; } = null!;
