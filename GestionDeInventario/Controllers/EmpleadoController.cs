@@ -3,6 +3,7 @@ using GestionDeInventario.DTOs.EmpleadoDTOs;
 using GestionDeInventario.Repository.Interfaces;
 using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
+using GestionDeInventario.Utilidades;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GestionDeInventario.Controllers
 {
-[Authorize(Roles= "Administrador")]
+    [Authorize(Roles = "Administrador")]
     public class EmpleadoController : Controller
     {
         private readonly IEmpleadoService _empleadoService;
@@ -286,6 +287,27 @@ namespace GestionDeInventario.Controllers
                     return RedirectToAction(nameof(Index));
                 }
             }
+        }
+             // 1. Acción normal que dirige a la vista de la página web
+        public IActionResult Perfil(int id)
+        {
+            var empleado = _empleadoService.GetByIdAsync(id);
+            return View(empleado); // Esto busca Views/Empleado/Perfil.cshtml
+        }
+
+        // 2. Acción que genera y devuelve el PDF
+        public async Task<IActionResult> DescargarPdf(int id)
+        {
+            // Buscamos los datos
+            EmpleadoResponseDTO empleado = await _empleadoService.GetByIdAsync(id);
+
+            // Usamos el módulo
+            var pdfModule = new EmpleadoPDF();
+            byte[] bytes = pdfModule.GenerarArchivoFicha(empleado);
+
+            // Devolvemos el archivo directamente
+            // "application/pdf" hace que el navegador lo abra o descargue
+            return File(bytes, "application/pdf", $"Ficha_{empleado.apellido}.pdf");
         }
     }
 }

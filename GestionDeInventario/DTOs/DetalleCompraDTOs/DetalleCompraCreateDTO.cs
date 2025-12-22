@@ -1,28 +1,22 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿
 namespace GestionDeInventario.DTOs.DetalleCompraDTOs
 {
     public class DetalleCompraCreateDTO
     {
-        [Required]
-        public string numeroFactura { get; set; } = null!;
+        public string numeroFactura { get; set; }
 
-        [Required]
-        public int productoId { get; set; }
-
-        [Required]
-        public int cantidad { get; set; }
-
-        [Required]
-        public decimal precioUnitarioCosto { get; set; }
-
-        [Required]
-        public DateTime fechaCompra { get; set; }
-
-        [Required]
         public int usuarioId { get; set; }
 
-        [Required]
         public int proveedorId { get; set; }
+
+        public int productoId { get; set; }
+
+        public int cantidad { get; set; }
+
+        public decimal precioUnitarioCosto { get; set; }
+
+        public decimal montoTotal { get; private set; }
+
+        public DateTime fechaCompra { get; set; }
     }
 }

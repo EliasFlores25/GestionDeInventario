@@ -19,7 +19,8 @@ namespace GestionDeInventario.Repository.Implementations
         public async Task<List<Empleado>> GetAllAsync()
           => await _context.Empleados.AsNoTracking().ToListAsync();
         public async Task<Empleado?> GetByIdAsync(int idEmpleado)
-            => await _context.Empleados.FindAsync(idEmpleado);
+            => await _context.Empleados.Include(e=>e.departamento).FirstOrDefaultAsync(e => e.idEmpleado == idEmpleado);
+
         public async Task<Empleado> AddAsync(Empleado entity)
         {
             _context.Empleados.Add(entity);

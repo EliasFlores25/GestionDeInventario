@@ -1,5 +1,4 @@
-﻿using GestionDeInventario.DTOs.DetalleCompra;
-using GestionDeInventario.DTOs.DetalleCompraDTOs;
+﻿using GestionDeInventario.DTOs.DetalleCompraDTOs;
 
 namespace GestionDeInventario.Services.Interfaces
 {

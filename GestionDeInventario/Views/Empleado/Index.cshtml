@@ -506,6 +506,9 @@
                                     <a asp-action="Delete" asp-route-id="@item.idEmpleado" class="btn btn-secondary btn-sm" title="Eliminar">
                                         <i class="fas fa-trash"></i>
                                     </a>
+                                    <a asp-controller="Empleado" asp-action="DescargarPdf" asp-route-id="@item.idEmpleado" target="_blank" class="btn btn-danger btn-sm" title="Generar Ficha PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -558,6 +561,9 @@
                         <a asp-action="Edit" asp-route-id="@item.idEmpleado" class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></a>
                         <a asp-action="Details" asp-route-id="@item.idEmpleado" class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i></a>
                         <a asp-action="Delete" asp-route-id="@item.idEmpleado" class="btn btn-secondary btn-sm"><i class="fas fa-trash"></i></a>
+                        <a asp-controller="Empleado" asp-action="DescargarPdf" asp-route-id="@item.idEmpleado" target="_blank" class="btn btn-danger btn-sm" title="Generar Ficha PDF">
+                            <i class="fas fa-file-pdf"></i>
+                        </a>
                     </div>
                 </div>
             }

@@ -25,6 +25,7 @@ namespace GestionDeInventario.Services.Implementations
                 telefono = x.telefono,
                 direccion = x.direccion,
                 departamentoId = x.departamentoId,
+                departamento = x.departamento,
                 estado = x.estado,
             };
         }
@@ -47,6 +48,7 @@ namespace GestionDeInventario.Services.Implementations
             (await _repo.GetAllAsync()).Select(MapToResponseDTO).ToList();
         public async Task<EmpleadoResponseDTO> GetByIdAsync(int idEmpleado)
         {
+
             var x = await _repo.GetByIdAsync(idEmpleado);
             if (x == null)
             {
