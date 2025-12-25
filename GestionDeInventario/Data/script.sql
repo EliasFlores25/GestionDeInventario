@@ -36,7 +36,7 @@ CREATE TABLE Usuario (
     Nombre VARCHAR(100) NOT NULL,
     Email VARCHAR(100) NOT NULL UNIQUE,
     TipoRol ENUM('Administrador') NOT NULL,
-    ContraseñaHash VARCHAR(255) NOT NULL,
+    Contraseña VARCHAR(255) NOT NULL,
     Estado ENUM('Activo', 'Inactivo') NOT NULL,
     PRIMARY KEY (IdUsuario)
 );

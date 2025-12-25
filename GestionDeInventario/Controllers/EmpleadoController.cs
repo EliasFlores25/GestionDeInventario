@@ -164,7 +164,7 @@ namespace GestionDeInventario.Controllers
                 {
                     return NotFound();
                 }
-                var updateDto = new EmpleadoUptadeDTO
+                var updateDto = new EmpleadoUpdateDTO
                 {
                     nombre = empleadoDto.nombre,
                     apellido = empleadoDto.apellido,
@@ -191,7 +191,7 @@ namespace GestionDeInventario.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, EmpleadoUptadeDTO empleado)
+        public async Task<IActionResult> Edit(int id, EmpleadoUpdateDTO empleado)
         {
             if (!ModelState.IsValid)
             {

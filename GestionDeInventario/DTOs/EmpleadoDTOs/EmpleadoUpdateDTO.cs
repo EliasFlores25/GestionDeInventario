@@ -2,7 +2,7 @@
 
 namespace GestionDeInventario.DTOs.EmpleadoDTOs
 {
-    public class EmpleadoUptadeDTO
+    public class EmpleadoUpdateDTO
     {
         public int idEmpleado { get; set; }
         [Required(ErrorMessage = "El nombre es obligatorio.")]

@@ -79,7 +79,7 @@ namespace GestionDeInventario.Services.Implementations
 
             return MapToResponseDTO(saved);
         }
-        public async Task<bool> UpdateAsync(int idEmpleado, EmpleadoUptadeDTO dto)
+        public async Task<bool> UpdateAsync(int idEmpleado, EmpleadoUpdateDTO dto)
         {
             var current = await _repo.GetByIdAsync(idEmpleado);
 

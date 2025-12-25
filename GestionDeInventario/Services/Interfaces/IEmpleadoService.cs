@@ -8,7 +8,7 @@ namespace GestionDeInventario.Services.Interfaces
         Task<List<EmpleadoResponseDTO>> GetAllAsync();
         Task<EmpleadoResponseDTO> GetByIdAsync(int idEmpleado);
         Task<EmpleadoResponseDTO> AddAsync(EmpleadoCreateDTO dto);
-        Task<bool> UpdateAsync(int idEmpleado, EmpleadoUptadeDTO dto);
+        Task<bool> UpdateAsync(int idEmpleado, EmpleadoUpdateDTO dto);
         Task<bool> DeleteAsync(int idEmpleado);
     }
 }
