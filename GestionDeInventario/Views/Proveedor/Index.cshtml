@@ -195,6 +195,22 @@
             background: #f8fafc;
         }
 
+    /* NUEVO: Estilos para campos truncados en desktop */
+    .td-direccion, .td-email {
+        display: block;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+        color: var(--primary);
+        transition: color 0.2s;
+    }
+
+        .td-direccion:hover, .td-email:hover {
+            color: #1d4ed8;
+        }
+
     .cards-mobile {
         display: grid;
         gap: 1rem;
@@ -241,6 +257,33 @@
         color: var(--dark);
         word-break: break-word;
     }
+
+    /* NUEVO: Estilos para campos truncados en mobile */
+    .direccion-mobile, .email-mobile {
+        max-height: 40px;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        padding-right: 20px;
+    }
+
+        .direccion-mobile::after, .email-mobile::after {
+            content: '...';
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            background: white;
+            padding-left: 5px;
+        }
+
+        .direccion-mobile.expanded, .email-mobile.expanded {
+            max-height: none;
+            white-space: pre-wrap;
+        }
+
+            .direccion-mobile.expanded::after, .email-mobile.expanded::after {
+                display: none;
+            }
 
     .card-actions {
         display: flex;
@@ -350,6 +393,30 @@
         color: var(--danger);
     }
 
+    /* NUEVO: Estilos para el modal */
+    .modal-descripcion {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
     @@media (min-width: 768px) {
         .container-proveedores {
             padding: 1.5rem;
@@ -456,9 +523,31 @@
                     {
                         <tr>
                             <td style="font-weight: 600;">@item.nombreEmpresa</td>
-                            <td>@item.direccion</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.direccion))
+                                {
+                                    <span class="td-direccion" onclick="mostrarDireccion('@Html.Raw(item.direccion?.Replace("'", "\\'") ?? "")')">
+                                        @(item.direccion.Length > 30 ? item.direccion.Substring(0, 30) + "..." : item.direccion)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No especificada</span>
+                                }
+                            </td>
                             <td>@item.telefono</td>
-                            <td>@item.email</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.email))
+                                {
+                                    <span class="td-email" onclick="mostrarEmail('@Html.Raw(item.email?.Replace("'", "\\'") ?? "")')">
+                                        @(item.email.Length > 25 ? item.email.Substring(0, 25) + "..." : item.email)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No especificado</span>
+                                }
+                            </td>
                             <td>
                                 @if (item.estado == "Activo")
                                 {
@@ -523,7 +612,14 @@
                     <div class="card-info">
                         <div class="info-item">
                             <span class="info-label">Dirección</span>
-                            <span class="info-value">@item.direccion</span>
+                            @if (!string.IsNullOrEmpty(item.direccion))
+                            {
+                                <div class="info-value direccion-mobile" onclick="this.classList.toggle('expanded')">@item.direccion</div>
+                            }
+                            else
+                            {
+                                <span class="info-value text-muted">No especificada</span>
+                            }
                         </div>
                         <div class="info-item">
                             <span class="info-label">Teléfono</span>
@@ -531,7 +627,14 @@
                         </div>
                         <div class="info-item">
                             <span class="info-label">Email</span>
-                            <span class="info-value">@item.email</span>
+                            @if (!string.IsNullOrEmpty(item.email))
+                            {
+                                <div class="info-value email-mobile" onclick="this.classList.toggle('expanded')">@item.email</div>
+                            }
+                            else
+                            {
+                                <span class="info-value text-muted">No especificado</span>
+                            }
                         </div>
                     </div>
                     <div class="card-actions">
@@ -602,6 +705,46 @@
 
 @section Scripts {
     <script>
+        // Función para mostrar Dirección en modal (Desktop)
+        function mostrarDireccion(direccion) {
+            direccion = direccion.replace(/\\'/g, "'");
+            const modal = $(`
+                <div class="modal-descripcion">
+                    <div class="modal-content">
+                        <h4><i class="fas fa-map-marker-alt"></i> Dirección Completa</h4>
+                        <p style="word-break: break-word; white-space: pre-wrap;">${direccion}</p>
+                        <button class="btn btn-primary" onclick="$(this).closest('.modal-descripcion').remove()">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                    </div>
+                </div>
+            `);
+            modal.on('click', e => { if (e.target === modal[0]) modal.remove(); });
+            $('body').append(modal);
+        }
+
+        // Función para mostrar Email en modal (Desktop)
+        function mostrarEmail(email) {
+            email = email.replace(/\\'/g, "'");
+            const modal = $(`
+                <div class="modal-descripcion">
+                    <div class="modal-content">
+                        <h4><i class="fas fa-envelope"></i> Email Completo</h4>
+                        <p style="word-break: break-word;">
+                            <a href="mailto:${email}" style="color: var(--primary); text-decoration: none;">
+                                ${email}
+                            </a>
+                        </p>
+                        <button class="btn btn-primary" onclick="$(this).closest('.modal-descripcion').remove()">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                    </div>
+                </div>
+            `);
+            modal.on('click', e => { if (e.target === modal[0]) modal.remove(); });
+            $('body').append(modal);
+        }
+
         $(document).ready(function() {
             // Auto-close alerts after 4 seconds
             setTimeout(() => $('.alert').fadeOut(300, function() { $(this).remove(); }), 4000);

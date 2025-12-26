@@ -1,11 +1,9 @@
-﻿using AspNetCoreGeneratedDocument;
-using GestionDeInventario.DTOs.EmpleadoDTOs;
+﻿using GestionDeInventario.DTOs.EmpleadoDTOs;
 using GestionDeInventario.Repository.Interfaces;
 using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
 using GestionDeInventario.Utilidades;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;

@@ -1,125 +1,684 @@
-﻿@* @model IEnumerable<GestionDeInventario.DTOs.DetalleCompraDTOs.DetalleCompraResponseDTO>
+﻿@model IEnumerable<GestionDeInventario.DTOs.DetalleCompraDTOs.DetalleCompraResponseDTO>
+@using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
     ViewData["Title"] = "Gestión de Compras";
+    var productoNombres = ViewBag.ProductosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var proveedorNombres = ViewBag.ProveedoresNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var usuarioNombres = ViewBag.UsuariosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+
+    var productosList = ViewBag.productoId as List<SelectListItem> ?? new List<SelectListItem>();
+    var proveedoresList = ViewBag.proveedorId as List<SelectListItem> ?? new List<SelectListItem>();
+
+    int pageNumber = ViewBag.PageNumber ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalRegistros = ViewBag.TotalRegistros ?? 0;
 }
 
 <style>
     :root {
         --primary: #2563eb;
-        --primary-dark: #1d4ed8;
+        --success: #10b981;
         --danger: #ef4444;
+        --warning: #f59e0b;
         --dark: #1f2937;
         --light: #f8fafc;
         --border: #e5e7eb;
-        --text-light: #6b7280;
     }
 
-    .container-departamentos {
-        padding: 1.5rem;
-        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    .container-compras {
+        padding: 1rem;
+        background: var(--light);
         min-height: 100vh;
     }
 
     .header {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
-    table {
-        width: 100%;
-        background: white;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,.1);
-        border-collapse: collapse;
-    }
-
-    th, td {
-        padding: 1rem;
-        text-align: center;
-        border-bottom: 1px solid var(--border);
-    }
-
-    th {
-        background: var(--primary);
-        color: white;
-        font-weight: 600;
-    }
-
-    tr:hover {
-        background: #f1f5f9;
-    }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
     .btn {
-        padding: .4rem .7rem;
-        border-radius: 6px;
-        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
         text-decoration: none;
-        font-size: .85rem;
     }
 
     .btn-primary {
         background: var(--primary);
+        color: white;
     }
 
-    .btn-danger {
-        background: var(--danger);
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+    .btn-warning {
+        background: var(--warning);
+        color: white;
     }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
 
     .btn-secondary {
-        background: var(--dark);
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+    .btn-sm {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .filters {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+    .alert {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border-left: 4px solid var(--success);
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid var(--danger);
+    }
+
+    .table-desktop {
+        display: none;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow-x: auto;
+    }
+
+        .table-desktop table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1300px;
+        }
+
+        .table-desktop th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .table-desktop td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .table-desktop tr:hover {
+            background: #f8fafc;
+        }
+
+    .td-moneda {
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .cards-mobile {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--primary);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .card-info {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 0.9rem;
+        color: var(--dark);
+        word-break: break-word;
+    }
+
+    .info-moneda {
+        font-weight: 600;
+        color: var(--success);
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    .badge-factura {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+        padding: 1rem;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .page-link {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 0.5rem;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        background: white;
+        color: var(--dark);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .page-link:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        .page-link.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .page-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6b7280;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .factura-badge {
+        background: #dbeafe;
+        color: #1d4ed8;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    @@media (min-width: 768px) {
+        .container-compras {
+            padding: 1.5rem;
+        }
+
+        .table-desktop {
+            display: block;
+        }
+
+        .cards-mobile {
+            display: none;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .table-desktop {
+            display: none;
+        }
+
+        .cards-mobile {
+            display: grid;
+        }
+
+        .header {
+            padding: 0.75rem;
+        }
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .card-info {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-sm:hover {
+        transform: scale(1.1);
     }
 </style>
 
-<div class="container-departamentos">
+<div class="container-compras">
     <div class="header">
-        <h1><i class="fas fa-shopping-cart"></i> Gestión de Compras</h1>
-        <a asp-action="Create" class="btn btn-primary">Nueva Compra</a>
+        <h1><i class="fas fa-shopping-cart"></i> @ViewData["Title"]</h1>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Nueva Compra</a>
+            <button class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#filters">
+                <i class="fas fa-filter"></i> Filtros
+            </button>
+        </div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Factura</th>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Precio</th>
-                <th>Total</th>
-                <th>Fecha</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model != null && Model.Any())
-            {
-                foreach (var item in Model)
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> @ViewBag.Error</div>
+    }
+    @if (TempData["Ok"] != null)
+    {
+        <div class="alert alert-success"><i class="fas fa-check-circle"></i> @TempData["Ok"]</div>
+    }
+
+    <div class="filters collapse" id="filters">
+        <form asp-action="Index" method="get">
+            <input type="hidden" name="page" value="1" />
+            <div class="filter-grid">
+                <input type="text" class="form-control" name="numeroFactura"
+                       placeholder="Número de Factura" value="@ViewBag.CurrentFactura">
+
+                <input type="date" class="form-control" name="fechaCompra"
+                       value="@(ViewBag.CurrentFecha?.ToString("yyyy-MM-dd"))">
+
+                <select class="form-select" name="productoId">
+                    <option value="">Todos los productos</option>
+                    @foreach (var item in productosList)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentProducto?.ToString())">
+                            @item.Text
+                        </option>
+                    }
+                </select>
+
+                <select class="form-select" name="proveedorId">
+                    <option value="">Todos los proveedores</option>
+                    @foreach (var item in proveedoresList)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentProveedor?.ToString())">
+                            @item.Text
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="filter-actions">
+                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-desktop">
+        <table>
+            <thead>
+                <tr>
+                    <th>Factura</th>
+                    <th>Fecha</th>
+                    <th>Proveedor</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unit.</th>
+                    <th>Total</th>
+                    <th>Usuario</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="factura-badge">
+                                    <i class="fas fa-file-invoice"></i> @item.numeroFactura
+                                </span>
+                            </td>
+                            <td>@item.fechaCompra.ToString("dd/MM/yyyy")</td>
+                            <td>@proveedorNombres.GetValueOrDefault(item.proveedorId, "N/A")</td>
+                            <td>@productoNombres.GetValueOrDefault(item.productoId, "N/A")</td>
+                            <td>@item.cantidad</td>
+                            <td class="td-moneda">@item.precioUnitarioCosto.ToString("C")</td>
+                            <td class="td-moneda">@item.montoTotal.ToString("C")</td>
+                            <td>@usuarioNombres.GetValueOrDefault(item.usuarioId, "N/A")</td>
+                            <td>
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <a asp-action="Edit" asp-route-id="@item.idDetalleCompra"
+                                       class="btn btn-secondary btn-sm" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.idDetalleCompra"
+                                       class="btn btn-secondary btn-sm" title="Detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.idDetalleCompra"
+                                       class="btn btn-secondary btn-sm" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    <a asp-controller="DetalleCompra" asp-action="DescargarPdf"
+                                       asp-route-id="@item.idDetalleCompra" target="_blank"
+                                       class="btn btn-danger btn-sm" title="Generar PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
                 {
                     <tr>
-                        <td>@item.numeroFactura</td>
-                        <td>@item.productoNombre</td>
-                        <td>@item.cantidad</td>
-                        <td>$@item.precioUnitarioCosto</td>
-                        <td><strong>$@item.montoTotal</strong></td>
-                        <td>@item.fechaCompra.ToString("dd/MM/yyyy")</td>
-                        <td>
-                            <a asp-action="Details" asp-route-id="@item.idDetalleCompra"
-                               class="btn btn-secondary">Ver</a>
-                            <a asp-action="Delete" asp-route-id="@item.idDetalleCompra"
-                               class="btn btn-danger">Eliminar</a>
+                        <td colspan="9" class="empty-state">
+                            <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                            <p>No hay compras registradas</p>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Registrar Primera Compra
+                            </a>
                         </td>
                     </tr>
                 }
-            }
-            else
+            </tbody>
+        </table>
+    </div>
+
+    <div class="cards-mobile">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
             {
-                <tr>
-                    <td colspan="7">No hay compras registradas</td>
-                </tr>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <strong>
+                                <i class="fas fa-file-invoice"></i> @item.numeroFactura
+                            </strong>
+                            <div class="text-muted small mt-1">
+                                @item.fechaCompra.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+                        <span class="info-moneda">@item.montoTotal.ToString("C")</span>
+                    </div>
+                    <div class="card-info">
+                        <div class="info-item">
+                            <span class="info-label">Proveedor</span>
+                            <span class="info-value">@proveedorNombres.GetValueOrDefault(item.proveedorId, "N/A")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Producto</span>
+                            <span class="info-value">@productoNombres.GetValueOrDefault(item.productoId, "N/A")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Cantidad</span>
+                            <span class="info-value">@item.cantidad unidades</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Precio Unit.</span>
+                            <span class="info-value info-moneda">@item.precioUnitarioCosto.ToString("C")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Usuario</span>
+                            <span class="info-value">@usuarioNombres.GetValueOrDefault(item.usuarioId, "N/A")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total</span>
+                            <span class="info-value info-moneda">@item.montoTotal.ToString("C")</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a asp-action="Edit" asp-route-id="@item.idDetalleCompra"
+                           class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></a>
+                        <a asp-action="Details" asp-route-id="@item.idDetalleCompra"
+                           class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i></a>
+                        <a asp-action="Delete" asp-route-id="@item.idDetalleCompra"
+                           class="btn btn-secondary btn-sm"><i class="fas fa-trash"></i></a>
+                        <a asp-controller="DetalleCompra" asp-action="DescargarPdf"
+                           asp-route-id="@item.idDetalleCompra" target="_blank"
+                           class="btn btn-danger btn-sm" title="Generar PDF">
+                            <i class="fas fa-file-pdf"></i>
+                        </a>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                <p>No hay compras registradas</p>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Registrar Primera Compra
+                </a>
+            </div>
+        }
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <div class="pagination-container">
+            <nav>
+                <ul class="pagination">
+                    @if (pageNumber > 1)
+                    {
+                        <li>
+                            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber - 1)"
+                               asp-route-numeroFactura="@ViewBag.CurrentFactura"
+                               asp-route-fechaCompra="@ViewBag.CurrentFecha?.ToString("yyyy-MM-dd")"
+                               asp-route-productoId="@ViewBag.CurrentProducto"
+                               asp-route-proveedorId="@ViewBag.CurrentProveedor">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        if (i == 1 || i == totalPages || (i >= pageNumber - 2 && i <= pageNumber + 2))
+                        {
+                            <li>
+                                <a class="page-link @(i == pageNumber ? "active" : "")"
+                                   asp-action="Index" asp-route-pageNumber="@i"
+                                   asp-route-numeroFactura="@ViewBag.CurrentFactura"
+                                   asp-route-fechaCompra="@ViewBag.CurrentFecha?.ToString("yyyy-MM-dd")"
+                                   asp-route-productoId="@ViewBag.CurrentProducto"
+                                   asp-route-proveedorId="@ViewBag.CurrentProveedor">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                        else if (i == pageNumber - 3 || i == pageNumber + 3)
+                        {
+                            <li><span class="page-link disabled">...</span></li>
+                        }
+                    }
+                    @if (pageNumber < totalPages)
+                    {
+                        <li>
+                            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber + 1)"
+                               asp-route-numeroFactura="@ViewBag.CurrentFactura"
+                               asp-route-fechaCompra="@ViewBag.CurrentFecha?.ToString("yyyy-MM-dd")"
+                               asp-route-productoId="@ViewBag.CurrentProducto"
+                               asp-route-proveedorId="@ViewBag.CurrentProveedor">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
 </div>
- *@
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-cerrar alertas
+            setTimeout(() => {
+                $('.alert').fadeOut(300, function() {
+                    $(this).remove();
+                });
+            }, 4000);
+
+            // Cambiar ícono del botón filtros
+            $('#filters').on('show.bs.collapse', function() {
+                $('[data-bs-target="#filters"] i').removeClass('fa-filter').addClass('fa-times');
+            }).on('hide.bs.collapse', function() {
+                $('[data-bs-target="#filters"] i').removeClass('fa-times').addClass('fa-filter');
+            });
+
+            // Scroll suave al cambiar de página
+            $(document).on('click', '.page-link', function(e) {
+                if (!$(this).hasClass('disabled') && !$(this).hasClass('active')) {
+                    $('html, body').animate({
+                        scrollTop: $('.container-compras').offset().top - 20
+                    }, 300);
+                }
+            });
+
+            // Formatear campos de moneda
+            $('.info-moneda, .td-moneda').each(function() {
+                var text = $(this).text();
+                if (text.includes('L')) {
+                    var parts = text.split('L');
+                    var amount = parts[1] ? 'L' + parts[1].trim() : text;
+                    $(this).text(amount);
+                }
+            });
+        });
+    </script>
+}

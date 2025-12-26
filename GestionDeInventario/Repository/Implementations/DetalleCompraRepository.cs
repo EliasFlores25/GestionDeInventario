@@ -18,15 +18,19 @@ namespace GestionDeInventario.Repository.Implementations
             _context.DetalleCompras.AsNoTracking();
         public async Task<List<DetalleCompra>> GetAllAsync() =>
             await _context.DetalleCompras.AsNoTracking().ToListAsync();
-        public async Task<DetalleCompra?> GetByIdAsync(int idDetalleCompra) =>
-            await _context.DetalleCompras.FindAsync(idDetalleCompra);
+        public async Task<DetalleCompra?> GetByIdAsync(int idDetalleCompra)
+             => await _context.DetalleCompras.AsNoTracking()
+            .Include(e => e.usuario)
+            .Include(e => e.producto)
+            .Include(e => e.proveedor)
+            .FirstOrDefaultAsync(e => e.idDetalleCompra == idDetalleCompra);
         public async Task<DetalleCompra> AddAsync(DetalleCompra entity)
         {
             _context.DetalleCompras.Add(entity);
             await _context.SaveChangesAsync();
             return entity;
         }
-        public async Task <bool> UpdateAsync(DetalleCompra entity)
+        public async Task<bool> UpdateAsync(DetalleCompra entity)
         {
             _context.DetalleCompras.Update(entity);
             return await _context.SaveChangesAsync() > 0;
