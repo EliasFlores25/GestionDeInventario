@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace GestionDeInventario.DTOs.DetalleCompraDTOs
 {
     public class DetalleCompraCreateDTO
@@ -15,7 +17,8 @@ namespace GestionDeInventario.DTOs.DetalleCompraDTOs
 
         public decimal precioUnitarioCosto { get; set; }
 
-        public decimal montoTotal { get; private set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public decimal montoTotal { get; set; }
 
         public DateTime fechaCompra { get; set; }
     }

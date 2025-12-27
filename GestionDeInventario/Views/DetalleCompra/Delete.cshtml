@@ -1,16 +1,20 @@
-﻿@* @model GestionDeInventario.DTOs.DetalleCompraDTOs.DetalleCompraReadDTO
+﻿@model GestionDeInventario.DTOs.DetalleCompraDTOs.DetalleCompraResponseDTO
 
 @{
     ViewData["Title"] = "Eliminar Detalle de Compra";
+    var productosNombres = ViewBag.ProductosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var proveedoresNombres = ViewBag.ProveedoresNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var usuariosNombres = ViewBag.UsuariosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
 }
 
 <style>
     :root {
         --primary: #2563eb;
+        --primary-dark: #1d4ed8;
         --danger: #ef4444;
         --danger-dark: #dc2626;
-        --success: #10b981;
         --dark: #1f2937;
+        --light: #f8fafc;
         --border: #e5e7eb;
         --text-light: #6b7280;
     }
@@ -24,43 +28,74 @@
     .delete-card {
         background: white;
         border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         padding: 2rem;
         border-top: 5px solid var(--danger);
-        max-width: 850px;
-        margin: auto;
+        max-width: 800px;
+        margin: 0 auto;
     }
 
-    .delete-header h1 {
-        color: var(--danger);
-        font-size: 1.75rem;
-        font-weight: 700;
-        display: flex;
-        gap: .5rem;
+    .delete-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
     }
+
+        .delete-header h1 {
+            color: var(--danger);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+            .delete-header h1 i {
+                color: var(--danger);
+            }
+
+        .delete-header h4 {
+            color: var(--text-light);
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+        }
 
     .warning-alert {
         background: #fee2e2;
         color: #991b1b;
         border-left: 4px solid var(--danger);
-        padding: 1rem;
+        padding: 1rem 1.25rem;
         border-radius: 8px;
-        margin: 1.5rem 0;
+        margin-bottom: 1.5rem;
         display: flex;
-        gap: .75rem;
+        align-items: flex-start;
+        gap: 0.75rem;
     }
 
+        .warning-alert i {
+            color: var(--danger);
+            font-size: 1.25rem;
+        }
+
     .section-title {
+        color: var(--dark);
+        font-size: 1.1rem;
         font-weight: 600;
         margin: 1.5rem 0 1rem;
-        padding-left: .75rem;
+        padding-left: 0.75rem;
         border-left: 3px solid var(--danger);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .detail-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1rem;
+        margin-bottom: 1.5rem;
     }
 
     .detail-item {
@@ -71,33 +106,69 @@
     }
 
     .detail-label {
-        font-size: .85rem;
         font-weight: 600;
         color: var(--text-light);
+        font-size: 0.85rem;
         text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
+        .detail-label i {
+            font-size: 0.9em;
+        }
+
     .detail-value {
+        color: var(--dark);
         font-size: 1rem;
         font-weight: 500;
-        color: var(--dark);
+        word-break: break-word;
+    }
+
+    .badge {
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .badge-info {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
     }
 
     .form-actions {
         display: flex;
         gap: 1rem;
+        justify-content: flex-start;
         margin-top: 2rem;
-        border-top: 2px solid var(--border);
         padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
     }
 
     .btn {
-        padding: .75rem 1.5rem;
+        padding: 0.75rem 1.5rem;
         border-radius: 8px;
+        border: none;
         font-weight: 600;
         display: inline-flex;
-        gap: .5rem;
-        border: none;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 0.95rem;
     }
 
     .btn-danger {
@@ -107,22 +178,75 @@
 
         .btn-danger:hover {
             background: var(--danger-dark);
-            box-shadow: 0 4px 8px rgba(220,38,38,.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
         }
 
     .btn-secondary {
         background: white;
+        color: var(--dark);
         border: 2px solid var(--border);
     }
 
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+    .total-item {
+        background: #fee2e2;
+        border-left: 3px solid var(--danger);
+        grid-column: 1 / -1;
+    }
+
+        .total-item .detail-label {
+            color: #991b1b;
+        }
+
+        .total-item .detail-value {
+            color: #991b1b;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+    .full-width-item {
+        grid-column: 1 / -1;
+    }
+
+        .full-width-item .detail-value {
+            line-height: 1.6;
+        }
+
     @@media (max-width: 768px) {
+        .container-delete {
+            padding: 1rem;
+        }
+
+        .delete-card {
+            padding: 1.5rem;
+        }
+
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
         .form-actions {
             flex-direction: column;
         }
 
-        .btn {
-            width: 100%;
-            justify-content: center;
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+    }
+
+    @@media (max-width: 576px) {
+        .delete-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .delete-card {
+            padding: 1rem;
         }
     }
 </style>
@@ -130,64 +254,102 @@
 <div class="container-delete">
     <div class="delete-card">
         <div class="delete-header">
-            <h1><i class="fas fa-file-invoice-dollar"></i> @ViewData["Title"]</h1>
-            <p class="text-muted">Confirmación de eliminación del registro de compra</p>
+            <h1><i class="fas fa-trash-alt"></i> @ViewData["Title"]</h1>
+            <h4>Confirmación de eliminación permanente</h4>
         </div>
 
         <div class="warning-alert">
             <i class="fas fa-exclamation-triangle"></i>
             <div>
-                <strong>Advertencia:</strong> Esta acción eliminará permanentemente el detalle de compra
-                con factura <strong>@Model.NumeroFactura</strong>.
-                Esta acción no se puede deshacer.
+                <strong>¡ADVERTENCIA CRÍTICA!</strong> Esta acción eliminará permanentemente el registro de número de factura
+                <strong>#@Model.idDetalleCompra</strong> por un monto total de
+                <strong>$@Model.montoTotal.ToString("N2")</strong>. Esta acción no se puede deshacer.
             </div>
         </div>
 
-        <!-- Información de la Compra -->
-        <div class="section-title">Información de la Compra</div>
+        <!-- Información General -->
+        <div class="section-title">
+            <i class="fas fa-info-circle"></i> Información General
+        </div>
         <div class="detail-grid">
             <div class="detail-item">
-                <div class="detail-label">ID Compra</div>
-                <div class="detail-value">@Model.IdDetalleCompra</div>
+                <div class="detail-label"><i class="fas fa-fingerprint"></i> ID de Compra</div>
+                <div class="detail-value">#@Model.idDetalleCompra</div>
             </div>
             <div class="detail-item">
-                <div class="detail-label">Número de Factura</div>
-                <div class="detail-value">@Model.NumeroFactura</div>
+                <div class="detail-label"><i class="fas fa-file-invoice"></i> Número de Factura</div>
+                <div class="detail-value">@Model.numeroFactura</div>
             </div>
             <div class="detail-item">
-                <div class="detail-label">Fecha</div>
-                <div class="detail-value">@Model.FechaCompra.ToString("dd/MM/yyyy")</div>
+                <div class="detail-label"><i class="fas fa-calendar-alt"></i> Fecha de Compra</div>
+                <div class="detail-value">@Model.fechaCompra.ToString("dd/MM/yyyy")</div>
             </div>
         </div>
 
-        <!-- Detalle del Producto -->
-        <div class="section-title">Detalle del Producto</div>
+        <!-- Información de Compra -->
+        <div class="section-title">
+            <i class="fas fa-users"></i> Información de Compra
+        </div>
         <div class="detail-grid">
             <div class="detail-item">
-                <div class="detail-label">Producto</div>
-                <div class="detail-value">@Model.ProductoId</div>
+                <div class="detail-label"><i class="fas fa-truck"></i> Proveedor</div>
+                <div class="detail-value">
+                    <span class="badge badge-info">
+                        <i class="fas fa-building"></i>
+                        @proveedoresNombres.GetValueOrDefault(Model.proveedorId, "No disponible")
+                    </span>
+                </div>
             </div>
             <div class="detail-item">
-                <div class="detail-label">Cantidad</div>
-                <div class="detail-value">@Model.Cantidad</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Precio Unitario</div>
-                <div class="detail-value">$@Model.PrecioUnitarioCosto.ToString("N2")</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Monto Total</div>
-                <div class="detail-value">$@Model.MontoTotal.ToString("N2")</div>
+                <div class="detail-label"><i class="fas fa-user-tie"></i> Usuario Responsable</div>
+                <div class="detail-value">
+                    <span class="badge badge-success">
+                        <i class="fas fa-user"></i>
+                        @usuariosNombres.GetValueOrDefault(Model.usuarioId, "No disponible")
+                    </span>
+                </div>
             </div>
         </div>
 
-        <!-- Acciones -->
+        <!-- Detalles del Producto -->
+        <div class="section-title">
+            <i class="fas fa-box"></i> Detalles del Producto
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-cube"></i> Producto</div>
+                <div class="detail-value">
+                    @productosNombres.GetValueOrDefault(Model.productoId, "No disponible")
+                </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-layer-group"></i> Cantidad</div>
+                <div class="detail-value">@Model.cantidad unidades</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-dollar-sign"></i> Precio Unitario</div>
+                <div class="detail-value">$@Model.precioUnitarioCosto.ToString("N2")</div>
+            </div>
+        </div>
+
+        <!-- Resumen de Compra -->
+        <div class="section-title">
+            <i class="fas fa-calculator"></i> Resumen de Compra
+        </div>
+        <div class="detail-grid">
+            <div class="total-item">
+                <div class="detail-label"><i class="fas fa-money-bill-wave"></i> MONTO TOTAL A ELIMINAR</div>
+                <div class="detail-value">$@Model.montoTotal.ToString("N2")</div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
         <div class="form-actions">
             <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Volver
+                <i class="fas fa-arrow-left"></i> Volver a la Lista
             </a>
-            <form asp-action="Delete" method="post">
-                <input type="hidden" asp-for="IdDetalleCompra" />
+            <form asp-action="Delete" method="post" style="display: inline;">
+                <input type="hidden" asp-for="idDetalleCompra" />
                 <button type="submit" class="btn btn-danger">
                     <i class="fas fa-trash-alt"></i> Eliminar Permanentemente
                 </button>
@@ -195,4 +357,9 @@
         </div>
     </div>
 </div>
- *@
+
+@section Scripts {
+    @{
+        // Scripts adicionales si son necesarios
+    }
+}

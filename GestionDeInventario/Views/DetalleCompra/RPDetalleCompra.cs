@@ -21,7 +21,6 @@ namespace GestionDeInventario.Views.DetalleCompra
         {
             container.Page(page =>
             {
-                // Configurar tamaño y márgenes
                 page.Size(PageSizes.A4.Portrait());
                 page.Margin(30);
                 page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Arial"));
@@ -30,199 +29,242 @@ namespace GestionDeInventario.Views.DetalleCompra
                 page.Header()
                     .Column(column =>
                     {
-                        // Título principal
+                        // Título y logo
                         column.Item()
-                            .AlignCenter()
-                            .Text("DETALLE DE COMPRA")
-                            .FontSize(16)
-                            .Bold()
-                            .FontColor(Colors.Blue.Darken3);
-
-                        // Línea divisoria
-                        column.Item()
-                            .PaddingVertical(5)
-                            .LineHorizontal(1)
-                            .LineColor(Colors.Grey.Lighten1);
-
-                        // Información básica
-                        column.Item()
-                            .PaddingTop(5)
                             .Row(row =>
                             {
                                 row.RelativeItem()
-                                    .Text($"Factura: {Model.numeroFactura}")
-                                    .Bold();
+                                    .Column(col =>
+                                    {
+                                        col.Item()
+                                            .Text("SISTEMA DE INVENTARIO")
+                                            .FontSize(12)
+                                            .Bold()
+                                            .FontColor(Colors.Blue.Darken3);
 
-                                row.RelativeItem()
+                                        col.Item()
+                                            .Text("REPORTE DE COMPRA")
+                                            .FontSize(16)
+                                            .Bold()
+                                            .FontColor(Colors.Black);
+                                    });
+
+                                row.ConstantItem(80)
                                     .AlignRight()
-                                    .Text($"Fecha: {Model.fechaCompra:dd/MM/yyyy HH:mm}")
-                                    .FontColor(Colors.Grey.Medium);
+                                    .Text(text =>
+                                    {
+                                        text.Span("Factura:\n").Bold();
+                                        text.Span(Model.numeroFactura).FontSize(9);
+                                    });
+                            });
+
+                        column.Item()
+                            .PaddingVertical(10)
+                            .LineHorizontal(1)
+                            .LineColor(Colors.Grey.Medium);
+
+                        // Información de compra
+                        column.Item()
+                            .PaddingBottom(5)
+                            .Row(row =>
+                            {
+                                row.RelativeItem()
+                                    .Text(text =>
+                                    {
+                                        text.Span("Fecha: ").Bold();
+                                        text.Span($"{Model.fechaCompra:dd/MM/yyyy}");
+                                    });
+
                             });
                     });
 
                 // CONTENIDO PRINCIPAL
                 page.Content()
-                    .PaddingVertical(15)
+                    .PaddingVertical(10)
                     .Column(column =>
                     {
-                        // SECCIÓN 1: Información de la compra
+                        // SECCIÓN 1: Información de partes
                         column.Item()
+                            .PaddingBottom(15)
+                            .Row(row =>
+                            {
+                                // Proveedor
+                                row.RelativeItem()
+                                    .Background(Colors.Grey.Lighten5)
+                                    .Padding(10)
+                                    .Border(1)
+                                    .BorderColor(Colors.Grey.Lighten2)
+                                    .Column(col =>
+                                    {
+                                        col.Item()
+                                            .Text("PROVEEDOR")
+                                            .FontSize(11)
+                                            .Bold()
+                                            .FontColor(Colors.Blue.Darken3);
+
+                                        col.Item().PaddingTop(3);
+
+                                        if (Model.proveedor != null)
+                                        {
+                                            col.Item()
+                                                .Text(Model.proveedor.nombreEmpresa)
+                                                .Bold()
+                                                .FontSize(11);
+
+                                            col.Item()
+                                                .Text(text =>
+                                                {
+                                                    text.Span("Contacto: ");
+                                                    text.Span(Model.proveedor.telefono ?? "N/A");
+                                                });
+
+                                            col.Item()
+                                                .Text(text =>
+                                                {
+                                                    text.Span("Dirección: ");
+                                                    text.Span(Model.proveedor.direccion ?? "N/A");
+                                                });
+                                        }
+                                        else
+                                        {
+                                            col.Item().Text("N/A").Italic();
+                                        }
+                                    });
+
+                                // Usuario
+                                row.RelativeItem()
+                                    .PaddingLeft(10)
+                                    .Background(Colors.Grey.Lighten5)
+                                    .Padding(10)
+                                    .Border(1)
+                                    .BorderColor(Colors.Grey.Lighten2)
+                                    .Column(col =>
+                                    {
+                                        col.Item()
+                                            .Text("REGISTRADO POR")
+                                            .FontSize(11)
+                                            .Bold()
+                                            .FontColor(Colors.Blue.Darken3);
+
+                                        col.Item().PaddingTop(3);
+
+                                        if (Model.usuario != null)
+                                        {
+                                            col.Item()
+                                                .Text(Model.usuario.nombre)
+                                                .Bold()
+                                                .FontSize(11);
+                                        }
+                                        else
+                                        {
+                                            col.Item().Text("N/A").Italic();
+                                        }
+                                    });
+                            });
+
+                        // SECCIÓN 2: Detalles del producto
+                        column.Item()
+                            .PaddingBottom(10)
                             .Background(Colors.Grey.Lighten5)
                             .Padding(10)
                             .Border(1)
                             .BorderColor(Colors.Grey.Lighten2)
-                            .Column(section =>
+                            .Column(col =>
                             {
-                                section.Item()
-                                    .Text("INFORMACIÓN DE LA COMPRA")
-                                    .FontSize(12)
+                                col.Item()
+                                    .Text("DETALLES DEL PRODUCTO")
+                                    .FontSize(11)
                                     .Bold()
                                     .FontColor(Colors.Blue.Darken3);
 
-                                section.Item().PaddingTop(5);
+                                col.Item().PaddingTop(5);
 
-                                // Datos del proveedor
-                                section.Item()
-                                    .Text(text =>
-                                    {
-                                        text.Span("Proveedor: ").Bold();
-                                        text.Span($"{Model.proveedor?.nombreEmpresa ?? "N/A"}");
-                                    });
-
-                                // Datos del producto
-                                section.Item()
-                                    .Text(text =>
-                                    {
-                                        text.Span("Producto: ").Bold();
-                                        text.Span($"{Model.producto?.nombre ?? "N/A"}");
-                                    });
-
-                                // Datos del usuario
-                                section.Item()
-                                    .Text(text =>
-                                    {
-                                        text.Span("Registrado por: ").Bold();
-                                        text.Span($"{Model.usuario?.nombre ?? "N/A"}");
-                                    });
-                            });
-
-                        column.Item().PaddingTop(20);
-
-                        // SECCIÓN 2: Detalles de la compra (Tabla)
-                        column.Item()
-                            .Text("DETALLES DE LA COMPRA")
-                            .FontSize(12)
-                            .Bold()
-                            .FontColor(Colors.Blue.Darken3);
-
-                        column.Item().PaddingTop(5);
-
-                        // Tabla de detalles
-                        column.Item()
-                            .Table(table =>
-                            {
-                                // Definir columnas
-                                table.ColumnsDefinition(columns =>
+                                if (Model.producto != null)
                                 {
-                                    columns.ConstantColumn(40); // Ítem
-                                    columns.RelativeColumn(3);  // Descripción
-                                    columns.ConstantColumn(80); // Cantidad
-                                    columns.ConstantColumn(100); // Precio Unit.
-                                    columns.ConstantColumn(100); // Total
-                                });
+                                    col.Item()
+                                        .Row(row =>
+                                        {
 
-                                // Encabezado de la tabla
-                                table.Header(header =>
+                                            row.RelativeItem()
+                                        .Text(text =>
+     {
+         text.Span("ID Producto: ").Bold();
+         text.Span(Model.productoId.ToString());
+     });
+
+                                            row.RelativeItem()
+                                                .Text(text =>
+                                                {
+                                                    text.Span("Producto: ").Bold();
+                                                    text.Span(Model.producto.nombre);
+                                                });
+
+                                            row.RelativeItem()
+                                                .Text(text =>
+                                                {
+                                                    text.Span("Unidad: ").Bold();
+                                                    text.Span(Model.producto.unidadMedida ?? "N/A");
+                                                });
+                                        });
+                                }
+                                else
                                 {
-                                    header.Cell().Element(CellStyle).Text("#").Bold();
-                                    header.Cell().Element(CellStyle).Text("DESCRIPCIÓN").Bold();
-                                    header.Cell().Element(CellStyle).AlignRight().Text("CANTIDAD").Bold();
-                                    header.Cell().Element(CellStyle).AlignRight().Text("PRECIO UNIT.").Bold();
-                                    header.Cell().Element(CellStyle).AlignRight().Text("TOTAL").Bold();
-
-                                    static IContainer CellStyle(IContainer container)
-                                    {
-                                        return container
-                                            .Background(Colors.Blue.Lighten5)
-                                            .PaddingVertical(8)
-                                            .PaddingHorizontal(5)
-                                            .BorderBottom(1)
-                                            .BorderColor(Colors.Grey.Lighten1);
-                                    }
-                                });
-
-                                // Fila de datos
-                                table.Cell().Element(CellStyle).Text("1");
-                                table.Cell().Element(CellStyle).Text(Model.producto?.nombre ?? "Producto");
-                                table.Cell().Element(CellStyle).AlignRight().Text(Model.cantidad.ToString("N0"));
-                                table.Cell().Element(CellStyle).AlignRight().Text(FormatCurrency(Model.precioUnitarioCosto));
-                                table.Cell().Element(CellStyle).AlignRight().Text(FormatCurrency(Model.montoTotal));
-
-                                static IContainer CellStyle(IContainer container)
-                                {
-                                    return container
-                                        .BorderBottom(1)
-                                        .BorderColor(Colors.Grey.Lighten2)
-                                        .PaddingVertical(8)
-                                        .PaddingHorizontal(5);
+                                    col.Item().Text("Producto no disponible").Italic();
                                 }
                             });
 
-                        column.Item().PaddingTop(30);
-
-                        // SECCIÓN 3: Resumen total
+                        // SECCIÓN 3: Tabla de compra
                         column.Item()
-                            .AlignRight()
-                            .Width(200)
-                            .Background(Colors.Grey.Lighten5)
-                            .Padding(15)
-                            .Border(1)
-                            .BorderColor(Colors.Grey.Lighten2)
-                            .Column(summary =>
+                            .PaddingBottom(15)
+                            .Table(table =>
                             {
-                                summary.Item()
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.ConstantColumn(30);  // #
+                                    columns.RelativeColumn(3);   // Descripción
+                                    columns.ConstantColumn(70);  // Cantidad
+                                    columns.ConstantColumn(90);  // Precio Unit.
+                                    columns.ConstantColumn(90);  // Subtotal
+                                });
+
+                                // Encabezado
+                                table.Header(header =>
+                                {
+                                    header.Cell().Element(CellHeader).Text("#").AlignCenter();
+                                    header.Cell().Element(CellHeader).Text("DESCRIPCIÓN");
+                                    header.Cell().Element(CellHeader).Text("CANTIDAD").Light();
+                                    header.Cell().Element(CellHeader).Text("PRECIO UNIT.").Light();
+                                    header.Cell().Element(CellHeader).Text("SUBTOTAL").Light();
+                                });
+
+                                // Datos
+                                table.Cell().Element(CellData).Text("1").AlignCenter();
+                                table.Cell().Element(CellData).Text(Model.producto?.nombre ?? "Producto");
+                                table.Cell().Element(CellData).Text(Model.cantidad.ToString("N0")).Light();
+                                table.Cell().Element(CellData).Text(FormatUSD(Model.precioUnitarioCosto)).Light();
+                                table.Cell().Element(CellData).Text(FormatUSD(Model.precioUnitarioCosto * Model.cantidad)).Light();
+
+                                // Total
+                                table.Cell().ColumnSpan(5).Element(CellTotal)
+                                    .PaddingTop(10)
                                     .Row(row =>
                                     {
-                                        row.RelativeItem()
-                                            .Text("Subtotal:")
-                                            .FontSize(11);
+                                        row.RelativeItem();
+                                        row.ConstantItem(250)
+                                            .Row(totalRow =>
+                                            {
+                                                totalRow.RelativeItem()
+                                                    .Text("TOTAL:")
+                                                    .Bold()
+                                                    .FontSize(12);
 
-                                        row.ConstantItem(80)
-                                            .AlignRight()
-                                            .Text(FormatCurrency(Model.precioUnitarioCosto))
-                                            .FontSize(11);
-                                    });
-
-                                summary.Item()
-                                    .Row(row =>
-                                    {
-                                        row.RelativeItem()
-                                            .Text("Cantidad:")
-                                            .FontSize(11);
-
-                                        row.ConstantItem(80)
-                                            .AlignRight()
-                                            .Text($"x {Model.cantidad}")
-                                            .FontSize(11);
-                                    });
-
-                                summary.Item()
-                                    .PaddingTop(5)
-                                    .BorderTop(1)
-                                    .BorderColor(Colors.Grey.Medium)
-                                    .Row(row =>
-                                    {
-                                        row.RelativeItem()
-                                            .Text("TOTAL:")
-                                            .Bold()
-                                            .FontSize(12);
-
-                                        row.ConstantItem(80)
-                                            .AlignRight()
-                                            .Text(FormatCurrency(Model.montoTotal))
-                                            .Bold()
-                                            .FontSize(12)
-                                            .FontColor(Colors.Blue.Darken3);
+                                                totalRow.ConstantItem(90)
+                                                    .AlignRight()
+                                                    .Text(FormatUSD(Model.montoTotal))
+                                                    .Bold()
+                                                    .FontSize(12)
+                                                    .FontColor(Colors.Blue.Darken3);
+                                            });
                                     });
                             });
                     });
@@ -230,20 +272,67 @@ namespace GestionDeInventario.Views.DetalleCompra
                 // PIE DE PÁGINA
                 page.Footer()
                     .AlignCenter()
-                    .Text(text =>
+                    .PaddingTop(10)
+                    .Column(col =>
                     {
-                        text.Span("Página ");
-                        text.CurrentPageNumber();
-                        text.Span(" de ");
-                        text.TotalPages();
-                        text.Span(" | Sistema de Gestión de Inventario");
+                        col.Item()
+                            .LineHorizontal((float)0.5)
+                            .LineColor(Colors.Grey.Lighten1);
+
+                        col.Item()
+                            .PaddingTop(5)
+                            .Row(row =>
+                            {
+                                row.RelativeItem()
+                                    .AlignCenter()
+                                    .Text(text =>
+                                    {
+                                        text.Span("Página ");
+                                        text.CurrentPageNumber();
+                                        text.Span(" de ");
+                                        text.TotalPages();
+                                    });
+
+                                row.RelativeItem()
+                                    .AlignRight()
+                                    .Text($"{DateTime.Now:dd/MM/yyyy HH:mm}")
+                                    .FontSize(8)
+                                    .FontColor(Colors.Grey.Medium);
+                            });
                     });
             });
         }
 
-        private string FormatCurrency(decimal amount)
+        private string FormatUSD(decimal amount)
         {
-            return amount.ToString("C", new CultureInfo("es-HN"));
+            return amount.ToString("C", CultureInfo.GetCultureInfo("en-US"));
+        }
+
+        private static IContainer CellHeader(IContainer container)
+        {
+            return container
+                .Background(Colors.Blue.Lighten5)
+                .PaddingVertical(7)
+                .PaddingHorizontal(5)
+                .BorderBottom(1)
+                .BorderColor(Colors.Grey.Lighten1);
+        }
+
+        private static IContainer CellData(IContainer container)
+        {
+            return container
+                .BorderBottom(1)
+                .BorderColor(Colors.Grey.Lighten2)
+                .PaddingVertical(7)
+                .PaddingHorizontal(5);
+        }
+
+        private static IContainer CellTotal(IContainer container)
+        {
+            return container
+                .BorderTop(2)
+                .BorderColor(Colors.Grey.Medium)
+                .PaddingTop(5);
         }
     }
 }

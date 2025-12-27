@@ -11,7 +11,8 @@ namespace GestionDeInventario.Models
         public string numeroFactura { get; set; }
         public int cantidad { get; set; }
         public decimal precioUnitarioCosto { get; set; }
-        public decimal montoTotal { get; set; } 
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public decimal montoTotal { get; set; }
         public DateTime fechaCompra { get; set; }
         public int usuarioId { get; set; }
         public Usuario usuario { get; set; } = null!;

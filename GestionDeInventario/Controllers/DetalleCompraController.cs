@@ -1,5 +1,5 @@
 ﻿using GestionDeInventario.DTOs.DetalleCompraDTOs;
-using GestionDeInventario.DTOs.EmpleadoDTOs;
+using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
 using GestionDeInventario.Utilidades;
 using Microsoft.AspNetCore.Authorization;
@@ -16,7 +16,6 @@ namespace GestionDeInventario.Controllers
         private readonly IUsuarioService _usuarioService;
         private readonly IProductoService _productoService;
         private readonly IProveedorService _proveedorService;
-
         public DetalleCompraController(IDetalleCompraService detalleCompraService, IUsuarioService usuarioService, IProductoService productoService, IProveedorService proveedorService)
         {
             _detalleCompraService = detalleCompraService;
@@ -39,7 +38,6 @@ namespace GestionDeInventario.Controllers
             var proveedores = await _proveedorService.GetAllAsync();
             ViewBag.proveedorId = new SelectList(proveedores, "idProveedor", "nombreEmpresa");
         }
-
         private async Task PopulateUsuarioNamesViewBag()
         {
             var usuarios = await _usuarioService.GetAllAsync();
@@ -148,9 +146,202 @@ namespace GestionDeInventario.Controllers
             await PopulateDropdownsProveedor();
             return View(new DetalleCompraCreateDTO());
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(DetalleCompraCreateDTO detalleCompraDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropdownsUsuario();
+                await PopulateDropdownsProducto();
+                await PopulateDropdownsProveedor();
+                return View(detalleCompraDto);
+            }
+            try
+            {
+                var nuevoDetalle = await _detalleCompraService.AddAsync(detalleCompraDto);
+                if (nuevoDetalle == null)
+                {
+                    ModelState.AddModelError("", "No se pudo crear el detalle de la compra.");
+                    await PopulateDropdownsUsuario();
+                    await PopulateDropdownsProducto();
+                    await PopulateDropdownsProveedor();
+                    return View(detalleCompraDto);
+                }
+                TempData["Ok"] = "Detalle de la compra creado con éxito.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (BusinessRuleException brex)
+            {
+                ModelState.AddModelError(string.Empty, brex.Message);
+                await PopulateDropdownsUsuario();
+                await PopulateDropdownsProducto();
+                await PopulateDropdownsProveedor();
+                return View(detalleCompraDto);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al crear el detalle de la compra: " + ex.Message);
+                await PopulateDropdownsUsuario();
+                await PopulateDropdownsProducto();
+                await PopulateDropdownsProveedor();
+                return View(detalleCompraDto);
+            }
+        }
+        public async Task<IActionResult> Edit(int id)
+        {
+            try
+            {
+                var detalleDto = await _detalleCompraService.GetByIdAsync(id);
+                if (detalleDto == null)
+                {
+                    return NotFound();
+                }
+                var updateDto = new DetalleCompraUpdateDTO
+                {
+                    numeroFactura = detalleDto.numeroFactura,
+                    usuarioId = detalleDto.usuarioId,
+                    proveedorId = detalleDto.proveedorId,
+                    productoId = detalleDto.productoId,
+                    cantidad = detalleDto.cantidad,
+                    precioUnitarioCosto = detalleDto.precioUnitarioCosto,
+                    montoTotal = detalleDto.montoTotal,
+                    fechaCompra = detalleDto.fechaCompra,
+                };
+                await PopulateDropdownsUsuario();
+                await PopulateDropdownsProducto();
+                await PopulateDropdownsProveedor();
+                return View(updateDto);
+            }
+            catch (NotFoundException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "No se pudo cargar el detalle de la compra para edición.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, DetalleCompraUpdateDTO detalleCompraUpdateDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropdownsUsuario();
+                await PopulateDropdownsProducto();
+                await PopulateDropdownsProveedor();
+                return View(detalleCompraUpdateDTO);
+            }
+            try
+            {
+                var success = await  _detalleCompraService.UpdateAsync(id, detalleCompraUpdateDTO);
+                if (success)
+                {
+                    TempData["Ok"] = "Detalle de la compra actualizado con éxito.";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("", "La actualización no se pudo completar. El registro no existe o el servicio falló.");
+                }
+            }
+            catch (NotFoundException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (BusinessRuleException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("", "Error al actualizar el detalle de la compra. Verifique si el ID coincide o si la sesión es válida.");
+            }
+            await PopulateDropdownsUsuario();
+            await PopulateDropdownsProducto();
+            await PopulateDropdownsProveedor();
+            return View(detalleCompraUpdateDTO);
+        }
 
+        public async Task<IActionResult> Details(int id)
+        {
+            var detalleCompra = await _detalleCompraService.GetByIdAsync(id);
+            var productos = await _productoService.GetAllAsync();
+            var proveedores = await _proveedorService.GetAllAsync();
+            var usuarios = await _usuarioService.GetAllAsync();
 
+            ViewBag.ProductosNombres = productos?.ToDictionary(d => d.idProducto, d => d.nombre) ?? new Dictionary<int, string>();
+            ViewBag.ProveedoresNombres = proveedores?.ToDictionary(d => d.idProveedor, d => d.nombreEmpresa) ?? new Dictionary<int, string>();
+            ViewBag.UsuariosNombres = usuarios?.ToDictionary(d => d.idUsuario, d => d.nombre) ?? new Dictionary<int, string>();
+            if (detalleCompra == null)
+            {
+                return NotFound();
+            }
+            return View(detalleCompra);
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var detalleCompra = await _detalleCompraService.GetByIdAsync(id);
+                var productos = await _productoService.GetAllAsync();
+                var proveedores = await _proveedorService.GetAllAsync();
+                var usuarios = await _usuarioService.GetAllAsync();
+                ViewBag.ProductosNombres = productos?.ToDictionary(d => d.idProducto, d => d.nombre) ?? new Dictionary<int, string>();
+                ViewBag.ProveedoresNombres = proveedores?.ToDictionary(d => d.idProveedor, d => d.nombreEmpresa) ?? new Dictionary<int, string>();
+                ViewBag.UsuariosNombres = usuarios?.ToDictionary(d => d.idUsuario, d => d.nombre) ?? new Dictionary<int, string>();
+                return View(detalleCompra);
+            }
+            catch (NotFoundException)
+            {
+                TempData["MensajeError"] = "Error: El detalle de la compra solicitado no existe.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            try
+            {
+                await _detalleCompraService.DeleteAsync(id);
+                TempData["MensajeExito"] = "Detalle de la compra eliminado con éxito.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (NotFoundException)
+            {
+                TempData["MensajeError"] = "Error: El detalle de la compra ya no existe o fue eliminado.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al eliminar el detalle de la compra: " + ex.Message);
+
+                try
+                {
+                    var detalleCompra = await _detalleCompraService.GetByIdAsync(id);
+                    var productos = await _productoService.GetAllAsync();
+                    var proveedores = await _proveedorService.GetAllAsync();
+                    var usuarios = await _usuarioService.GetAllAsync();
+                    ViewBag.ProductosNombres = productos?.ToDictionary(d => d.idProducto, d => d.nombre) ?? new Dictionary<int, string>();
+                    ViewBag.ProveedoresNombres = proveedores?.ToDictionary(d => d.idProveedor, d => d.nombreEmpresa) ?? new Dictionary<int, string>();
+                    ViewBag.UsuariosNombres = usuarios?.ToDictionary(d => d.idUsuario, d => d.nombre) ?? new Dictionary<int, string>();
+                    return View("Delete", detalleCompra);
+                }
+                catch (NotFoundException)
+                {
+                    TempData["MensajeError"] = "Error interno: El detalle de la compra fue eliminado antes de mostrar el error.";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+        }
 
 
         // SOLO PDF - Acción para descargar PDF
@@ -184,7 +375,7 @@ namespace GestionDeInventario.Controllers
 
                 // Redirigir o mostrar error
                 TempData["ErrorMessage"] = "Error al generar el PDF.";
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "DetalleCompra");
             }
         }
 
@@ -210,7 +401,7 @@ namespace GestionDeInventario.Controllers
             catch (Exception)
             {
                 TempData["ErrorMessage"] = "Error al generar el PDF.";
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "DetalleCompra");
             }
         }
     }
