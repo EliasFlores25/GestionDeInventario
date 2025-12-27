@@ -1,7 +1,8 @@
 ﻿namespace GestionDeInventario.DTOs.DetalleDistribucionDTOs
 {
-    public class DetalleDistribucionCreateDTO
+    public class DetalleDistribucionResponseDTO
     {
+        public int IdDetalleDistribucion { get; set; }
         public string NumeroDistribucion { get; set; }
 
         public int IdUsuario { get; set; }
