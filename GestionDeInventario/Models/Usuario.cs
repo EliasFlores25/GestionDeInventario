@@ -12,5 +12,6 @@ namespace GestionDeInventario.Models
         public string email { get; set; }
         public string contraseña{ get; set; }
         public ICollection<DetalleCompra> DetallesCompras { get; set; } = new List<DetalleCompra>();
+        public ICollection<DetalleDistribucion> DetallesDistribuciones { get; set; } = new List<DetalleDistribucion>();
     }
 }

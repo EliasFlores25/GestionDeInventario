@@ -14,5 +14,6 @@ namespace GestionDeInventario.Data
         public DbSet<Departamento> Departamentos { get; set; }
         public DbSet <DetalleCompra> DetalleCompras { get; set; }
         public DbSet<Proveedor> Proveedores { get; set; }
+        public DbSet<DetalleDistribucion> DetalleDistribuciones { get; set; }
     }
 }

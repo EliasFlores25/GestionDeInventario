@@ -2,7 +2,6 @@
 using GestionDeInventario.Models;
 using GestionDeInventario.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics.CodeAnalysis;
 
 namespace GestionDeInventario.Repository.Implementations
 {

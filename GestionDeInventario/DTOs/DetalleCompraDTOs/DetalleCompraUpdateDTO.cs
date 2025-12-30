@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿
 namespace GestionDeInventario.DTOs.DetalleCompraDTOs
 {
     public class DetalleCompraUpdateDTO

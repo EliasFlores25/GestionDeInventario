@@ -62,6 +62,8 @@ builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
 builder.Services.AddScoped<IProveedorService, ProveedorService>();
 builder.Services.AddScoped<IDetalleCompraRepository, DetalleCompraRepository>();
 builder.Services.AddScoped<IDetalleCompraService, DetalleCompraService>();
+builder.Services.AddScoped<IDetalleDistribucionRepository, DetalleDistribucionRepository>();
+builder.Services.AddScoped<IDetalleDistribucionService, DetalleDistribucionService>();
 
 
 var app = builder.Build();

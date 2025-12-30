@@ -1,0 +1,421 @@
+﻿@model GestionDeInventario.DTOs.DetalleDistribucionDTOs.DetalleDistribucionUpdateDTO
+
+@{
+    ViewData["Title"] = "Editar Detalle de Distribución";
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --warning: #f59e0b;
+        --warning-dark: #d97706;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
+    }
+
+    .container-edit {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .edit-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border-top: 5px solid var(--warning);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .edit-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+        .edit-header h1 {
+            color: var(--dark);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+            .edit-header h1 i {
+                color: var(--warning);
+            }
+
+        .edit-header h4 {
+            color: var(--text-light);
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+        }
+
+    .section-title {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--warning);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .form-control, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        background: white;
+    }
+
+    .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+        .form-control:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--warning);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .form-control::placeholder, .form-textarea::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        opacity: 1;
+    }
+
+    .validation-error {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-warning {
+        background: var(--warning);
+        color: white;
+    }
+
+        .btn-warning:hover {
+            background: var(--warning-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2);
+        }
+
+    .btn-secondary {
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 12px;
+        border: 2px solid var(--border);
+    }
+
+    .detail-item {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid var(--warning);
+    }
+
+    .detail-label {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-value {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    .detail-id {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-left-color: #0ea5e9;
+    }
+
+    .detail-numero {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-left-color: #f59e0b;
+    }
+
+    .detail-fecha {
+        background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+        border-left-color: #a855f7;
+    }
+
+    .total-item {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid var(--warning);
+        text-align: center;
+        min-width: 250px;
+    }
+
+    @@media (max-width: 768px) {
+        .container-edit {
+            padding: 1rem;
+        }
+
+        .edit-card {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+        .detail-grid {
+            grid-template-columns: 1fr;
+            padding: 1rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .edit-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .edit-card {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container-edit">
+    <div class="edit-card">
+        <div class="edit-header">
+            <h1><i class="fas fa-edit"></i> @ViewData["Title"]</h1>
+            <h4>Actualiza los detalles de la distribución registrada</h4>
+        </div>
+
+        <form asp-action="Edit" method="post" id="editDistribucionForm">
+            <div asp-validation-summary="ModelOnly" class="alert-danger"></div>
+            <input type="hidden" asp-for="IdDetalleDistribucion" />
+
+            <!-- Sección 1: Información de Distribución -->
+            <div class="section-title">
+                <i class="fas fa-hashtag"></i> Información de Distribución
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="NumeroDistribucion">Número de Distribución</label>
+                        <input asp-for="NumeroDistribucion" class="form-control" placeholder="Ej: DIST-001-2024" />
+                        <span asp-validation-for="NumeroDistribucion" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="FechaSalida">Fecha de Salida</label>
+                        <input asp-for="FechaSalida" type="date" class="form-control" id="fechaSalidaInput" />
+                        <span asp-validation-for="FechaSalida" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Personal Responsable -->
+            <div class="section-title">
+                <i class="fas fa-users"></i> Personal Responsable
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="UsuarioId">Usuario</label>
+                        <select asp-for="UsuarioId" class="form-select" asp-items="ViewBag.UsuarioId">
+                            <option value="">-- Seleccionar Usuario --</option>
+                        </select>
+                        <span asp-validation-for="UsuarioId" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="EmpleadoId">Empleado</label>
+                        <select asp-for="EmpleadoId" class="form-select" asp-items="ViewBag.EmpleadoId">
+                            <option value="">-- Seleccionar Empleado --</option>
+                        </select>
+                        <span asp-validation-for="EmpleadoId" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 3: Detalles del Producto -->
+            <div class="section-title">
+                <i class="fas fa-box"></i> Detalles del Producto
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="ProductoId">Producto</label>
+                        <select asp-for="ProductoId" class="form-select" asp-items="ViewBag.ProductoId">
+                            <option value="">-- Seleccionar Producto --</option>
+                        </select>
+                        <span asp-validation-for="ProductoId" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Cantidad">Cantidad</label>
+                        <input asp-for="Cantidad" type="number" min="1" class="form-control" placeholder="Ej: 10" />
+                        <span asp-validation-for="Cantidad" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 4: Motivo de Distribución -->
+            <div class="section-title">
+                <i class="fas fa-clipboard-list"></i> Motivo de Distribución
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Motivo">Motivo</label>
+                        <textarea asp-for="Motivo" class="form-textarea" placeholder="Describa el motivo de la distribución..."></textarea>
+                        <span asp-validation-for="Motivo" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+
+            <center>
+                <div class="detail-grid">
+                    <div class="total-item">
+                        <div class="detail-label"><i class="fas fa-money-bill-wave"></i> MONTO TOTAL</div>
+                        <div class="detail-value">@(Model.MontoTotal.ToString("C") ?? "$0.00")</div>
+                    </div>
+                </div>
+            </center>
+
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a la Lista
+                </a>
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Formatear la fecha para date (solo fecha)
+            const fechaInput = document.getElementById('fechaSalidaInput');
+
+            // Si ya hay una fecha en el modelo, formatearla como YYYY-MM-DD
+            if (fechaInput.value) {
+                const originalDate = new Date(fechaInput.value);
+                const formattedDate = originalDate.toISOString().split('T')[0];
+                fechaInput.value = formattedDate;
+            }
+
+            // Configurar fecha mínima (hoy)
+            const today = new Date().toISOString().split('T')[0];
+            fechaInput.min = today;
+
+            // Configurar fecha máxima (1 año en el futuro)
+            const maxDate = new Date();
+            maxDate.setFullYear(maxDate.getFullYear() + 1);
+            const maxDateFormatted = maxDate.toISOString().split('T')[0];
+            fechaInput.max = maxDateFormatted;
+
+            console.log('Fecha configurada:', fechaInput.value);
+        });
+    </script>
+}

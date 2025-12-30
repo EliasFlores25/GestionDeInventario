@@ -1,9 +1,9 @@
-﻿@model GestionDeInventario.DTOs.DetalleCompraDTOs.DetalleCompraResponseDTO
+﻿@model GestionDeInventario.DTOs.DetalleDistribucionDTOs.DetalleDistribucionResponseDTO
 
 @{
-    ViewData["Title"] = "Eliminar Detalle de Compra";
+    ViewData["Title"] = "Eliminar Detalle de Distribución";
+    var empleadosNombres = ViewBag.EmpleadosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
     var productosNombres = ViewBag.ProductosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
-    var proveedoresNombres = ViewBag.ProveedoresNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
     var usuariosNombres = ViewBag.UsuariosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
 }
 
@@ -148,6 +148,11 @@
         color: #065f46;
     }
 
+    .badge-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
     .form-actions {
         display: flex;
         gap: 1rem;
@@ -209,12 +214,27 @@
             font-weight: 700;
         }
 
+    .monetary-item {
+        background: #f0f9ff;
+        border-left: 3px solid #0ea5e9;
+    }
+
+        .monetary-item .detail-label {
+            color: #1e40af;
+        }
+
+        .monetary-item .detail-value {
+            color: #1e40af;
+            font-weight: 600;
+        }
+
     .full-width-item {
         grid-column: 1 / -1;
     }
 
         .full-width-item .detail-value {
             line-height: 1.6;
+            white-space: pre-wrap;
         }
 
     @@media (max-width: 768px) {
@@ -261,9 +281,9 @@
         <div class="warning-alert">
             <i class="fas fa-exclamation-triangle"></i>
             <div>
-                <strong>¡ADVERTENCIA CRÍTICA!</strong> Esta acción eliminará permanentemente el registro de número de factura
-                <strong>#@Model.idDetalleCompra</strong> por un monto total de
-                <strong>$@Model.montoTotal.ToString("N2")</strong>. Esta acción no se puede deshacer.
+                <strong>¡ADVERTENCIA CRÍTICA!</strong> Esta acción eliminará permanentemente la distribución
+                <strong>#@Model.NumeroDistribucion</strong> por un monto total de
+                <strong>@Model.MontoTotal.ToString("C")</strong>. Esta acción no se puede deshacer.
             </div>
         </div>
 
@@ -273,39 +293,44 @@
         </div>
         <div class="detail-grid">
             <div class="detail-item">
-                <div class="detail-label"><i class="fas fa-fingerprint"></i> ID de Compra</div>
-                <div class="detail-value">#@Model.idDetalleCompra</div>
+                <div class="detail-label"><i class="fas fa-fingerprint"></i> ID de Distribución</div>
+                <div class="detail-value">#@Model.IdDetalleDistribucion</div>
             </div>
             <div class="detail-item">
-                <div class="detail-label"><i class="fas fa-file-invoice"></i> Número de Factura</div>
-                <div class="detail-value">@Model.numeroFactura</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label"><i class="fas fa-calendar-alt"></i> Fecha de Compra</div>
-                <div class="detail-value">@Model.fechaCompra.ToString("dd/MM/yyyy")</div>
-            </div>
-        </div>
-
-        <!-- Información de Compra -->
-        <div class="section-title">
-            <i class="fas fa-users"></i> Información de Compra
-        </div>
-        <div class="detail-grid">
-            <div class="detail-item">
-                <div class="detail-label"><i class="fas fa-truck"></i> Proveedor</div>
+                <div class="detail-label"><i class="fas fa-hashtag"></i> Número de Distribución</div>
                 <div class="detail-value">
                     <span class="badge badge-info">
-                        <i class="fas fa-building"></i>
-                        @proveedoresNombres.GetValueOrDefault(Model.proveedorId, "No disponible")
+                        <i class="fas fa-hashtag"></i>
+                        @Model.NumeroDistribucion
                     </span>
                 </div>
             </div>
             <div class="detail-item">
-                <div class="detail-label"><i class="fas fa-user-tie"></i> Usuario Responsable</div>
+                <div class="detail-label"><i class="fas fa-calendar-alt"></i> Fecha de Salida</div>
+                <div class="detail-value">@Model.FechaSalida.ToString("dd/MM/yyyy")</div>
+            </div>
+        </div>
+
+        <!-- Información de Personal Responsable -->
+        <div class="section-title">
+            <i class="fas fa-users"></i> Personal Responsable
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-user-tie"></i> Usuario</div>
                 <div class="detail-value">
                     <span class="badge badge-success">
                         <i class="fas fa-user"></i>
-                        @usuariosNombres.GetValueOrDefault(Model.usuarioId, "No disponible")
+                        @usuariosNombres.GetValueOrDefault(Model.UsuarioId, "No disponible")
+                    </span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-user-cog"></i> Empleado</div>
+                <div class="detail-value">
+                    <span class="badge badge-warning">
+                        <i class="fas fa-user-tie"></i>
+                        @empleadosNombres.GetValueOrDefault(Model.EmpleadoId, "No disponible")
                     </span>
                 </div>
             </div>
@@ -319,30 +344,49 @@
             <div class="detail-item">
                 <div class="detail-label"><i class="fas fa-cube"></i> Producto</div>
                 <div class="detail-value">
-                    @productosNombres.GetValueOrDefault(Model.productoId, "No disponible")
+                    <span class="badge badge-info">
+                        <i class="fas fa-box"></i>
+                        @productosNombres.GetValueOrDefault(Model.ProductoId, "No disponible")
+                    </span>
                 </div>
             </div>
             <div class="detail-item">
                 <div class="detail-label"><i class="fas fa-layer-group"></i> Cantidad</div>
-                <div class="detail-value">@Model.cantidad unidades</div>
+                <div class="detail-value">
+                    <span class="badge badge-success">
+                        <i class="fas fa-calculator"></i>
+                        @Model.Cantidad unidades
+                    </span>
+                </div>
             </div>
-                <div class="detail-item">
-                    <div class="detail-label"><i class="fas fa-dollar-sign"></i> Precio Unitario</div>
-                    <div class="detail-value">$@Model.precioUnitarioCosto.ToString("N2")</div>
+        </div>
+
+        <!-- Información Monetaria -->
+        <div class="section-title">
+            <i class="fas fa-money-bill-wave"></i> Información Monetaria
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item monetary-item">
+                <div class="detail-label"><i class="fas fa-dollar-sign"></i> Precio Unitario</div>
+                <div class="detail-value">@Model.PrecioCostoUnitario.ToString("C")</div>
+            </div>
+            
+                <div class="total-item">
+                <CENTER>
+                    <div class="detail-label"><i class="fas fa-money-bill-wave"></i> MONTO TOTAL A ELIMINAR</div>
+                    <div class="detail-value">@Model.MontoTotal.ToString("C")</div>
+                </CENTER>
                 </div>
         </div>
 
-        <!-- Resumen de Compra -->
+        <!-- Motivo de Distribución -->
         <div class="section-title">
-            <i class="fas fa-calculator"></i> Resumen de Compra
+            <i class="fas fa-clipboard-list"></i> Motivo de Distribución
         </div>
         <div class="detail-grid">
-            <div class="total-item">
-            <center>
-                    <div class="detail-label"><i class="fas fa-money-bill-wave"></i> MONTO TOTAL A ELIMINAR</div>
-                    <div class="detail-value">$@Model.montoTotal.ToString("N2")</div>
-            </center>
-              
+            <div class="detail-item full-width-item">
+                <div class="detail-label"><i class="fas fa-sticky-note"></i> Descripción del Motivo</div>
+                <div class="detail-value">@Model.Motivo</div>
             </div>
         </div>
 
@@ -352,7 +396,8 @@
                 <i class="fas fa-arrow-left"></i> Volver a la Lista
             </a>
             <form asp-action="Delete" method="post" style="display: inline;">
-                <input type="hidden" asp-for="idDetalleCompra" />
+                <input type="hidden" asp-for="IdDetalleDistribucion" />
+                @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn-danger">
                     <i class="fas fa-trash-alt"></i> Eliminar Permanentemente
                 </button>
@@ -362,7 +407,26 @@
 </div>
 
 @section Scripts {
-    @{
-        // Scripts adicionales si son necesarios
-    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Confirmación adicional para eliminación
+            const deleteForm = document.querySelector('form[asp-action="Delete"]');
+            const deleteButton = deleteForm.querySelector('button[type="submit"]');
+
+            deleteButton.addEventListener('click', function(e) {
+                const confirmDelete = confirm('¿ESTÁ COMPLETAMENTE SEGURO?\n\nEsta acción eliminará permanentemente la distribución:\n\n' +
+                    '• Número: @Model.NumeroDistribucion\n' +
+                    '• Monto: @Model.MontoTotal.ToString("C")\n' +
+                    '• Fecha: @Model.FechaSalida.ToString("dd/MM/yyyy")\n\n' +
+                    'Esta acción NO se puede deshacer.\n\n' +
+                    '¿Desea continuar con la eliminación?');
+
+                if (!confirmDelete) {
+                    e.preventDefault();
+                }
+            });
+
+            console.log('Página de eliminación cargada - Distribución: @Model.NumeroDistribucion');
+        });
+    </script>
 }

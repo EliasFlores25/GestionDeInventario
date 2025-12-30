@@ -15,5 +15,6 @@ namespace GestionDeInventario.Models
         public decimal precio { get; set; }
         public string estado { get; set; }
         public ICollection<DetalleCompra> detalleCompras { get; set; } = new List<DetalleCompra>();
+        public ICollection<DetalleDistribucion> detalleDistribuciones { get; set; } = new List<DetalleDistribucion>();
     }
 }
