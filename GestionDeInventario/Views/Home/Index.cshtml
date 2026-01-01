@@ -250,56 +250,43 @@
             </h3>
 
             <div class="actions-grid">
-                @if (User.IsInRole("Administrador") || User.IsInRole("Gerente") || User.IsInRole("Empleado"))
+                @if (User.IsInRole("Administrador"))
                 {
-                    <a asp-controller="Empleado" asp-action="Create" class="action-btn">
-                        <i class="fas fa-user-plus action-icon"></i>
-                        <span class="action-label">Nuevo Empleado</span>
+                    <a asp-controller="Empleado" asp-action="Index" class="action-btn">
+                        <i class="fas fa-users action-icon"></i>
+                        <span class="action-label">Ver Empleados</span>
                     </a>
 
-                    <a asp-controller="Producto" asp-action="Create" class="action-btn">
-                        <i class="fas fa-box action-icon"></i>
-                        <span class="action-label">Nuevo Producto</span>
+                    <a asp-controller="Producto" asp-action="Index" class="action-btn">
+                        <i class="fas fa-box-open action-icon"></i>
+                        <span class="action-label">Ver Productos</span>
                     </a>
 
-                    <a asp-controller="Departamento" asp-action="Create" class="action-btn">
-                        <i class="fas fa-building action-icon"></i>
-                        <span class="action-label">Nuevo Departamento</span>
+                    <a asp-controller="Departamento" asp-action="Index" class="action-btn">
+                        <i class="fas fa-sitemap action-icon"></i>
+                        <span class="action-label">Ver Departamentos</span>
                     </a>
                 }
 
                 @if (User.IsInRole("Administrador"))
                 {
-                    <a asp-controller="Usuario" asp-action="Create" class="action-btn">
-                        <i class="fas fa-user-plus action-icon"></i>
-                        <span class="action-label">Nuevo Usuario</span>
+                    <a asp-controller="Proveedor" asp-action="Index" class="action-btn">
+                        <i class="fas fa-truck-loading action-icon"></i>
+                        <span class="action-label">Ver Proveedores</span>
                     </a>
                 }
 
-                <a asp-controller="Empleado" asp-action="Index" class="action-btn">
-                    <i class="fas fa-list action-icon"></i>
-                    <span class="action-label">Ver Empleados</span>
+                <a asp-controller="DetalleCompra" asp-action="Index" class="action-btn">
+                    <i class="fas fa-shopping-cart action-icon"></i>
+                    <span class="action-label">Ver Compras</span>
                 </a>
 
-                <a asp-controller="Producto" asp-action="Index" class="action-btn">
-                    <i class="fas fa-boxes action-icon"></i>
-                    <span class="action-label">Ver Productos</span>
+                <a asp-controller="DetalleDistribucion" asp-action="Index" class="action-btn">
+                    <i class="fas fa-truck-moving action-icon"></i>
+                    <span class="action-label">Ver Distribuciones</span>
                 </a>
+
             </div>
-        </div>
-
-        <!-- Información del sistema -->
-        <div class="info-box">
-            <h4 class="info-title">
-                <i class="fas fa-info-circle"></i>
-                Información del Sistema
-            </h4>
-            <ul class="info-list">
-                <li><i class="fas fa-check-circle"></i> Totalmente responsive y optimizado</li>
-                <li><i class="fas fa-check-circle"></i> Gestión por roles de usuario</li>
-                <li><i class="fas fa-check-circle"></i> Reportes en tiempo real</li>
-                <li><i class="fas fa-check-circle"></i> Interfaz intuitiva y fácil de usar</li>
-            </ul>
         </div>
     </div>
 </div>

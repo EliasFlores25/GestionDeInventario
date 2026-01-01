@@ -1,6 +1,5 @@
 ﻿using GestionDeInventario.Models;
 using Microsoft.EntityFrameworkCore;
-
 namespace GestionDeInventario.Data
 {
     public class AppDbContext : DbContext

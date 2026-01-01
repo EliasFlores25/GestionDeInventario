@@ -10,5 +10,7 @@ namespace GestionDeInventario.Services.Interfaces
         Task<DetalleCompraResponseDTO> AddAsync(DetalleCompraCreateDTO dto);
         Task<bool> UpdateAsync(int idDetalleCompra, DetalleCompraUpdateDTO dto);
         Task<bool> DeleteAsync(int idDetalleCompra);
+
+        IQueryable<DetalleCompraExcelDTO> GetQueryableForExcel();
     }
 }

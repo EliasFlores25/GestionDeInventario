@@ -2,6 +2,7 @@
 using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
 using GestionDeInventario.Utilidades;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -14,12 +15,14 @@ namespace GestionDeInventario.Controllers
         private readonly IUsuarioService _usuarioService;
         private readonly IEmpleadoService _empleadoService;
         public readonly IProductoService _productoService;
-        public DetalleDistribucionController(IDetalleDistribucionService dDetalleservice, IUsuarioService usuarioService, IEmpleadoService empleadoService, IProductoService productoService)
+        private readonly ExcelExporter _excelExporter;
+        public DetalleDistribucionController(IDetalleDistribucionService dDetalleservice, IUsuarioService usuarioService, IEmpleadoService empleadoService, IProductoService productoService, ExcelExporter excelExporter)
         {
             _detalleDistribucionService = dDetalleservice;
             _usuarioService = usuarioService;
             _empleadoService = empleadoService;
             _productoService = productoService;
+            _excelExporter = excelExporter;
         }
         private async Task PopulateDropdownsUsuario()
         {
@@ -72,14 +75,17 @@ namespace GestionDeInventario.Controllers
             var empleadosList = empleados.Select(d => new SelectListItem
             {
                 Value = d.idEmpleado.ToString(),
-                Text = d.nombre
+                Text = $"{d.nombre} {d.apellido}"
             }).ToList();
+
             empleadosList.Insert(0, new SelectListItem { Value = "", Text = "Todos los Empleados" });
             ViewBag.empleadoId = empleadosList;
 
-            ViewBag.EmpleadosNombres = empleados.ToDictionary(d => d.idEmpleado, d => d.nombre);
+            ViewBag.EmpleadosNombres = empleados.ToDictionary(
+                d => d.idEmpleado,
+                d => $"{d.nombre} {d.apellido}"
+                );
         }
-
         public async Task<IActionResult> Index(string numeroDistribucion, DateTime? fechaSalida, int? empleadoId, int pageNumber = 1, int pageSize = 5)
         {
             await PopulateUsuarioNamesViewBag();
@@ -395,5 +401,152 @@ namespace GestionDeInventario.Controllers
                 return RedirectToAction("Index", "DetalleDistribucion");
             }
         }
+
+
+
+
+        // ACCIÓN PRINCIPAL PARA EXPORTAR EXCEL
+        [HttpGet]
+        public async Task<IActionResult> ExportarExcel(
+            string numeroDistribucion = null,
+            DateTime? fechaInicio = null,
+            DateTime? fechaFin = null,
+            int? empleadoId = null,
+            int? productoId = null,
+            int maxRegistros = 1000)
+        {
+            try
+            {
+                // Obtener consulta específica para Excel
+                IQueryable<DetalleDistribucionExcelDTO> query = _detalleDistribucionService.GetQueryableForExcel();
+
+                // APLICAR FILTROS (igual que en Index)
+                if (!string.IsNullOrWhiteSpace(numeroDistribucion))
+                {
+                    query = query.Where(d => d.NumeroDistribucion.Contains(numeroDistribucion));
+                }
+
+                if (fechaInicio.HasValue)
+                {
+                    query = query.Where(d => d.FechaSalida.Date >= fechaInicio.Value.Date);
+                }
+
+                if (fechaFin.HasValue)
+                {
+                    query = query.Where(d => d.FechaSalida.Date <= fechaFin.Value.Date);
+                }
+
+                if (empleadoId.HasValue && empleadoId > 0)
+                {
+                    // Si tienes ID de empleado en el DTO Excel, agrégalo
+                    // Si no, puedes filtrar por nombre (menos eficiente)
+                    query = query.Where(d => d.NombreEmpleado.Contains(empleadoId.ToString()));
+                }
+
+                if (productoId.HasValue && productoId > 0)
+                {
+                    // Similar para producto
+                    query = query.Where(d => d.NombreProducto.Contains(productoId.ToString()));
+                }
+
+                // Limitar cantidad de registros
+                query = query.Take(maxRegistros);
+
+                // Obtener datos
+                var datos = await query.ToListAsync();
+
+                if (!datos.Any())
+                {
+                    TempData["ErrorMessage"] = "No hay datos para exportar con los filtros seleccionados.";
+                    return RedirectToAction("Index");
+                }
+
+                // Generar Excel
+                byte[] excelBytes = _excelExporter.ExportarDetalleDistribucion(datos);
+
+                // Nombre del archivo
+                string nombreArchivo = $"Distribuciones_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                return File(excelBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    nombreArchivo);
+            }
+            catch (Exception ex)
+            {
+                // Log del error
+                Console.WriteLine($"Error al exportar Excel: {ex.Message}");
+
+                TempData["ErrorMessage"] = $"Error al generar el Excel: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // ACCIÓN PARA FORMULARIO DE EXPORTACIÓN
+        [HttpGet]
+        public IActionResult Exportar()
+        {
+            // Puedes pasar opciones para límites
+            ViewBag.MaxRegistrosOpciones = new List<int> { 100, 500, 1000, 5000, 10000 };
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Exportar(
+            string numeroDistribucion,
+            DateTime? fechaInicio,
+            DateTime? fechaFin,
+            int? empleadoId,
+            int? productoId,
+            int maxRegistros = 1000)
+        {
+            // Redirigir a la acción de exportación con parámetros
+            return RedirectToAction("ExportarExcel", new
+            {
+                numeroDistribucion,
+                fechaInicio,
+                fechaFin,
+                empleadoId,
+                productoId,
+                maxRegistros
+            });
+        }
+
+        // ACCIÓN RÁPIDA: Exportar con filtros actuales del Index
+        [HttpGet]
+        public async Task<IActionResult> ExportarRapido()
+        {
+            try
+            {
+                // Obtener parámetros actuales del Index
+                string numeroDistribucion = Request.Query["numeroDistribucion"].ToString();
+                DateTime? fechaInicio = Request.Query["fechaInicio"].Count > 0
+                    ? DateTime.Parse(Request.Query["fechaInicio"])
+                    : null;
+                DateTime? fechaFin = Request.Query["fechaFin"].Count > 0
+                    ? DateTime.Parse(Request.Query["fechaFin"])
+                    : null;
+                int? empleadoId = Request.Query["empleadoId"].Count > 0
+                    ? int.Parse(Request.Query["empleadoId"])
+                    : null;
+                int? productoId = Request.Query["productoId"].Count > 0
+                    ? int.Parse(Request.Query["productoId"])
+                    : null;
+
+                // Redirigir a ExportarExcel con los parámetros actuales
+                return await ExportarExcel(
+                    numeroDistribucion,
+                    fechaInicio,
+                    fechaFin,
+                    empleadoId,
+                    productoId,
+                    1000);
+            }
+            catch
+            {
+                // Si hay error, exportar todo
+                return await ExportarExcel(maxRegistros: 1000);
+            }
+        }
+
     }
 }

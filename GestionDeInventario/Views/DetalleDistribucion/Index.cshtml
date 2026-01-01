@@ -19,6 +19,8 @@
         --success: #10b981;
         --danger: #ef4444;
         --warning: #f59e0b;
+        --excel-green: #10b981;
+        --excel-blue: #0ea5e9;
         --dark: #1f2937;
         --light: #f8fafc;
         --border: #e5e7eb;
@@ -100,6 +102,28 @@
         justify-content: center;
     }
 
+    .btn-excel {
+        background: var(--excel-green);
+        color: white;
+    }
+
+        .btn-excel:hover {
+            background: #0da271;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+        }
+
+    .btn-excel-filtered {
+        background: var(--excel-blue);
+        color: white;
+    }
+
+        .btn-excel-filtered:hover {
+            background: #0284c7;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.3);
+        }
+
     .filters {
         background: white;
         border-radius: 10px;
@@ -119,9 +143,10 @@
         display: flex;
         gap: 0.5rem;
         justify-content: flex-end;
+        flex-wrap: wrap;
     }
 
-    .form-control {
+    .form-control, .form-select {
         width: 100%;
         padding: 0.5rem;
         border: 2px solid var(--border);
@@ -129,7 +154,7 @@
         font-size: 0.9rem;
     }
 
-        .form-control:focus {
+        .form-control:focus, .form-select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
@@ -174,7 +199,7 @@
         .table-desktop table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1200px;
+            min-width: 1300px;
         }
 
         .table-desktop th {
@@ -191,20 +216,29 @@
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--border);
             vertical-align: middle;
+            white-space: nowrap; /* Evita saltos de línea */
         }
 
         .table-desktop tr:hover {
             background: #f8fafc;
         }
 
+    /* Columnas específicas para mantener contenido en una línea */
+    .td-usuario, .td-empleado, .td-producto {
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
     .td-motivo {
-        display: block;
-        max-width: 250px;
+        max-width: 200px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         cursor: pointer;
         color: var(--primary);
+        display: block;
     }
 
         .td-motivo:hover {
@@ -260,7 +294,7 @@
 
     .monetary-value {
         font-weight: 600;
-        color: var(--dark); /* CAMBIADO DE VERDE A NEGRO */
+        color: var(--dark);
     }
 
     .motivo-mobile {
@@ -392,14 +426,6 @@
         overflow-y: auto;
     }
 
-    .date-info {
-        background: #f3f4f6;
-        padding: 0.5rem;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        color: #4b5563;
-    }
-
     @@media (min-width: 768px) {
         .container-distribuciones {
             padding: 1.5rem;
@@ -440,6 +466,51 @@
         }
     }
 
+    /* Botones en móvil - una línea */
+    @@media (max-width: 767px) {
+        .filter-actions {
+            gap: 0.4rem;
+            justify-content: center;
+        }
+
+            .filter-actions .btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+                min-width: 0;
+                flex: 1 1 auto;
+            }
+    }
+
+    @@media (max-width: 480px) {
+        .filter-actions {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+            justify-content: flex-start;
+        }
+
+            .filter-actions .btn {
+                flex-shrink: 0;
+                white-space: nowrap;
+            }
+                /* Solo íconos en móvil pequeño */
+                .filter-actions .btn span {
+                    display: none;
+                }
+
+                .filter-actions .btn i {
+                    margin-right: 0;
+                    font-size: 1rem;
+                }
+
+        .btn-excel, .btn-excel-filtered {
+            min-width: 40px;
+            width: 40px;
+            justify-content: center;
+            padding: 0.4rem;
+        }
+    }
+
     .btn-danger:hover {
         background: #dc2626;
         transform: translateY(-1px);
@@ -474,13 +545,6 @@
     {
         <div class="alert alert-success"><i class="fas fa-check-circle"></i> @TempData["Ok"]</div>
     }
-    @if (ViewData["IsFilterApplied"] != null && (bool)ViewData["IsFilterApplied"])
-    {
-        <div class="alert alert-warning">
-            <i class="fas fa-filter"></i> Mostrando resultados filtrados
-            <a asp-action="Index" class="btn btn-sm btn-warning" style="margin-left: 10px;">Limpiar filtros</a>
-        </div>
-    }
 
     <div class="filters collapse" id="filters">
         <form asp-action="Index" method="get">
@@ -488,7 +552,7 @@
             <div class="filter-grid">
                 <input type="text" class="form-control" name="numeroDistribucion" placeholder="Número de Distribución" value="@ViewBag.CurrentFactura">
                 <input type="date" class="form-control" name="fechaSalida" value="@(ViewBag.CurrentFecha?.ToString("yyyy-MM-dd"))">
-                <select class="form-control" name="empleadoId">
+                <select class="form-select" name="empleadoId">
                     <option value="">Todos los empleados</option>
                     @foreach (var item in empleadosList)
                     {
@@ -497,8 +561,18 @@
                 </select>
             </div>
             <div class="filter-actions">
-                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                <a asp-action="Exportar" class="btn btn-excel">
+                    <i class="fas fa-file-excel"></i> <span>Exportar Todo</span>
+                </a>
+                <a asp-action="ExportarRapido" class="btn btn-excel-filtered">
+                    <i class="fas fa-download"></i> <span>Exportar Filtros</span>
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> <span>Limpiar</span>
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> <span>Buscar</span>
+                </button>
             </div>
         </form>
     </div>
@@ -531,14 +605,20 @@
                             <td>
                                 @item.FechaSalida.ToString("dd/MM/yyyy")
                             </td>
-                            <td>@usuarioNombres.GetValueOrDefault(item.UsuarioId, "N/A")</td>
-                            <td>@empleadoNombres.GetValueOrDefault(item.EmpleadoId, "N/A")</td>
-                            <td>@productoNombres.GetValueOrDefault(item.ProductoId, "N/A")</td>
+                            <td class="td-usuario" title="@usuarioNombres.GetValueOrDefault(item.UsuarioId, "N/A")">
+                                @usuarioNombres.GetValueOrDefault(item.UsuarioId, "N/A")
+                            </td>
+                            <td class="td-empleado" title="@empleadoNombres.GetValueOrDefault(item.EmpleadoId, "N/A")">
+                                @empleadoNombres.GetValueOrDefault(item.EmpleadoId, "N/A")
+                            </td>
+                            <td class="td-producto" title="@productoNombres.GetValueOrDefault(item.ProductoId, "N/A")">
+                                @productoNombres.GetValueOrDefault(item.ProductoId, "N/A")
+                            </td>
                             <td>
                                 <span class="badge badge-success">@item.Cantidad</span>
                             </td>
                             <td>
-                                <span class="td-motivo" onclick="mostrarMotivo('@Html.Raw(item.Motivo?.Replace("'", "\\'"))')">
+                                <span class="td-motivo" onclick="mostrarMotivo('@Html.Raw(item.Motivo?.Replace("'", "\\'"))')" title="@item.Motivo">
                                     @item.Motivo
                                 </span>
                             </td>

@@ -1,0 +1,217 @@
+﻿@* Views/DetalleDistribucion/Exportar.cshtml *@
+@{
+    ViewData["Title"] = "Exportar Distribuciones a Excel";
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --success: #10b981;
+        --dark: #1f2937;
+        --border: #e5e7eb;
+    }
+
+    .export-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-top: 5px solid var(--success);
+    }
+
+    .export-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+        .export-header h1 {
+            color: var(--dark);
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+            .export-header h1 i {
+                color: var(--success);
+            }
+
+        .export-header p {
+            color: #6b7280;
+            margin: 0;
+        }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--success);
+        }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-success {
+        background: var(--success);
+        color: white;
+        border: 2px solid var(--border);
+    }
+
+        .btn-success:hover {
+            background: #0da271;
+        }
+
+    .btn-secondary {
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+    .date-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .help-text {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    @@media (max-width: 768px) {
+        .export-container {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+
+        .date-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .export-container {
+            padding: 1rem;
+        }
+
+        .export-header h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="export-container">
+    <div class="export-header">
+        <h1><i class="fas fa-file-excel"></i> @ViewData["Title"]</h1>
+        <p>Configura los filtros para exportar los registros</p>
+    </div>
+
+    <form asp-action="Exportar" method="post">
+        <div class="form-group">
+            <label class="form-label">Número de Distribución</label>
+            <input type="text" name="numeroDistribucion" class="form-control"
+                   placeholder="Ej: DIST-001-2024">
+            <span class="help-text">Deja en blanco para exportar todos</span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Rango de Fechas</label>
+            <div class="date-row">
+                <input type="date" name="fechaInicio" class="form-control" placeholder="Fecha Inicio">
+                <input type="date" name="fechaFin" class="form-control" placeholder="Fecha Fin">
+            </div>
+            <span class="help-text">Opcional - selecciona un rango específico</span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Límite de Registros</label>
+            <select name="maxRegistros" class="form-select">
+                <option value="500" selected>500 registros</option>
+                <option value="1000">1,000 registros</option>
+                <option value="5000">5,000 registros</option>
+                <option value="10000">10,000 registros (Máximo)</option>
+            </select>
+            <span class="help-text">Más registros pueden tardar más tiempo</span>
+        </div>
+
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Generar Excel
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fechaInicio = document.querySelector('[name="fechaInicio"]');
+            const fechaFin = document.querySelector('[name="fechaFin"]');
+
+            if (!fechaInicio.value) {
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                fechaInicio.value = thirtyDaysAgo.toISOString().split('T')[0];
+            }
+
+            if (!fechaFin.value) {
+                const today = new Date().toISOString().split('T')[0];
+                fechaFin.value = today;
+            }
+        });
+    </script>
+}

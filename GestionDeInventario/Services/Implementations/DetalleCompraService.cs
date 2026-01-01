@@ -128,5 +128,32 @@ namespace GestionDeInventario.Services.Implementations
                 throw new BusinessRuleException("Error al eliminar registro: " + ex.Message);
             }
         }
+
+
+
+        // NUEVO: Método para Excel
+        public IQueryable<DetalleCompraExcelDTO> GetQueryableForExcel()
+        {
+            return _repo.GetQueryable()
+                .Select(x => new DetalleCompraExcelDTO
+                {
+                    IdDetalleCompra = x.idDetalleCompra,
+                    NumeroFactura = x.numeroFactura,
+                    FechaCompra = x.fechaCompra,
+                    NombreProveedor = x.proveedor != null
+                        ? x.proveedor.nombreEmpresa
+                        : $"ID: {x.proveedorId}",
+                    NombreProducto = x.producto != null
+                        ? x.producto.nombre
+                        : $"ID: {x.productoId}",
+                    Cantidad = x.cantidad,
+                    PrecioUnitarioCosto = x.precioUnitarioCosto,
+                    MontoTotal = x.montoTotal,
+                    UsuarioRegistro = x.usuario != null
+                        ? x.usuario.nombre
+                        : $"ID: {x.usuarioId}"
+                })
+                .AsQueryable();
+        }
     }
 }

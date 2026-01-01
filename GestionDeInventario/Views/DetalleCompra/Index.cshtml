@@ -21,6 +21,8 @@
         --success: #10b981;
         --danger: #ef4444;
         --warning: #f59e0b;
+        --excel-green: #10b981;
+        --excel-blue: #0ea5e9;
         --dark: #1f2937;
         --light: #f8fafc;
         --border: #e5e7eb;
@@ -102,6 +104,28 @@
         justify-content: center;
     }
 
+    .btn-excel {
+        background: var(--excel-green);
+        color: white;
+    }
+
+        .btn-excel:hover {
+            background: #0da271;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+        }
+
+    .btn-excel-filtered {
+        background: var(--excel-blue);
+        color: white;
+    }
+
+        .btn-excel-filtered:hover {
+            background: #0284c7;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.3);
+        }
+
     .filters {
         background: white;
         border-radius: 10px;
@@ -121,6 +145,7 @@
         display: flex;
         gap: 0.5rem;
         justify-content: flex-end;
+        flex-wrap: wrap;
     }
 
     .form-control, .form-select {
@@ -377,6 +402,51 @@
         }
     }
 
+    /* Botones en móvil - una línea */
+    @@media (max-width: 767px) {
+        .filter-actions {
+            gap: 0.4rem;
+            justify-content: center;
+        }
+
+            .filter-actions .btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+                min-width: 0;
+                flex: 1 1 auto;
+            }
+    }
+
+    @@media (max-width: 480px) {
+        .filter-actions {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+            justify-content: flex-start;
+        }
+
+            .filter-actions .btn {
+                flex-shrink: 0;
+                white-space: nowrap;
+            }
+                /* Solo íconos en móvil pequeño */
+                .filter-actions .btn span {
+                    display: none;
+                }
+
+                .filter-actions .btn i {
+                    margin-right: 0;
+                    font-size: 1rem;
+                }
+
+        .btn-excel, .btn-excel-filtered {
+            min-width: 40px;
+            width: 40px;
+            justify-content: center;
+            padding: 0.4rem;
+        }
+    }
+
     .btn-danger:hover {
         background: #dc2626;
         transform: translateY(-1px);
@@ -439,8 +509,18 @@
                 </select>
             </div>
             <div class="filter-actions">
-                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                <a asp-action="Exportar" class="btn btn-excel">
+                    <i class="fas fa-file-excel"></i> <span>Exportar Todo</span>
+                </a>
+                <a asp-action="ExportarRapido" class="btn btn-excel-filtered">
+                    <i class="fas fa-download"></i> <span>Exportar Filtros</span>
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> <span>Limpiar</span>
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> <span>Buscar</span>
+                </button>
             </div>
         </form>
     </div>
@@ -647,36 +727,15 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Auto-cerrar alertas
-            setTimeout(() => {
-                $('.alert').fadeOut(300, function() {
-                    $(this).remove();
-                });
-            }, 4000);
-
-            // Cambiar ícono del botón filtros
+            setTimeout(() => $('.alert').fadeOut(300, function() { $(this).remove(); }), 4000);
             $('#filters').on('show.bs.collapse', function() {
                 $('[data-bs-target="#filters"] i').removeClass('fa-filter').addClass('fa-times');
             }).on('hide.bs.collapse', function() {
                 $('[data-bs-target="#filters"] i').removeClass('fa-times').addClass('fa-filter');
             });
-
-            // Scroll suave al cambiar de página
             $(document).on('click', '.page-link', function(e) {
                 if (!$(this).hasClass('disabled') && !$(this).hasClass('active')) {
-                    $('html, body').animate({
-                        scrollTop: $('.container-compras').offset().top - 20
-                    }, 300);
-                }
-            });
-
-            // Formatear campos de moneda
-            $('.info-moneda, .td-moneda').each(function() {
-                var text = $(this).text();
-                if (text.includes('L')) {
-                    var parts = text.split('L');
-                    var amount = parts[1] ? 'L' + parts[1].trim() : text;
-                    $(this).text(amount);
+                    $('html, body').animate({ scrollTop: $('.container-compras').offset().top - 20 }, 300);
                 }
             });
         });

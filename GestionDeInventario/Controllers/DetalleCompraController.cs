@@ -16,12 +16,14 @@ namespace GestionDeInventario.Controllers
         private readonly IUsuarioService _usuarioService;
         private readonly IProductoService _productoService;
         private readonly IProveedorService _proveedorService;
-        public DetalleCompraController(IDetalleCompraService detalleCompraService, IUsuarioService usuarioService, IProductoService productoService, IProveedorService proveedorService)
+        private readonly ExcelExporter _excelExporter;
+        public DetalleCompraController(IDetalleCompraService detalleCompraService, IUsuarioService usuarioService, IProductoService productoService, IProveedorService proveedorService, ExcelExporter excelExporter)
         {
             _detalleCompraService = detalleCompraService;
             _usuarioService = usuarioService;
             _productoService = productoService;
             _proveedorService = proveedorService;
+            _excelExporter = excelExporter;
         }
         private async Task PopulateDropdownsUsuario()
         {
@@ -403,5 +405,149 @@ namespace GestionDeInventario.Controllers
                 return RedirectToAction("Index", "DetalleCompra");
             }
         }
+
+
+
+
+        // ACCIÓN PRINCIPAL PARA EXPORTAR EXCEL
+        [HttpGet]
+        public async Task<IActionResult> ExportarExcel(
+            string numeroFactura = null,
+            DateTime? fechaInicio = null,
+            DateTime? fechaFin = null,
+            int? productoId = null,
+            int? proveedorId = null,
+            int maxRegistros = 1000)
+        {
+            try
+            {
+                // Obtener consulta específica para Excel
+                IQueryable<DetalleCompraExcelDTO> query = _detalleCompraService.GetQueryableForExcel();
+
+                // APLICAR FILTROS
+                if (!string.IsNullOrWhiteSpace(numeroFactura))
+                {
+                    query = query.Where(d => d.NumeroFactura.Contains(numeroFactura));
+                }
+
+                if (fechaInicio.HasValue)
+                {
+                    query = query.Where(d => d.FechaCompra.Date >= fechaInicio.Value.Date);
+                }
+
+                if (fechaFin.HasValue)
+                {
+                    query = query.Where(d => d.FechaCompra.Date <= fechaFin.Value.Date);
+                }
+
+                if (productoId.HasValue && productoId > 0)
+                {
+                    query = query.Where(d => d.NombreProducto.Contains(productoId.ToString()));
+                }
+
+                if (proveedorId.HasValue && proveedorId > 0)
+                {
+                    query = query.Where(d => d.NombreProveedor.Contains(proveedorId.ToString()));
+                }
+
+                // Limitar cantidad de registros
+                query = query.Take(maxRegistros);
+
+                // Obtener datos
+                var datos = await query.ToListAsync();
+
+                if (!datos.Any())
+                {
+                    TempData["ErrorMessage"] = "No hay compras para exportar con los filtros seleccionados.";
+                    return RedirectToAction("Index");
+                }
+
+                // Generar Excel
+                byte[] excelBytes = _excelExporter.ExportarDetalleCompra(datos);
+
+                // Nombre del archivo
+                string nombreArchivo = $"Compras_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                return File(excelBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    nombreArchivo);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al exportar Excel: {ex.Message}");
+                TempData["ErrorMessage"] = $"Error al generar el Excel: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // VISTA PARA FORMULARIO DE EXPORTACIÓN
+        [HttpGet]
+        public IActionResult Exportar()
+        {
+            // Opciones para límites
+            ViewBag.MaxRegistrosOpciones = new List<int> { 100, 500, 1000, 5000, 10000 };
+
+            // Puedes cargar listas para dropdowns si es necesario
+            // ViewBag.Productos = await _productoService.GetAllAsync();
+            // ViewBag.Proveedores = await _proveedorService.GetAllAsync();
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Exportar(
+            string numeroFactura,
+            DateTime? fechaInicio,
+            DateTime? fechaFin,
+            int? productoId,
+            int? proveedorId,
+            int maxRegistros = 1000)
+        {
+            // Redirigir a la acción de exportación con parámetros
+            return RedirectToAction("ExportarExcel", new
+            {
+                numeroFactura,
+                fechaInicio,
+                fechaFin,
+                productoId,
+                proveedorId,
+                maxRegistros
+            });
+        }
+
+        // ACCIÓN RÁPIDA: Exportar con filtros actuales del Index
+        [HttpGet]
+        public async Task<IActionResult> ExportarRapido()
+        {
+            try
+            {
+                // Obtener parámetros actuales del Index
+                string numeroFactura = Request.Query["numeroFactura"].ToString();
+                DateTime? fechaCompra = Request.Query["fechaCompra"].Count > 0
+                    ? DateTime.Parse(Request.Query["fechaCompra"])
+                    : null;
+                int? productoId = Request.Query["productoId"].Count > 0
+                    ? int.Parse(Request.Query["productoId"])
+                    : null;
+                int? proveedorId = Request.Query["proveedorId"].Count > 0
+                    ? int.Parse(Request.Query["proveedorId"])
+                    : null;
+
+                // Redirigir a ExportarExcel con los parámetros actuales
+                return await ExportarExcel(
+                    numeroFactura,
+                    fechaCompra,
+                    null, // fechaFin
+                    productoId,
+                    proveedorId,
+                    1000);
+            }
+            catch
+            {
+                // Si hay error, exportar todo
+                return await ExportarExcel(maxRegistros: 1000);
+            }
+        }
+
     }
 }

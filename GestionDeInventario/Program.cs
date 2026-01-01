@@ -3,13 +3,15 @@ using GestionDeInventario.Repository.Implementations;
 using GestionDeInventario.Repository.Interfaces;
 using GestionDeInventario.Services.Implementations;
 using GestionDeInventario.Services.Interfaces;
+using GestionDeInventario.Utilidades;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
-
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
 {
     var connectionString = builder.Configuration.GetConnectionString("Conn");
@@ -51,7 +53,7 @@ builder.Services.AddControllersWithViews(options =>
     // Aplicar la política de autorización a *todos* los controladores y acciones
     options.Filters.Add(new AuthorizeFilter(policy));
 });
-
+builder.Services.AddScoped<ExcelExporter>();
 builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
 builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();

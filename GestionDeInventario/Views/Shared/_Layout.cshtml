@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - GestionDeInventario</title>
+    <title>@ViewData["Title"] - Sistema de Inventario</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -14,68 +14,280 @@
           crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
-        /* Estilos básicos para evitar desbordamiento */
-        .navbar-nav {
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            padding: 0.5rem 0;
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --light-bg: #f8f9fa;
+            --border-color: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+            --shadow-lg: 0 8px 16px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
         }
 
-            .navbar-nav::-webkit-scrollbar {
-                display: none;
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Header mejorado */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
+            box-shadow: var(--shadow-lg);
+            padding: 0.8rem 0;
+            transition: var(--transition);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+        }
+
+            .navbar-brand i {
+                background: var(--secondary-color);
+                padding: 0.5rem;
+                border-radius: 8px;
+                margin-right: 0.75rem;
+                box-shadow: var(--shadow-sm);
             }
 
-        .nav-link {
-            padding: 0.5rem 0.75rem !important;
-            margin: 0 2px;
+        /* Menú de navegación */
+        .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            font-weight: 500;
+            padding: 0.625rem 1rem !important;
+            margin: 0 0.125rem;
+            border-radius: 6px;
+            transition: var(--transition);
+            position: relative;
         }
 
-            .nav-link i {
+            .navbar-nav .nav-link:hover {
+                color: white !important;
+                background: rgba(255,255,255,0.15);
+                transform: translateY(-1px);
+            }
+
+            .navbar-nav .nav-link.active {
+                background: rgba(52, 152, 219, 0.2);
+                color: white !important;
+            }
+
+            .navbar-nav .nav-link i {
+                width: 20px;
+                text-align: center;
                 margin-right: 0.5rem;
             }
 
-        /* Menú de usuario siempre visible */
-        .user-menu {
-            flex-shrink: 0;
-            margin-left: auto;
+        /* Menú desplegable de usuario */
+        .user-menu .nav-link {
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            padding: 0.5rem 1rem !important;
         }
 
-        /* Breadcrumbs simples */
-        .breadcrumb-simple {
-            background: #f8f9fa;
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--shadow-lg);
+            border-radius: 10px;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-item {
             padding: 0.75rem 1rem;
             border-radius: 6px;
-            margin-bottom: 1rem;
+            transition: var(--transition);
+            font-weight: 500;
         }
+
+            .dropdown-item:hover {
+                background-color: var(--light-bg);
+                transform: translateX(5px);
+            }
+
+        /* Contenedor principal */
+        .container.main-container {
+            max-width: 1400px;
+            padding-top: 1.5rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        /* Breadcrumbs mejorados */
+        .breadcrumb-simple {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--secondary-color);
+        }
+
+            .breadcrumb-simple a {
+                color: var(--secondary-color);
+                font-weight: 500;
+                transition: var(--transition);
+            }
+
+                .breadcrumb-simple a:hover {
+                    color: var(--primary-color);
+                    text-decoration: none;
+                }
+
+            .breadcrumb-simple span {
+                color: #6c757d;
+            }
+
+        /* Alertas mejoradas */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-left-color: var(--success-color);
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-left-color: var(--accent-color);
+        }
+
+        .alert i {
+            font-size: 1.1em;
+        }
+
+        /* Contenido principal */
+        main {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            min-height: calc(100vh - 250px);
+        }
+
+        /* Footer mejorado */
+        footer {
+            background: var(--primary-color);
+            color: rgba(255,255,255,0.8);
+            margin-top: 2rem;
+            padding: 1.5rem 0 !important;
+        }
+
+            footer a {
+                color: rgba(255,255,255,0.9);
+                transition: var(--transition);
+                font-weight: 500;
+            }
+
+                footer a:hover {
+                    color: white;
+                    text-decoration: none;
+                }
 
         /* Responsive */
         @@media (max-width: 768px) {
-            .navbar-nav {
-                flex-direction: column;
-                overflow-x: visible;
-                width: 100%;
+            .navbar-nav
+
+        {
+            background: rgba(44, 62, 80, 0.95);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1rem !important;
+            margin: 0.25rem 0;
+        }
+
+        .user-menu {
+            margin-top: 1rem;
+        }
+
+        .container.main-container {
+            padding: 1rem;
+        }
+
+        main {
+            padding: 1rem;
+        }
+
+        }
+
+        /* Efectos hover para cards */
+        .card {
+            transition: var(--transition);
+            border: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+            .card:hover {
+                transform: translateY(-3px);
+                box-shadow: var(--shadow-md);
             }
 
-            .nav-link {
-                padding: 0.75rem 1rem !important;
-                margin: 0.25rem 0;
+        /* Botones mejorados */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-1px);
+                box-shadow: var(--shadow-md);
             }
+
+        /* Separador visual */
+        .separator {
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--border-color), transparent);
+            margin: 1.5rem 0;
         }
     </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container-fluid">
-                <!-- Logo -->
-                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-boxes me-2"></i>Gestión Inventario
+                <!-- Logo mejorado -->
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-boxes"></i>
+                    <span>InventarioPro</span>
                 </a>
 
-                <!-- Botón toggle para móvil -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <!-- Botón toggle con mejor diseño -->
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -87,18 +299,14 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Home" asp-action="Index">
-                                    <i class="fas fa-home"></i> Home
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Privacy">
-                                    <i class="fas fa-shield-alt"></i> Privacy
+                                    <i class="fas fa-home"></i> Inicio
                                 </a>
                             </li>
 
                             @if (User.IsInRole("Administrador") || User.IsInRole("Gerente") || User.IsInRole("Empleado"))
                             {
+                                <div class="separator d-lg-none"></div>
+
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Empleado" asp-action="Index">
                                         <i class="fas fa-users"></i> Empleados
@@ -106,7 +314,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Producto" asp-action="Index">
-                                        <i class="fas fa-boxes"></i> Productos
+                                        <i class="fas fa-box-open"></i> Productos
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -116,23 +324,25 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Proveedor" asp-action="Index">
-                                        <i class="fas fa-building"></i> Proveedores
+                                        <i class="fas fa-truck"></i> Proveedores
                                     </a>
-                                    </li>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="DetalleCompra" asp-action="Index">
-                                        <i class="fas fa-building"></i> Detalles de Compra
+                                        <i class="fas fa-receipt"></i> Compras
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="DetalleDistribucion" asp-action="Index">
-                                        <i class="fas fa-building"></i> Detalles de Distribución
+                                        <i class="fas fa-shipping-fast"></i> Distribución
                                     </a>
                                 </li>
                             }
 
                             @if (User.IsInRole("Administrador"))
                             {
+                                <div class="separator d-lg-none"></div>
+
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Usuario" asp-action="Index">
                                         <i class="fas fa-user-cog"></i> Usuarios
@@ -142,19 +352,23 @@
                         }
                     </ul>
 
-                    <!-- Menú de usuario -->
+                    <!-- Menú de usuario mejorado -->
                     <div class="user-menu">
                         <ul class="navbar-nav">
                             @if (User.Identity.IsAuthenticated)
                             {
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-user me-1"></i>@User.Identity.Name
+                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-user-circle me-2"></i>
+                                        <span class="d-none d-md-inline">@User.Identity.Name</span>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end">
-                                        <a class="dropdown-item" asp-controller="Usuario" asp-action="Perfil">
-                                            <i class="fas fa-user me-2"></i>Mi Perfil
-                                        </a>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Usuario" asp-action="Perfil">
+                                                <i class="fas fa-user me-2"></i>Mi Perfil
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <a class="dropdown-item text-danger" asp-controller="Auth" asp-action="Logout">
                                                 <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
@@ -166,12 +380,12 @@
                             else
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Auth" asp-action="Login">
+                                    <a class="btn btn-outline-light me-2" asp-controller="Auth" asp-action="Login">
                                         <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesión
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Auth" asp-action="Register">
+                                    <a class="btn btn-light" asp-controller="Auth" asp-action="Register">
                                         <i class="fas fa-user-plus me-1"></i>Registrarse
                                     </a>
                                 </li>
@@ -183,43 +397,53 @@
         </nav>
     </header>
 
-    <div class="container mt-3">
+    <div class="container main-container">
         <main role="main" class="pb-3">
-            <!-- Breadcrumbs simples -->
+            <!-- Breadcrumbs mejorados -->
             @if (ViewContext.RouteData.Values["controller"]?.ToString() != "Home")
             {
                 <nav class="breadcrumb-simple">
                     <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
-                        <i class="fas fa-home"></i> Home
+                        <i class="fas fa-home me-1"></i> Inicio
                     </a>
                     @if (ViewContext.RouteData.Values["controller"] != null)
                     {
-                        <span class="mx-2">/</span>
+                        <span class="mx-2">›</span>
                         <a asp-controller="@ViewContext.RouteData.Values["controller"]" asp-action="Index" class="text-decoration-none">
                             @ViewContext.RouteData.Values["controller"]
                         </a>
                     }
                     @if (ViewContext.RouteData.Values["action"]?.ToString() != "Index")
                     {
-                        <span class="mx-2">/</span>
-                        <span>@ViewData["Title"]</span>
+                        <span class="mx-2">›</span>
+                        <span class="fw-medium">@ViewData["Title"]</span>
                     }
                 </nav>
             }
 
-            <!-- Alertas -->
+            <!-- Alertas mejoradas -->
             @if (TempData["SuccessMessage"] != null)
             {
                 <div class="alert alert-success alert-dismissible fade show">
-                    <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle me-3 fs-4"></i>
+                        <div class="flex-grow-1">
+                            @TempData["SuccessMessage"]
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
                 </div>
             }
             @if (TempData["ErrorMessage"] != null)
             {
                 <div class="alert alert-danger alert-dismissible fade show">
-                    <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle me-3 fs-4"></i>
+                        <div class="flex-grow-1">
+                            @TempData["ErrorMessage"]
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
                 </div>
             }
 
@@ -227,15 +451,15 @@
         </main>
     </div>
 
-    <footer class="border-top py-3 mt-4">
+    <footer class="border-top">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6 text-center text-md-start">
-                    <i class="fas fa-copyright me-1"></i> @DateTime.Now.Year - GestionDeInventario
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                    <i class="fas fa-copyright me-1"></i> @DateTime.Now.Year - Sistema de Gestión de Inventario
                 </div>
                 <div class="col-md-6 text-center text-md-end">
                     <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">
-                        <i class="fas fa-shield-alt me-1"></i>Privacy
+                        <i class="fas fa-shield-alt me-1"></i>Política de Privacidad
                     </a>
                 </div>
             </div>
@@ -247,46 +471,58 @@
 
     <script>
         $(document).ready(function() {
-            // Auto-cerrar alertas
+            // Auto-cerrar alertas después de 5 segundos
             setTimeout(function() {
                 $('.alert-dismissible').alert('close');
             }, 5000);
 
-            // Detectar vista CRUD y ocultar menú
-            var currentUrl = window.location.pathname.toLowerCase();
-            var currentAction = '@ViewContext.RouteData.Values["action"]'.toLowerCase();
-            var crudActions = ['create', 'edit', 'details', 'delete'];
+            // Mejorar la detección de vista CRUD
+            var currentPath = window.location.pathname.toLowerCase();
+            var currentAction = '@ViewContext.RouteData.Values["action"]'?.toLowerCase();
+            var crudPaths = ['/create', '/edit/', '/details/', '/delete/'];
 
-            if (crudActions.includes(currentAction) ||
-                currentUrl.includes('/create') ||
-                currentUrl.includes('/edit/') ||
-                currentUrl.includes('/details/') ||
-                currentUrl.includes('/delete/')) {
+            var isCrudView = crudPaths.some(path => currentPath.includes(path)) ||
+                           (currentAction && ['create', 'edit', 'details', 'delete'].includes(currentAction));
 
-                // Ocultar menú principal pero mantener usuario
+            if (isCrudView) {
+                // Animación para ocultar el menú
                 $('.navbar-nav.me-auto').hide();
 
-                // Crear botón para mostrar menú
-                if (!$('#showMenuBtn').length) {
-                    $('.navbar-brand').after(
-                        '<button id="showMenuBtn" class="btn btn-sm btn-outline-primary ms-2">' +
-                        '<i class="fas fa-bars"></i> Menú' +
-                        '</button>'
-                    );
+                // Crear botón flotante para mostrar/ocultar menú
+                if (!$('#floatingMenuBtn').length) {
+                    $('body').append(`
+                        <button id="floatingMenuBtn" class="btn btn-primary shadow-lg rounded-pill"
+                                style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 0.75rem 1.25rem;">
+                            <i class="fas fa-bars me-2"></i>Mostrar Menú
+                        </button>
+                    `);
 
-                    $('#showMenuBtn').click(function() {
-                        $('.navbar-nav.me-auto').toggle();
+                    $('#floatingMenuBtn').click(function() {
+                        $('.navbar-nav.me-auto').slideToggle(300);
+                        $(this).find('i').toggleClass('fa-bars fa-times');
+                        $(this).find('span').toggle();
                     });
                 }
             }
 
-            // Marcar enlace activo
-            var currentPath = window.location.pathname;
-            $('.nav-link').each(function() {
-                var linkPath = $(this).attr('href');
-                if (linkPath && currentPath === linkPath) {
+            // Mejorar marcado de enlace activo
+            var currentRoute = window.location.pathname;
+            $('.navbar-nav .nav-link').each(function() {
+                var linkHref = $(this).attr('href');
+                if (linkHref && currentRoute.startsWith(linkHref)) {
                     $(this).addClass('active');
+                    $(this).append('<span class="active-dot"></span>');
                 }
+            });
+
+            // Smooth scroll para breadcrumbs
+            $('.breadcrumb-simple a').click(function(e) {
+                e.preventDefault();
+                var target = $(this).attr('href');
+                $('html, body').animate({
+                    scrollTop: $(target).offset().top - 80
+                }, 500);
+                window.location.href = $(this).attr('href');
             });
         });
     </script>
