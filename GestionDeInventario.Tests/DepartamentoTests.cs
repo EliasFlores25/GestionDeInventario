@@ -5,7 +5,7 @@ namespace GestionDeInventario.Tests.Models
 {
     public class DepartamentoTests
     {
-        // 1️⃣ Verifica que las propiedades se asignan correctamente
+        
         [Fact]
         public void Departamento_PuedeAsignarPropiedades()
         {
@@ -23,7 +23,7 @@ namespace GestionDeInventario.Tests.Models
             Assert.Equal("Departamento de RRHH", departamento.descripcion);
         }
 
-        // 2️⃣ Verifica que la colección Empleados se inicializa
+        
         [Fact]
         public void Departamento_Empleados_InicializadoCorrectamente()
         {

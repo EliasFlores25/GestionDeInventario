@@ -5,7 +5,7 @@ namespace GestionDeInventario.Tests.Models
 {
     public class EmpleadoTests
     {
-        // 1️⃣ Verificar asignación de propiedades
+        
         [Fact]
         public void Empleado_PuedeAsignarPropiedades()
         {
@@ -35,7 +35,7 @@ namespace GestionDeInventario.Tests.Models
             Assert.Equal("Activo", empleado.estado);
         }
 
-        // 2️⃣ Verificar que la colección DetallesDistribucion se inicializa
+        
         [Fact]
         public void Empleado_DetallesDistribucion_Inicializado()
         {
@@ -47,7 +47,7 @@ namespace GestionDeInventario.Tests.Models
             Assert.Empty(empleado.DetallesDistribucion);
         }
 
-        // 3️⃣ Verificar que la propiedad Departamento puede asignarse
+        
         [Fact]
         public void Empleado_Departamento_PuedeAsignarse()
         {
