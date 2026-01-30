@@ -22,6 +22,6 @@ namespace GestionDeInventario.Models
         public int departamentoId { get; set; }
         public Departamento departamento { get; set; } = null!;
         public string estado { get; set; }
-        public ICollection<DetalleDistribucion> DetallesDistribucion { get; set; } = new List<DetalleDistribucion>();
+        public ICollection<Distribucion> Distribuciones { get; set; } = new List<Distribucion>();
     }
 }

@@ -5,28 +5,15 @@ namespace GestionDeInventario.DTOs.DetalleCompraDTOs
     public class DetalleCompraExcelDTO
     {
         public int IdDetalleCompra { get; set; }
-
-        [Display(Name = "Número de Factura")]
+        [Display(Name = "Compra")]
         public string NumeroFactura { get; set; }
-
-        [Display(Name = "Fecha de Compra")]
-        public DateTime FechaCompra { get; set; }
-
-        [Display(Name = "Proveedor")]
-        public string NombreProveedor { get; set; }
-
         [Display(Name = "Producto")]
-        public string NombreProducto { get; set; }
-
+        public string nombre { get; set; }
+        [Display(Name = "Cantidad")]
         public int Cantidad { get; set; }
-
-        [Display(Name = "Precio Unitario")]
+        [Display(Name = "Precio Unitariio")]
         public decimal PrecioUnitarioCosto { get; set; }
-
-        [Display(Name = "Monto Total")]
-        public decimal MontoTotal { get; set; }
-
-        [Display(Name = "Usuario Registro")]
-        public string UsuarioRegistro { get; set; }
+        [Display(Name = "Subtotal")]
+        public decimal Subtotal { get; set; }
     }
 }

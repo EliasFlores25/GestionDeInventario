@@ -1,0 +1,767 @@
+﻿@model IEnumerable<GestionDeInventario.DTOs.CompraDTOs.CompraResponseDTO>
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Gestión de Compras";
+    var usuariosNombres = ViewBag.UsuariosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var proveedoresNombres = ViewBag.ProveedoresNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var usuariosList = ViewBag.UsuariosFiltro as List<SelectListItem> ?? new List<SelectListItem>();
+    var proveedoresList = ViewBag.ProveedoresFiltro as List<SelectListItem> ?? new List<SelectListItem>();
+    int pageNumber = ViewBag.PageNumber ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalRegistros = ViewBag.TotalRegistros ?? 0;
+    bool isFilterApplied = ViewData["IsFilterApplied"] as bool? ?? false;
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+    }
+
+    .container-compras {
+        padding: 1rem;
+        background: var(--light);
+        min-height: 100vh;
+    }
+
+    .header {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+        }
+
+    .btn-secondary {
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            transform: translateY(-1px);
+        }
+
+    .btn-warning {
+        background: var(--warning);
+        color: white;
+    }
+
+        .btn-warning:hover {
+            background: #d97706;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+        }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+        }
+
+    .btn-sm {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        justify-content: center;
+    }
+
+        .btn-sm:hover {
+            transform: scale(1.1);
+        }
+
+    .filters {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.5rem;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+    .alert {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border-left: 4px solid var(--success);
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid var(--danger);
+    }
+
+    .alert-warning {
+        background: #fef3c7;
+        color: #92400e;
+        border-left: 4px solid var(--warning);
+    }
+
+    .table-desktop {
+        display: none;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow-x: auto;
+    }
+
+        .table-desktop table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        .table-desktop th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .table-desktop td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .table-desktop tr:hover {
+            background: #f8fafc;
+        }
+
+    .cards-mobile {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--primary);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .card-info {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 0.9rem;
+        color: var(--dark);
+        word-break: break-word;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    .badge-primary {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .monto-total {
+        font-weight: 600;
+        color: var(--success);
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+        padding: 1rem;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .page-link {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 0.5rem;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        background: white;
+        color: var(--dark);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .page-link:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        .page-link.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .page-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6b7280;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #9ca3af;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+    .filter-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        background: #e0f2fe;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        color: var(--primary);
+    }
+
+    .active-filters {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+        .active-filters .filter-badge i {
+            cursor: pointer;
+        }
+
+            .active-filters .filter-badge i:hover {
+                color: var(--danger);
+            }
+
+    @@media (min-width: 768px) {
+        .container-compras {
+            padding: 1.5rem;
+        }
+
+        .table-desktop {
+            display: block;
+        }
+
+        .cards-mobile {
+            display: none;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .table-desktop {
+            display: none;
+        }
+
+        .cards-mobile {
+            display: grid;
+        }
+
+        .header {
+            padding: 0.75rem;
+        }
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .card-info {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .td-monto {
+        font-weight: 600;
+        color: var(--success);
+    }
+
+    .td-numero-factura {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .fecha-compra {
+        white-space: nowrap;
+    }
+</style>
+
+<div class="container-compras">
+    <div class="header">
+        <h1><i class="fas fa-shopping-cart"></i> @ViewData["Title"]</h1>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Nueva Compra</a>
+            <button class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#filters">
+                <i class="fas fa-filter"></i> Filtros
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> @TempData["Error"]</div>
+    }
+    @if (TempData["Ok"] != null)
+    {
+        <div class="alert alert-success"><i class="fas fa-check-circle"></i> @TempData["Ok"]</div>
+    }
+
+    @if (isFilterApplied)
+    {
+        <div class="active-filters">
+            @if (!string.IsNullOrWhiteSpace(ViewBag.CurrentNumeroFactura))
+            {
+                <span class="filter-badge">
+                    Factura: @ViewBag.CurrentNumeroFactura
+                    <a asp-action="Index"
+                       asp-route-numeroFactura=""
+                       asp-route-usuarioId="@ViewBag.CurrentUsuarioId"
+                       asp-route-proveedorId="@ViewBag.CurrentProveedorId"
+                       asp-route-pageNumber="1">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </span>
+            }
+            @if (ViewBag.CurrentUsuarioId != null && ViewBag.CurrentUsuarioId > 0)
+            {
+                <span class="filter-badge">
+                    Usuario: @usuariosNombres.GetValueOrDefault((int)ViewBag.CurrentUsuarioId, "N/A")
+                    <a asp-action="Index"
+                       asp-route-numeroFactura="@ViewBag.CurrentNumeroFactura"
+                       asp-route-usuarioId=""
+                       asp-route-proveedorId="@ViewBag.CurrentProveedorId"
+                       asp-route-pageNumber="1">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </span>
+            }
+            @if (ViewBag.CurrentProveedorId != null && ViewBag.CurrentProveedorId > 0)
+            {
+                <span class="filter-badge">
+                    Proveedor: @proveedoresNombres.GetValueOrDefault((int)ViewBag.CurrentProveedorId, "N/A")
+                    <a asp-action="Index"
+                       asp-route-numeroFactura="@ViewBag.CurrentNumeroFactura"
+                       asp-route-usuarioId="@ViewBag.CurrentUsuarioId"
+                       asp-route-proveedorId=""
+                       asp-route-pageNumber="1">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </span>
+            }
+            @if (isFilterApplied)
+            {
+                <span class="filter-badge">
+                    <a asp-action="Index" asp-route-pageNumber="1">
+                        <i class="fas fa-times"></i> Limpiar todos
+                    </a>
+                </span>
+            }
+        </div>
+    }
+
+    <div class="filters collapse @(isFilterApplied ? "show" : "")" id="filters">
+        <form asp-action="Index" method="get">
+            <input type="hidden" name="pageNumber" value="1" />
+            <div class="filter-grid">
+                <input type="text" class="form-control" name="numeroFactura" placeholder="Número de Factura" value="@ViewBag.CurrentNumeroFactura">
+                <select class="form-control" name="usuarioId">
+                    @foreach (var item in usuariosList)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentUsuarioId?.ToString())">@item.Text</option>
+                    }
+                </select>
+                <select class="form-control" name="proveedorId">
+                    @foreach (var item in proveedoresList)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentProveedorId?.ToString())">@item.Text</option>
+                    }
+                </select>
+                <select class="form-control" name="pageSize">
+                    <option value="5" selected="@(ViewBag.PageSize == 5)">5 por página</option>
+                    <option value="10" selected="@(ViewBag.PageSize == 10)">10 por página</option>
+                    <option value="25" selected="@(ViewBag.PageSize == 25)">25 por página</option>
+                    <option value="50" selected="@(ViewBag.PageSize == 50)">50 por página</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-desktop">
+        <table>
+            <thead>
+                <tr>
+                    <th>Factura</th>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Proveedor</th>
+                    <th>Monto Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><span class="td-numero-factura">@item.NumeroFactura</span></td>
+                            <td class="fecha-compra">@item.FechaCompra.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@usuariosNombres.GetValueOrDefault(item.UsuarioId, "N/A")</td>
+                            <td>@proveedoresNombres.GetValueOrDefault(item.ProveedorId, "N/A")</td>
+                            <td class="td-monto">$@item.MontoTotalCompra.ToString("N2")</td>
+                            <td>
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <a asp-action="Details" asp-route-id="@item.IdCompra" class="btn btn-secondary btn-sm" title="Detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.IdCompra" class="btn btn-secondary btn-sm" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.IdCompra" class="btn btn-secondary btn-sm" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                            <p>No hay compras registradas</p>
+                            @if (isFilterApplied)
+                            {
+                                <p class="small text-muted">Prueba con otros criterios de búsqueda</p>
+                                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar filtros</a>
+                            }
+                            else
+                            {
+                                <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Registrar primera compra</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="cards-mobile">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <strong><span class="td-numero-factura">@item.NumeroFactura</span></strong>
+                            <div class="text-muted small mt-1">
+                                <i class="fas fa-calendar-alt"></i> @item.FechaCompra.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+                        <span class="monto-total">$@item.MontoTotalCompra.ToString("N2")</span>
+                    </div>
+                    <div class="card-info">
+                        <div class="info-item">
+                            <span class="info-label">Usuario</span>
+                            <span class="info-value">
+                                <i class="fas fa-user"></i> @usuariosNombres.GetValueOrDefault(item.UsuarioId, "N/A")
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Proveedor</span>
+                            <span class="info-value">
+                                <i class="fas fa-truck"></i> @proveedoresNombres.GetValueOrDefault(item.ProveedorId, "N/A")
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a asp-action="Details" asp-route-id="@item.IdCompra" class="btn btn-secondary btn-sm" title="Detalles">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@item.IdCompra" class="btn btn-secondary btn-sm" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.IdCompra" class="btn btn-secondary btn-sm" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                <p>No hay compras registradas</p>
+                @if (isFilterApplied)
+                {
+                    <p class="small text-muted">Prueba con otros criterios de búsqueda</p>
+                    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar filtros</a>
+                }
+                else
+                {
+                    <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Registrar primera compra</a>
+                }
+            </div>
+        }
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <div class="pagination-container">
+            <nav>
+                <ul class="pagination">
+                    @if (pageNumber > 1)
+                    {
+                        <li>
+                            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber - 1)"
+                               asp-route-numeroFactura="@ViewBag.CurrentNumeroFactura"
+                               asp-route-usuarioId="@ViewBag.CurrentUsuarioId"
+                               asp-route-proveedorId="@ViewBag.CurrentProveedorId"
+                               asp-route-pageSize="@ViewBag.PageSize">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        if (i == 1 || i == totalPages || (i >= pageNumber - 2 && i <= pageNumber + 2))
+                        {
+                            <li>
+                                <a class="page-link @(i == pageNumber ? "active" : "")" asp-action="Index" asp-route-pageNumber="@i"
+                                   asp-route-numeroFactura="@ViewBag.CurrentNumeroFactura"
+                                   asp-route-usuarioId="@ViewBag.CurrentUsuarioId"
+                                   asp-route-proveedorId="@ViewBag.CurrentProveedorId"
+                                   asp-route-pageSize="@ViewBag.PageSize">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                        else if (i == pageNumber - 3 || i == pageNumber + 3)
+                        {
+                            <li><span class="page-link disabled">...</span></li>
+                        }
+                    }
+                    @if (pageNumber < totalPages)
+                    {
+                        <li>
+                            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber + 1)"
+                               asp-route-numeroFactura="@ViewBag.CurrentNumeroFactura"
+                               asp-route-usuarioId="@ViewBag.CurrentUsuarioId"
+                               asp-route-proveedorId="@ViewBag.CurrentProveedorId"
+                               asp-route-pageSize="@ViewBag.PageSize">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+
+    @if (totalRegistros > 0)
+    {
+        <div class="text-center text-muted small mt-2">
+            Mostrando @(((pageNumber - 1) * ViewBag.PageSize) + 1)-@Math.Min(pageNumber * ViewBag.PageSize, totalRegistros) de @totalRegistros compras
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-ocultar alertas después de 4 segundos
+            setTimeout(() => $('.alert').fadeOut(300, function() { $(this).remove(); }), 4000);
+
+            // Cambiar ícono del botón de filtros
+            $('#filters').on('show.bs.collapse', function() {
+                $('[data-bs-target="#filters"] i').removeClass('fa-filter').addClass('fa-times');
+            }).on('hide.bs.collapse', function() {
+                $('[data-bs-target="#filters"] i').removeClass('fa-times').addClass('fa-filter');
+            });
+
+            // Smooth scroll al cambiar de página
+            $(document).on('click', '.page-link', function(e) {
+                if (!$(this).hasClass('disabled') && !$(this).hasClass('active')) {
+                    $('html, body').animate({ scrollTop: $('.container-compras').offset().top - 20 }, 300);
+                }
+            });
+
+            // Auto-enviar formulario al cambiar el tamaño de página
+            $('select[name="pageSize"]').change(function() {
+                $(this).closest('form').submit();
+            });
+
+            // Mostrar filtros si hay filtros aplicados
+            @if (isFilterApplied)
+            {
+                    <text>
+                    $('#filters').addClass('show');
+                    $('[data-bs-target="#filters"] i').removeClass('fa-filter').addClass('fa-times');
+                    </text>
+            }
+        });
+    </script>
+}

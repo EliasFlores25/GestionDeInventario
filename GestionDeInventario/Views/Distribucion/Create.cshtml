@@ -1,0 +1,407 @@
+﻿@model GestionDeInventario.DTOs.DistribucionDTOs.DistribucionCreateDTO
+
+@{
+    ViewData["Title"] = "Crear Nueva Distribución";
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
+        --info: #3b82f6;
+    }
+
+    .container-create {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .create-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border-top: 5px solid var(--info);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .create-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+        .create-header h1 {
+            color: var(--dark);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+            .create-header h1 i {
+                color: var(--info);
+            }
+
+        .create-header h4 {
+            color: var(--text-light);
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+        }
+
+    .section-title {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--info);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .form-control, .form-select, .form-datetime {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        background: white;
+    }
+
+        .form-control:focus, .form-select:focus, .form-datetime:focus {
+            outline: none;
+            border-color: var(--info);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-control::placeholder, .form-datetime::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-datetime::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+    }
+
+        .form-datetime::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+
+    .validation-error {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid var(--danger);
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary {
+        background: var(--info);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+        }
+
+    .btn-secondary {
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+    .form-icon {
+        position: relative;
+    }
+
+        .form-icon i {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+        }
+
+        .form-icon .form-control,
+        .form-icon .form-select,
+        .form-icon .form-datetime {
+            padding-right: 2.5rem;
+        }
+
+    .info-note {
+        background: #f0f9ff;
+        border-left: 4px solid var(--info);
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        margin: 0.5rem 0;
+        font-size: 0.875rem;
+        color: #1e40af;
+    }
+
+        .info-note i {
+            color: var(--info);
+            margin-right: 0.5rem;
+        }
+
+    @@media (max-width: 768px) {
+        .container-create {
+            padding: 1rem;
+        }
+
+        .create-card {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+    }
+
+    @@media (max-width: 576px) {
+        .create-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .create-card {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container-create">
+    <div class="create-card">
+        <div class="create-header">
+            <h1><i class="fas fa-truck-loading"></i> @ViewData["Title"]</h1>
+            <h4>Completa los datos para crear una nueva distribución de productos.</h4>
+        </div>
+
+        <form asp-action="Create">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert-danger"></div>
+
+            <!-- Sección 1: Información de Distribución -->
+            <div class="section-title">
+                <i class="fas fa-info-circle"></i> Información de la Distribución
+            </div>
+
+            <div class="info-note">
+                <i class="fas fa-lightbulb"></i> Los campos marcados con * son obligatorios.
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="NumeroDistribucion">Número de Distribución *</label>
+                        <div class="form-icon">
+                            <input asp-for="NumeroDistribucion" class="form-control" placeholder="Ej: DIST-001" />
+                            <i class="fas fa-hashtag"></i>
+                        </div>
+                        <span asp-validation-for="NumeroDistribucion" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="FechaSalida">Fecha de Salida *</label>
+                        <div class="form-icon">
+                            <input asp-for="FechaSalida" type="datetime-local" class="form-datetime"
+                                   value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <span asp-validation-for="FechaSalida" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Asignación de Responsables -->
+            <div class="section-title">
+                <i class="fas fa-users"></i> Responsables de la Distribución
+            </div>
+
+            <div class="info-note">
+                <i class="fas fa-info-circle"></i> Selecciona el usuario y empleado responsables de esta distribución.
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="UsuarioId">Usuario Responsable *</label>
+                        <div class="form-icon">
+                            <select asp-for="UsuarioId" class="form-select" asp-items="ViewBag.UsuarioId">
+                                <option value="">-- Seleccionar Usuario --</option>
+                            </select>
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span asp-validation-for="UsuarioId" class="validation-error"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="EmpleadoId">Empleado Asignado *</label>
+                        <div class="form-icon">
+                            <select asp-for="EmpleadoId" class="form-select" asp-items="ViewBag.EmpleadoId">
+                                <option value="">-- Seleccionar Empleado --</option>
+                            </select>
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <span asp-validation-for="EmpleadoId" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 3: Información Adicional -->
+            <div class="section-title">
+                <i class="fas fa-sticky-note"></i> Información Adicional
+            </div>
+
+            <div class="info-note">
+                <i class="fas fa-comment-alt"></i> Describe el motivo o propósito de esta distribución (opcional).
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Motivo">Motivo de la Distribución</label>
+                        <div class="form-icon">
+                            <textarea asp-for="Motivo" class="form-control" placeholder="Ej: Distribución a sucursal central, reposición de inventario, etc."></textarea>
+                            <i class="fas fa-align-left" style="top: 1.5rem;"></i>
+                        </div>
+                        <span asp-validation-for="Motivo" class="validation-error"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a la Lista
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Crear Distribución
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Configurar el datetime-local para que use la hora actual si no está establecido
+            if (!$('#FechaSalida').val()) {
+                var now = new Date();
+                var formattedDateTime = now.getFullYear() + '-' +
+                    String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(now.getDate()).padStart(2, '0') + 'T' +
+                    String(now.getHours()).padStart(2, '0') + ':' +
+                    String(now.getMinutes()).padStart(2, '0');
+                $('#FechaSalida').val(formattedDateTime);
+            }
+
+            // Validación adicional para el número de distribución
+            $('#NumeroDistribucion').on('blur', function() {
+                var value = $(this).val();
+                if (value && value.length < 2) {
+                    $(this).addClass('is-invalid');
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            // Agregar clases de validación de Bootstrap
+            $('.form-control, .form-select, .form-datetime').on('input change', function() {
+                var $this = $(this);
+                var isValid = $this[0].checkValidity();
+
+                if ($this.val().trim() === '') {
+                    $this.removeClass('is-valid is-invalid');
+                } else if (isValid) {
+                    $this.removeClass('is-invalid').addClass('is-valid');
+                } else {
+                    $this.removeClass('is-valid').addClass('is-invalid');
+                }
+            });
+        });
+    </script>
+}

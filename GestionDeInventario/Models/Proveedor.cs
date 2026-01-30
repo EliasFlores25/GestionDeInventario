@@ -13,6 +13,6 @@ namespace GestionDeInventario.Models
         public string telefono { get; set; }
         public string email { get; set; }
         public string estado { get; set; }
-        public ICollection<DetalleCompra> detalleCompras  { get; set; }=new List<DetalleCompra> ();
+        public ICollection<Compra> Compras  { get; set; }=new List<Compra> ();
     }
 }

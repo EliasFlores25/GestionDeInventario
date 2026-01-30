@@ -1,4 +1,4 @@
-﻿@* Views/DetalleCompra/Exportar.cshtml *@
+﻿Views/DetalleCompra/Exportar.cshtml
 @{
     ViewData["Title"] = "Exportar Compras a Excel";
 }
@@ -22,7 +22,7 @@
     }
 
     .export-header {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         text-align: center;
     }
 
@@ -107,12 +107,6 @@
             background: #f3f4f6;
         }
 
-    .date-row, .ids-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-    }
-
     .help-text {
         font-size: 0.85rem;
         color: #6b7280;
@@ -120,14 +114,28 @@
         display: block;
     }
 
+    .info-box {
+        background-color: #f0f9ff;
+        border-left: 4px solid #2563eb;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 4px;
+    }
+
+        .info-box p {
+            margin: 0 0 0.5rem 0;
+            color: #1e40af;
+            font-size: 0.9rem;
+        }
+
+            .info-box p:last-child {
+                margin-bottom: 0;
+            }
+
     @@media (max-width: 768px) {
         .export-container {
             padding: 1.5rem;
             margin: 1rem;
-        }
-
-        .date-row, .ids-row {
-            grid-template-columns: 1fr;
         }
 
         .form-actions {
@@ -157,6 +165,11 @@
         <p>Configura los filtros para exportar las compras</p>
     </div>
 
+    <div class="info-box">
+        <p><strong>Campos incluidos en la exportación:</strong></p>
+        <p>• ID Detalle Compra • N° Factura • Producto • Cantidad • Precio Unitario • Subtotal</p>
+    </div>
+
     <form asp-action="Exportar" method="post">
         <div class="form-group">
             <label class="form-label">Número de Factura</label>
@@ -166,12 +179,10 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label">Rango de Fechas</label>
-            <div class="date-row">
-                <input type="date" name="fechaInicio" class="form-control" placeholder="Fecha Inicio">
-                <input type="date" name="fechaFin" class="form-control" placeholder="Fecha Fin">
-            </div>
-            <span class="help-text">Opcional - selecciona un rango específico</span>
+            <label class="form-label">Nombre del Producto</label>
+            <input type="text" name="nombreProducto" class="form-control"
+                   placeholder="Buscar por nombre del producto">
+            <span class="help-text">Filtrar por nombre del producto</span>
         </div>
 
         <div class="form-group">
@@ -198,20 +209,6 @@
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const fechaInicio = document.querySelector('[name="fechaInicio"]');
-            const fechaFin = document.querySelector('[name="fechaFin"]');
-
-            if (!fechaInicio.value) {
-                const thirtyDaysAgo = new Date();
-                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                fechaInicio.value = thirtyDaysAgo.toISOString().split('T')[0];
-            }
-
-            if (!fechaFin.value) {
-                const today = new Date().toISOString().split('T')[0];
-                fechaFin.value = today;
-            }
-        });
+        // No se necesitan scripts para fechas ya que no hay campos de fecha
     </script>
 }

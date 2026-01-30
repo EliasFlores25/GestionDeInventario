@@ -48,14 +48,10 @@ namespace GestionDeInventario.Utilidades
                 {
                     worksheet.Cells[row, 1].Value = item.IdDetalleDistribucion;
                     worksheet.Cells[row, 2].Value = item.NumeroDistribucion;
-                    worksheet.Cells[row, 3].Value = item.FechaSalida.ToString("dd/MM/yyyy");
-                    worksheet.Cells[row, 4].Value = item.NombreEmpleado;
-                    worksheet.Cells[row, 5].Value = item.NombreProducto;
-                    worksheet.Cells[row, 6].Value = item.Cantidad;
-                    worksheet.Cells[row, 7].Value = item.Motivo;
-                    worksheet.Cells[row, 8].Value = item.PrecioCostoUnitario;
-                    worksheet.Cells[row, 9].Value = item.MontoTotal;
-                    worksheet.Cells[row, 10].Value = item.UsuarioRegistro;
+                    worksheet.Cells[row, 3].Value = item.nombre; // Cambiado: NombreProducto → nombre
+                    worksheet.Cells[row, 4].Value = item.Cantidad;
+                    worksheet.Cells[row, 5].Value = item.PrecioCostoUnitario;
+                    worksheet.Cells[row, 6].Value = item.Subtotal; // Cambiado: MontoTotal → Subtotal
                     row++;
                 }
 
@@ -69,8 +65,8 @@ namespace GestionDeInventario.Utilidades
                         range.Style.Border.BorderAround(ExcelBorderStyle.Thin);
                     }
 
-                    // Formato moneda para columnas de precios
-                    using (var range = worksheet.Cells[2, 8, row - 1, 9])
+                    // Formato moneda para columnas de precios (columnas 5 y 6 ahora)
+                    using (var range = worksheet.Cells[2, 5, row - 1, 6])
                     {
                         range.Style.Numberformat.Format = "#,##0.00";
                     }
@@ -88,14 +84,14 @@ namespace GestionDeInventario.Utilidades
                     worksheet.Cells[row, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
                     worksheet.Cells[row, 1].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
 
-                    // Suma de cantidad
+                    // Suma de cantidad (columna 4 ahora)
+                    worksheet.Cells[row, 4].Formula = $"SUM(D2:D{row - 1})";
+                    worksheet.Cells[row, 4].Style.Font.Bold = true;
+
+                    // Suma de subtotal (columna 6 ahora)
                     worksheet.Cells[row, 6].Formula = $"SUM(F2:F{row - 1})";
                     worksheet.Cells[row, 6].Style.Font.Bold = true;
-
-                    // Suma de valor total
-                    worksheet.Cells[row, 9].Formula = $"SUM(I2:I{row - 1})";
-                    worksheet.Cells[row, 9].Style.Font.Bold = true;
-                    worksheet.Cells[row, 9].Style.Numberformat.Format = "#,##0.00";
+                    worksheet.Cells[row, 6].Style.Numberformat.Format = "#,##0.00";
                 }
 
                 // INFORMACIÓN DEL REPORTE
@@ -176,8 +172,8 @@ namespace GestionDeInventario.Utilidades
 
                 // ENCABEZADOS
                 string[] headers = {
-                    "ID", "N° Factura", "Fecha Compra", "Proveedor",
-                    "Producto", "Cantidad", "Precio Unitario", "Monto Total", "Usuario"
+                    "ID", "N° Factura", "Producto", // Cambiado: quitada "Fecha Compra" y "Proveedor"
+                    "Cantidad", "Precio Unitario", "Subtotal" // Cambiado: "Monto Total" → "Subtotal", quitado "Usuario"
                 };
 
                 for (int i = 0; i < headers.Length; i++)
@@ -203,13 +199,10 @@ namespace GestionDeInventario.Utilidades
                 {
                     worksheet.Cells[row, 1].Value = item.IdDetalleCompra;
                     worksheet.Cells[row, 2].Value = item.NumeroFactura;
-                    worksheet.Cells[row, 3].Value = item.FechaCompra.ToString("dd/MM/yyyy");
-                    worksheet.Cells[row, 4].Value = item.NombreProveedor;
-                    worksheet.Cells[row, 5].Value = item.NombreProducto;
-                    worksheet.Cells[row, 6].Value = item.Cantidad;
-                    worksheet.Cells[row, 7].Value = item.PrecioUnitarioCosto;
-                    worksheet.Cells[row, 8].Value = item.MontoTotal;
-                    worksheet.Cells[row, 9].Value = item.UsuarioRegistro;
+                    worksheet.Cells[row, 3].Value = item.nombre; // Cambiado: NombreProducto → nombre
+                    worksheet.Cells[row, 4].Value = item.Cantidad;
+                    worksheet.Cells[row, 5].Value = item.PrecioUnitarioCosto;
+                    worksheet.Cells[row, 6].Value = item.Subtotal; // Cambiado: MontoTotal → Subtotal
                     row++;
                 }
 
@@ -223,8 +216,8 @@ namespace GestionDeInventario.Utilidades
                         range.Style.Border.BorderAround(ExcelBorderStyle.Thin);
                     }
 
-                    // Formato moneda
-                    using (var range = worksheet.Cells[2, 7, row - 1, 8])
+                    // Formato moneda (columnas 5 y 6 ahora)
+                    using (var range = worksheet.Cells[2, 5, row - 1, 6])
                     {
                         range.Style.Numberformat.Format = "#,##0.00";
                     }
@@ -241,14 +234,14 @@ namespace GestionDeInventario.Utilidades
                     worksheet.Cells[row, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
                     worksheet.Cells[row, 1].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
 
-                    // Suma de cantidad
+                    // Suma de cantidad (columna 4 ahora)
+                    worksheet.Cells[row, 4].Formula = $"SUM(D2:D{row - 1})";
+                    worksheet.Cells[row, 4].Style.Font.Bold = true;
+
+                    // Suma de subtotal (columna 6 ahora)
                     worksheet.Cells[row, 6].Formula = $"SUM(F2:F{row - 1})";
                     worksheet.Cells[row, 6].Style.Font.Bold = true;
-
-                    // Suma de monto total
-                    worksheet.Cells[row, 8].Formula = $"SUM(H2:H{row - 1})";
-                    worksheet.Cells[row, 8].Style.Font.Bold = true;
-                    worksheet.Cells[row, 8].Style.Numberformat.Format = "#,##0.00";
+                    worksheet.Cells[row, 6].Style.Numberformat.Format = "#,##0.00";
                 }
 
                 // INFORMACIÓN DEL REPORTE
@@ -258,7 +251,7 @@ namespace GestionDeInventario.Utilidades
                 worksheet.Cells[infoRow, 1].Style.Font.Size = 11;
 
                 worksheet.Cells[infoRow + 1, 1].Value = $"Total de compras: {datos.Count}";
-                worksheet.Cells[infoRow + 2, 1].Value = $"Valor total: {datos.Sum(x => x.MontoTotal).ToString("C")}";
+                worksheet.Cells[infoRow + 2, 1].Value = $"Valor total: {datos.Sum(x => x.Subtotal).ToString("C")}"; // Cambiado: MontoTotal → Subtotal
                 worksheet.Cells[infoRow + 3, 1].Value = $"Fecha de generación: {DateTime.Now:dd/MM/yyyy HH:mm}";
                 worksheet.Cells[infoRow + 4, 1].Value = "Sistema de Gestión de Inventario";
 

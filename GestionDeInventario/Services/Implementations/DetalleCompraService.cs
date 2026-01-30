@@ -3,6 +3,8 @@ using GestionDeInventario.Models;
 using GestionDeInventario.Repository.Interfaces;
 using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
+using GestionDeInventario.Views.Empleado;
+using Microsoft.EntityFrameworkCore;
 
 namespace GestionDeInventario.Services.Implementations
 {
@@ -18,33 +20,26 @@ namespace GestionDeInventario.Services.Implementations
         {
             return new DetalleCompraResponseDTO
             {
-                idDetalleCompra = x.idDetalleCompra,
-                numeroFactura = x.numeroFactura,
-                usuarioId = x.usuarioId,
-                usuario = x.usuario,
-                proveedorId = x.proveedorId,
-                proveedor = x.proveedor,
-                productoId = x.productoId,
-                producto = x.producto,
-                cantidad = x.cantidad,
-                precioUnitarioCosto = x.precioUnitarioCosto,
-                montoTotal = x.montoTotal,
-                fechaCompra = x.fechaCompra,
+                IdDetalleCompra = x.IdDetalleCompra,
+                CompraId = x.CompraId,
+                Compra = x.Compra,
+                ProductoId = x.ProductoId,
+                Producto = x.Producto,
+                PrecioUnitarioCosto = x.PrecioUnitarioCosto,
+                Cantidad = x.Cantidad,
+                Subtotal = x.Subtotal,
             };
         }
         public IQueryable<DetalleCompraResponseDTO> GetQueryable()
         {
             return _repo.GetQueryable().Select(x => new DetalleCompraResponseDTO
             {
-                idDetalleCompra = x.idDetalleCompra,
-                numeroFactura = x.numeroFactura,
-                usuarioId = x.usuarioId,
-                proveedorId = x.proveedorId,
-                productoId = x.productoId,
-                cantidad = x.cantidad,
-                precioUnitarioCosto = x.precioUnitarioCosto,
-                montoTotal = x.montoTotal,
-                fechaCompra = x.fechaCompra,
+                IdDetalleCompra = x.IdDetalleCompra,
+                CompraId = x.CompraId,
+                ProductoId = x.ProductoId,
+                PrecioUnitarioCosto = x.PrecioUnitarioCosto,
+                Cantidad = x.Cantidad,
+                Subtotal = x.Subtotal,
             });
         }
         public async Task<List<DetalleCompraResponseDTO>> GetAllAsync() =>
@@ -52,39 +47,32 @@ namespace GestionDeInventario.Services.Implementations
         public async Task<DetalleCompraResponseDTO> GetByIdAsync(int idDetalleCompra)
         {
             var x = await _repo.GetByIdAsync(idDetalleCompra);
+
             if (x == null)
             {
-                throw new NotFoundException($"Detalle de la compra con ID {idDetalleCompra} no encontrado.");
+                throw new NotFoundException($"Detalle Compra con ID {idDetalleCompra} no encontrado.");
             }
             return MapToResponseDTO(x);
+
         }
         public async Task<DetalleCompraResponseDTO> AddAsync(DetalleCompraCreateDTO dto)
         {
+
             // 1. Mapeo de DTO a Modelo
             var detalleCompra = new DetalleCompra
             {
-                numeroFactura = dto.numeroFactura,
-                cantidad = dto.cantidad,
-                precioUnitarioCosto = dto.precioUnitarioCosto,
-                montoTotal = dto.montoTotal,
-                fechaCompra = dto.fechaCompra,
-                usuarioId = dto.usuarioId,
-                proveedorId = dto.proveedorId,
-                productoId = dto.productoId,
+                CompraId = dto.CompraId,
+                ProductoId = dto.ProductoId,
+                Cantidad = dto.Cantidad,
+                PrecioUnitarioCosto = dto.PrecioUnitarioCosto
             };
             try
             {
-                // 2. Guardar en BD
-                // Al ejecutar esto, el Trigger de SQL se dispara automáticamente
-                // y actualiza el stock y precio en la tabla Producto.
                 var saved = await _repo.AddAsync(detalleCompra);
-
-                // 3. Retornar el mapeo (incluyendo el montoTotal calculado por la DB)
                 return MapToResponseDTO(saved);
             }
             catch (Exception ex)
             {
-                // Si el Trigger lanza un error (ej. validación), lo capturamos aquí
                 throw new BusinessRuleException("Error al procesar la compra: " + ex.Message);
             }
         }
@@ -93,19 +81,12 @@ namespace GestionDeInventario.Services.Implementations
             var current = await _repo.GetByIdAsync(idDetalleCompra);
             if (current == null) throw new NotFoundException("No existe la compra.");
 
-            current.numeroFactura = dto.numeroFactura.Trim();
-            current.cantidad = dto.cantidad;
-            current.precioUnitarioCosto = dto.precioUnitarioCosto;
-            current.montoTotal = dto.montoTotal;
-            current.fechaCompra = dto.fechaCompra;
-            current.usuarioId = dto.usuarioId;
-            current.proveedorId = dto.proveedorId;
-            current.productoId = dto.productoId;
-
+            current.CompraId = dto.CompraId;
+            current.ProductoId = dto.ProductoId;
+            current.Cantidad = dto.Cantidad;
+            current.PrecioUnitarioCosto = dto.PrecioUnitarioCosto;
             try
             {
-                // El Trigger 'trg_actualizar_stock_compra' de la DB hará el ajuste 
-                // de restar la cantidad vieja y sumar la nueva automáticamente.
                 return await _repo.UpdateAsync(current);
             }
             catch (Exception ex)
@@ -120,7 +101,6 @@ namespace GestionDeInventario.Services.Implementations
 
             try
             {
-                // El Trigger 'trg_eliminar_stock_compra' restará el stock que se había ingresado.
                 return await _repo.DeleteAsync(idDetalleCompra);
             }
             catch (Exception ex)
@@ -129,29 +109,23 @@ namespace GestionDeInventario.Services.Implementations
             }
         }
 
-
-
-        // NUEVO: Método para Excel
+        // Método para Excel
         public IQueryable<DetalleCompraExcelDTO> GetQueryableForExcel()
         {
             return _repo.GetQueryable()
                 .Select(x => new DetalleCompraExcelDTO
                 {
-                    IdDetalleCompra = x.idDetalleCompra,
-                    NumeroFactura = x.numeroFactura,
-                    FechaCompra = x.fechaCompra,
-                    NombreProveedor = x.proveedor != null
-                        ? x.proveedor.nombreEmpresa
-                        : $"ID: {x.proveedorId}",
-                    NombreProducto = x.producto != null
-                        ? x.producto.nombre
-                        : $"ID: {x.productoId}",
-                    Cantidad = x.cantidad,
-                    PrecioUnitarioCosto = x.precioUnitarioCosto,
-                    MontoTotal = x.montoTotal,
-                    UsuarioRegistro = x.usuario != null
-                        ? x.usuario.nombre
-                        : $"ID: {x.usuarioId}"
+                    IdDetalleCompra = x.IdDetalleCompra,
+
+                    NumeroFactura = x.Compra != null
+                        ? x.Compra.NumeroFactura : $"ID: {x.CompraId}",
+
+                    nombre = x.Producto != null
+                        ? x.Producto.nombre : $"ID: {x.ProductoId}",
+
+                    Cantidad = x.Cantidad,
+                    PrecioUnitarioCosto = x.PrecioUnitarioCosto,
+                    Subtotal = x.Subtotal,
                 })
                 .AsQueryable();
         }

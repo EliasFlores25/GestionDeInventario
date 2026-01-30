@@ -286,7 +286,8 @@ namespace GestionDeInventario.Controllers
                 }
             }
         }
-             // 1. Acción normal que dirige a la vista de la página web
+
+        // 1. Acción normal que dirige a la vista de la página web
         public IActionResult Perfil(int id)
         {
             var empleado = _empleadoService.GetByIdAsync(id);
@@ -309,3 +310,10 @@ namespace GestionDeInventario.Controllers
         }
     }
 }
+
+
+
+
+
+
+

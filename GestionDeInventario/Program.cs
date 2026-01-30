@@ -9,9 +9,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+QuestPDF.Settings.License = LicenseType.Community;
 builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
 {
     var connectionString = builder.Configuration.GetConnectionString("Conn");
@@ -54,6 +56,10 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add(new AuthorizeFilter(policy));
 });
 builder.Services.AddScoped<ExcelExporter>();
+builder.Services.AddScoped<ICompraRepository, CompraRepository>();
+builder.Services.AddScoped<ICompraService, CompraService>();
+builder.Services.AddScoped<IDistribucionRepository, DistribucionRepository>();
+builder.Services.AddScoped<IDistribucionService, DistribucionService>();
 builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
 builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
@@ -66,6 +72,7 @@ builder.Services.AddScoped<IDetalleCompraRepository, DetalleCompraRepository>();
 builder.Services.AddScoped<IDetalleCompraService, DetalleCompraService>();
 builder.Services.AddScoped<IDetalleDistribucionRepository, DetalleDistribucionRepository>();
 builder.Services.AddScoped<IDetalleDistribucionService, DetalleDistribucionService>();
+
 
 
 var app = builder.Build();

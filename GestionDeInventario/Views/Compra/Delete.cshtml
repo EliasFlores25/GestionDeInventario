@@ -1,0 +1,315 @@
+﻿@model GestionDeInventario.DTOs.CompraDTOs.CompraResponseDTO
+@{
+    ViewData["Title"] = "Eliminar Compra";
+    var usuariosNombres = ViewBag.UsuariosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var proveedoresNombres = ViewBag.ProveedoresNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --danger: #ef4444;
+        --danger-dark: #dc2626;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
+    }
+
+    .container-delete {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .delete-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border-top: 5px solid var(--danger);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .delete-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+        .delete-header h1 {
+            color: var(--danger);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+            .delete-header h1 i {
+                color: var(--danger);
+            }
+
+        .delete-header h4 {
+            color: var(--text-light);
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+        }
+
+    .warning-alert {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid var(--danger);
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+        .warning-alert i {
+            color: var(--danger);
+            font-size: 1.25rem;
+        }
+
+    .section-title {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--danger);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-item {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 3px solid var(--primary);
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: var(--text-light);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .detail-label i {
+            font-size: 0.9em;
+        }
+
+    .detail-value {
+        color: var(--dark);
+        font-size: 1rem;
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .badge {
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+        .btn-danger:hover {
+            background: var(--danger-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
+        }
+
+    .btn-secondary {
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+    @@media (max-width: 768px) {
+        .container-delete {
+            padding: 1rem;
+        }
+
+        .delete-card {
+            padding: 1.5rem;
+        }
+
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+    }
+
+    @@media (max-width: 576px) {
+        .delete-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .delete-card {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container-delete">
+    <div class="delete-card">
+        <div class="delete-header">
+            <h1><i class="fas fa-trash-alt"></i> @ViewData["Title"]</h1>
+            <h4>Confirmación de eliminación permanente</h4>
+        </div>
+
+        <div class="warning-alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Advertencia:</strong> Esta acción eliminará permanentemente la compra
+                <strong>@Model.NumeroFactura</strong>. Esta acción no se puede deshacer.
+            </div>
+        </div>
+
+        <!-- Información de la Factura -->
+        <div class="section-title">
+            <i class="fas fa-file-invoice"></i> Información de la Factura
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-hashtag"></i> ID</div>
+                <div class="detail-value">@Model.IdCompra</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-file-alt"></i> Número de Factura</div>
+                <div class="detail-value">@Model.NumeroFactura</div>
+            </div>
+        </div>
+
+        <!-- Fecha de la Compra -->
+        <div class="section-title">
+            <i class="fas fa-calendar-alt"></i> Fecha de la Compra
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-clock"></i> Fecha y Hora</div>
+                <div class="detail-value">@Model.FechaCompra.ToString("dd/MM/yyyy HH:mm")</div>
+            </div>
+        </div>
+
+        <!-- Información de Usuario y Proveedor -->
+        <div class="section-title">
+            <i class="fas fa-users"></i> Usuario y Proveedor
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-user"></i> Usuario Responsable</div>
+                <div class="detail-value">@usuariosNombres.GetValueOrDefault(Model.UsuarioId, "No asignado")</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-truck"></i> Proveedor</div>
+                <div class="detail-value">@proveedoresNombres.GetValueOrDefault(Model.ProveedorId, "No asignado")</div>
+            </div>
+        </div>
+
+        <!-- Monto Total -->
+        <div class="section-title">
+            <i class="fas fa-money-bill-wave"></i> Monto Total
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-dollar-sign"></i> Monto Total</div>
+                <div class="detail-value">$@Model.MontoTotalCompra.ToString("N2")</div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a la Lista
+            </a>
+            <form asp-action="Delete" method="post" style="display: inline;">
+                <input type="hidden" name="id" value="@Model.IdCompra" />
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash-alt"></i> Eliminar Permanentemente
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        // Scripts adicionales si son necesarios
+    }
+}

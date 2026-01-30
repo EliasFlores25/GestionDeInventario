@@ -2,13 +2,12 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
-    ViewData["Title"] = "Gestión de Compras";
-    var productoNombres = ViewBag.ProductosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
-    var proveedorNombres = ViewBag.ProveedoresNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
-    var usuarioNombres = ViewBag.UsuariosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    ViewData["Title"] = "Gestión de Detalles de Compra";
+    var comprasNombres = ViewBag.ComprasNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var productosNombres = ViewBag.ProductosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
 
-    var productosList = ViewBag.productoId as List<SelectListItem> ?? new List<SelectListItem>();
-    var proveedoresList = ViewBag.proveedorId as List<SelectListItem> ?? new List<SelectListItem>();
+    var comprasList = ViewBag.CompraId as List<SelectListItem> ?? new List<SelectListItem>();
+    var productosList = ViewBag.ProductoId as List<SelectListItem> ?? new List<SelectListItem>();
 
     int pageNumber = ViewBag.PageNumber ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
@@ -292,7 +291,7 @@
         display: inline-block;
     }
 
-    .badge-factura {
+    .badge-compra {
         background: #dbeafe;
         color: #1d4ed8;
     }
@@ -460,9 +459,9 @@
 
 <div class="container-compras">
     <div class="header">
-        <h1><i class="fas fa-shopping-cart"></i> @ViewData["Title"]</h1>
+        <h1><i class="fas fa-list-alt"></i> @ViewData["Title"]</h1>
         <div class="d-flex gap-2">
-            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Nueva Compra</a>
+            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Nuevo Detalle</a>
             <button class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#filters">
                 <i class="fas fa-filter"></i> Filtros
             </button>
@@ -477,36 +476,50 @@
     {
         <div class="alert alert-success"><i class="fas fa-check-circle"></i> @TempData["Ok"]</div>
     }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]</div>
+    }
 
     <div class="filters collapse" id="filters">
         <form asp-action="Index" method="get">
-            <input type="hidden" name="page" value="1" />
+            <input type="hidden" name="pageNumber" value="1" />
             <div class="filter-grid">
-                <input type="text" class="form-control" name="numeroFactura"
-                       placeholder="Número de Factura" value="@ViewBag.CurrentFactura">
-
-                <input type="date" class="form-control" name="fechaCompra"
-                       value="@(ViewBag.CurrentFecha?.ToString("yyyy-MM-dd"))">
+                <select class="form-select" name="compraId">
+                    <option value="">Todas las Compras</option>
+                    @foreach (var item in comprasList)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentCompraId?.ToString())">
+                            @item.Text
+                        </option>
+                    }
+                </select>
 
                 <select class="form-select" name="productoId">
                     <option value="">Todos los productos</option>
                     @foreach (var item in productosList)
                     {
-                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentProducto?.ToString())">
+                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentProductoId?.ToString())">
                             @item.Text
                         </option>
                     }
                 </select>
 
-                <select class="form-select" name="proveedorId">
-                    <option value="">Todos los proveedores</option>
-                    @foreach (var item in proveedoresList)
-                    {
-                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentProveedor?.ToString())">
-                            @item.Text
-                        </option>
-                    }
-                </select>
+                <input type="number" class="form-control" name="precioMin"
+                       placeholder="Precio Mínimo" value="@ViewBag.CurrentPrecioMin"
+                       step="0.01" min="0">
+
+                <input type="number" class="form-control" name="precioMax"
+                       placeholder="Precio Máximo" value="@ViewBag.CurrentPrecioMax"
+                       step="0.01" min="0">
+
+                <input type="number" class="form-control" name="cantidadMin"
+                       placeholder="Cantidad Mínima" value="@ViewBag.CurrentCantidadMin"
+                       min="0">
+
+                <input type="number" class="form-control" name="cantidadMax"
+                       placeholder="Cantidad Máxima" value="@ViewBag.CurrentCantidadMax"
+                       min="0">
             </div>
             <div class="filter-actions">
                 <a asp-action="Exportar" class="btn btn-excel">
@@ -529,14 +542,11 @@
         <table>
             <thead>
                 <tr>
-                    <th>Factura</th>
-                    <th>Fecha</th>
-                    <th>Proveedor</th>
+                    <th>Compra</th>
                     <th>Producto</th>
                     <th>Cantidad</th>
                     <th>Precio Unit.</th>
-                    <th>Total</th>
-                    <th>Usuario</th>
+                    <th>Subtotal</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -546,35 +556,27 @@
                     foreach (var item in Model)
                     {
                         <tr>
-                            <td>
-                                <span class="factura-badge">
-                                    <i class="fas fa-file-invoice"></i> @item.numeroFactura
-                                </span>
-                            </td>
-                            <td>@item.fechaCompra.ToString("dd/MM/yyyy")</td>
-                            <td>@proveedorNombres.GetValueOrDefault(item.proveedorId, "N/A")</td>
-                            <td>@productoNombres.GetValueOrDefault(item.productoId, "N/A")</td>
-                            <td>@item.cantidad</td>
-                            <td class="td-moneda">@item.precioUnitarioCosto.ToString("C")</td>
-                            <td class="td-moneda">@item.montoTotal.ToString("C")</td>
-                            <td>@usuarioNombres.GetValueOrDefault(item.usuarioId, "N/A")</td>
+                            <td>@comprasNombres.GetValueOrDefault(item.CompraId, "N/A")</td>
+                            <td>@productosNombres.GetValueOrDefault(item.ProductoId, "N/A")</td>
+                            <td>@item.Cantidad</td>
+                            <td class="td-moneda">@item.PrecioUnitarioCosto.ToString("C")</td>
+                            <td class="td-moneda">@item.Subtotal.ToString("C")</td>
                             <td>
                                 <div class="d-flex gap-1 justify-content-center">
-                                    <a asp-action="Edit" asp-route-id="@item.idDetalleCompra"
+                                    <a asp-action="Edit" asp-route-id="@item.IdDetalleCompra"
                                        class="btn btn-secondary btn-sm" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a asp-action="Details" asp-route-id="@item.idDetalleCompra"
+                                    <a asp-action="Details" asp-route-id="@item.IdDetalleCompra"
                                        class="btn btn-secondary btn-sm" title="Detalles">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a asp-action="Delete" asp-route-id="@item.idDetalleCompra"
+                                    <a asp-action="Delete" asp-route-id="@item.IdDetalleCompra"
                                        class="btn btn-secondary btn-sm" title="Eliminar">
                                         <i class="fas fa-trash"></i>
                                     </a>
-                                    <a asp-controller="DetalleCompra" asp-action="DescargarPdf"
-                                       asp-route-id="@item.idDetalleCompra" target="_blank"
-                                       class="btn btn-danger btn-sm" title="Generar PDF">
+                                    <a asp-action="DescargarPdf" asp-route-id="@item.IdDetalleCompra"
+                                       target="_blank" class="btn btn-danger btn-sm" title="Generar PDF">
                                         <i class="fas fa-file-pdf"></i>
                                     </a>
                                 </div>
@@ -585,11 +587,11 @@
                 else
                 {
                     <tr>
-                        <td colspan="9" class="empty-state">
-                            <i class="fas fa-shopping-cart fa-2x mb-2"></i>
-                            <p>No hay compras registradas</p>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-list-alt fa-2x mb-2"></i>
+                            <p>No hay detalles de compra registrados</p>
                             <a asp-action="Create" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Registrar Primera Compra
+                                <i class="fas fa-plus"></i> Registrar Primer Detalle
                             </a>
                         </td>
                     </tr>
@@ -607,50 +609,45 @@
                     <div class="card-header">
                         <div>
                             <strong>
-                                <i class="fas fa-file-invoice"></i> @item.numeroFactura
+                                Compra: @comprasNombres.GetValueOrDefault(item.CompraId, "N/A")
                             </strong>
-                            <div class="text-muted small mt-1">
-                                @item.fechaCompra.ToString("dd/MM/yyyy")
-                            </div>
+                           
                         </div>
-                        <span class="info-moneda">@item.montoTotal.ToString("C")</span>
+                        <span class="info-moneda">@item.Subtotal.ToString("C")</span>
                     </div>
                     <div class="card-info">
                         <div class="info-item">
-                            <span class="info-label">Proveedor</span>
-                            <span class="info-value">@proveedorNombres.GetValueOrDefault(item.proveedorId, "N/A")</span>
-                        </div>
-                        <div class="info-item">
                             <span class="info-label">Producto</span>
-                            <span class="info-value">@productoNombres.GetValueOrDefault(item.productoId, "N/A")</span>
+                            <span class="info-value">@productosNombres.GetValueOrDefault(item.ProductoId, "N/A")</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Cantidad</span>
-                            <span class="info-value">@item.cantidad unidades</span>
+                            <span class="info-value">@item.Cantidad unidades</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Precio Unit.</span>
-                            <span class="info-value info-moneda">@item.precioUnitarioCosto.ToString("C")</span>
+                            <span class="info-value info-moneda">@item.PrecioUnitarioCosto.ToString("C")</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Usuario</span>
-                            <span class="info-value">@usuarioNombres.GetValueOrDefault(item.usuarioId, "N/A")</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Total</span>
-                            <span class="info-value info-moneda">@item.montoTotal.ToString("C")</span>
+                            <span class="info-label">Subtotal</span>
+                            <span class="info-value info-moneda">@item.Subtotal.ToString("C")</span>
                         </div>
                     </div>
                     <div class="card-actions">
-                        <a asp-action="Edit" asp-route-id="@item.idDetalleCompra"
-                           class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></a>
-                        <a asp-action="Details" asp-route-id="@item.idDetalleCompra"
-                           class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i></a>
-                        <a asp-action="Delete" asp-route-id="@item.idDetalleCompra"
-                           class="btn btn-secondary btn-sm"><i class="fas fa-trash"></i></a>
-                        <a asp-controller="DetalleCompra" asp-action="DescargarPdf"
-                           asp-route-id="@item.idDetalleCompra" target="_blank"
-                           class="btn btn-danger btn-sm" title="Generar PDF">
+                        <a asp-action="Edit" asp-route-id="@item.IdDetalleCompra"
+                           class="btn btn-secondary btn-sm" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a asp-action="Details" asp-route-id="@item.IdDetalleCompra"
+                           class="btn btn-secondary btn-sm" title="Detalles">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.IdDetalleCompra"
+                           class="btn btn-secondary btn-sm" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                        <a asp-action="DescargarPdf" asp-route-id="@item.IdDetalleCompra"
+                           target="_blank" class="btn btn-danger btn-sm" title="Generar PDF">
                             <i class="fas fa-file-pdf"></i>
                         </a>
                     </div>
@@ -660,10 +657,10 @@
         else
         {
             <div class="empty-state">
-                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
-                <p>No hay compras registradas</p>
+                <i class="fas fa-list-alt fa-2x mb-2"></i>
+                <p>No hay detalles de compra registrados</p>
                 <a asp-action="Create" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Registrar Primera Compra
+                    <i class="fas fa-plus"></i> Registrar Primer Detalle
                 </a>
             </div>
         }
@@ -678,10 +675,12 @@
                     {
                         <li>
                             <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber - 1)"
-                               asp-route-numeroFactura="@ViewBag.CurrentFactura"
-                               asp-route-fechaCompra="@ViewBag.CurrentFecha?.ToString("yyyy-MM-dd")"
-                               asp-route-productoId="@ViewBag.CurrentProducto"
-                               asp-route-proveedorId="@ViewBag.CurrentProveedor">
+                               asp-route-compraId="@ViewBag.CurrentCompraId"
+                               asp-route-productoId="@ViewBag.CurrentProductoId"
+                               asp-route-precioMin="@ViewBag.CurrentPrecioMin"
+                               asp-route-precioMax="@ViewBag.CurrentPrecioMax"
+                               asp-route-cantidadMin="@ViewBag.CurrentCantidadMin"
+                               asp-route-cantidadMax="@ViewBag.CurrentCantidadMax">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                         </li>
@@ -693,10 +692,12 @@
                             <li>
                                 <a class="page-link @(i == pageNumber ? "active" : "")"
                                    asp-action="Index" asp-route-pageNumber="@i"
-                                   asp-route-numeroFactura="@ViewBag.CurrentFactura"
-                                   asp-route-fechaCompra="@ViewBag.CurrentFecha?.ToString("yyyy-MM-dd")"
-                                   asp-route-productoId="@ViewBag.CurrentProducto"
-                                   asp-route-proveedorId="@ViewBag.CurrentProveedor">
+                                   asp-route-compraId="@ViewBag.CurrentCompraId"
+                                   asp-route-productoId="@ViewBag.CurrentProductoId"
+                                   asp-route-precioMin="@ViewBag.CurrentPrecioMin"
+                                   asp-route-precioMax="@ViewBag.CurrentPrecioMax"
+                                   asp-route-cantidadMin="@ViewBag.CurrentCantidadMin"
+                                   asp-route-cantidadMax="@ViewBag.CurrentCantidadMax">
                                     @i
                                 </a>
                             </li>
@@ -710,10 +711,12 @@
                     {
                         <li>
                             <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber + 1)"
-                               asp-route-numeroFactura="@ViewBag.CurrentFactura"
-                               asp-route-fechaCompra="@ViewBag.CurrentFecha?.ToString("yyyy-MM-dd")"
-                               asp-route-productoId="@ViewBag.CurrentProducto"
-                               asp-route-proveedorId="@ViewBag.CurrentProveedor">
+                               asp-route-compraId="@ViewBag.CurrentCompraId"
+                               asp-route-productoId="@ViewBag.CurrentProductoId"
+                               asp-route-precioMin="@ViewBag.CurrentPrecioMin"
+                               asp-route-precioMax="@ViewBag.CurrentPrecioMax"
+                               asp-route-cantidadMin="@ViewBag.CurrentCantidadMin"
+                               asp-route-cantidadMax="@ViewBag.CurrentCantidadMax">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>

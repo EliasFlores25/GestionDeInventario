@@ -1,7 +1,7 @@
 ﻿@model GestionDeInventario.DTOs.DetalleDistribucionDTOs.DetalleDistribucionCreateDTO
 
 @{
-    ViewData["Title"] = "Registrar Nueva Distribución";
+    ViewData["Title"] = "Agregar Detalle de Distribución";
 }
 
 <style>
@@ -9,7 +9,6 @@
         --primary: #2563eb;
         --primary-dark: #1d4ed8;
         --success: #10b981;
-        --warning: #f59e0b;
         --danger: #ef4444;
         --dark: #1f2937;
         --light: #f8fafc;
@@ -29,7 +28,7 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         padding: 2rem;
         border-top: 5px solid var(--primary);
-        max-width: 900px;
+        max-width: 800px;
         margin: 0 auto;
     }
 
@@ -74,7 +73,6 @@
 
     .form-group {
         margin-bottom: 1.25rem;
-        position: relative;
     }
 
     .form-label {
@@ -85,7 +83,7 @@
         font-size: 0.95rem;
     }
 
-    .form-control, .form-select, .form-textarea {
+    .form-control, .form-select {
         width: 100%;
         padding: 0.75rem 1rem;
         border: 2px solid var(--border);
@@ -95,26 +93,16 @@
         background: white;
     }
 
-    .form-textarea {
-        min-height: 100px;
-        resize: vertical;
-    }
-
-        .form-control:focus, .form-select:focus, .form-textarea:focus {
+        .form-control:focus, .form-select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        .form-control::placeholder, .form-textarea::placeholder {
+        .form-control::placeholder {
             color: var(--text-light);
             opacity: 0.7;
         }
-
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        opacity: 1;
-    }
 
     .validation-error {
         color: var(--danger);
@@ -177,6 +165,37 @@
             border-color: #d1d5db;
         }
 
+    .input-with-icon {
+        position: relative;
+    }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .input-with-icon input, .input-with-icon select {
+            padding-left: 3rem;
+        }
+
+    .info-box {
+        background: #f0f9ff;
+        border: 2px solid #bae6fd;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--dark);
+    }
+
+        .info-box i {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
     @@media (max-width: 768px) {
         .container-create {
             padding: 1rem;
@@ -194,11 +213,6 @@
                 width: 100%;
                 justify-content: center;
             }
-
-        .form-row {
-            flex-direction: column;
-            gap: 1.25rem;
-        }
     }
 
     @@media (max-width: 576px) {
@@ -216,107 +230,107 @@
     <div class="create-card">
         <div class="create-header">
             <h1><i class="fas fa-truck-moving"></i> @ViewData["Title"]</h1>
-            <h4>Registra los detalles de la distribución incluyendo empleado, producto y motivo.</h4>
+            <h4>Agrega un nuevo detalle a la distribución. El sistema calculará automáticamente el subtotal.</h4>
         </div>
 
-        <form asp-action="Create" id="distribucionForm">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="alert-danger"></div>
 
-            <!-- Sección 1: Información de Distribución -->
+            <!-- Sección 1: Información de la Distribución -->
             <div class="section-title">
-                <i class="fas fa-hashtag"></i> Información de Distribución
+                <i class="fas fa-truck-loading"></i> Información de la Distribución
             </div>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="form-group">
-                        <label class="form-label" asp-for="NumeroDistribucion">Número de Distribución</label>
-                        <input asp-for="NumeroDistribucion" class="form-control" placeholder="Ej: DIST-001-2024" />
-                        <span asp-validation-for="NumeroDistribucion" class="validation-error"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label" asp-for="FechaSalida">Fecha de Salida</label>
-                        <input asp-for="FechaSalida" type="date" class="form-control" id="fechaSalidaInput" />
-                        <span asp-validation-for="FechaSalida" class="validation-error"></span>
+                        <label class="form-label" asp-for="DistribucionId">Distribución</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-hashtag"></i>
+                            <select asp-for="DistribucionId" class="form-select" asp-items="ViewBag.DistribucionId">
+                                <option value="">-- Seleccionar Distribución --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="DistribucionId" class="validation-error"></span>
                     </div>
                 </div>
             </div>
 
-            <!-- Sección 2: Personal Responsable -->
+            <!-- Sección 2: Producto -->
             <div class="section-title">
-                <i class="fas fa-users"></i> Personal Responsable
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label" asp-for="UsuarioId">Usuario</label>
-                        <select asp-for="UsuarioId" class="form-select" asp-items="ViewBag.usuarioId">
-                            <option value="">-- Seleccionar Usuario --</option>
-                        </select>
-                        <span asp-validation-for="UsuarioId" class="validation-error"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label" asp-for="EmpleadoId">Empleado</label>
-                        <select asp-for="EmpleadoId" class="form-select" asp-items="ViewBag.empleadoId">
-                            <option value="">-- Seleccionar Empleado --</option>
-                        </select>
-                        <span asp-validation-for="EmpleadoId" class="validation-error"></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sección 3: Detalles del Producto -->
-            <div class="section-title">
-                <i class="fas fa-box"></i> Detalles del Producto
+                <i class="fas fa-box"></i> Producto
             </div>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="form-group">
                         <label class="form-label" asp-for="ProductoId">Producto</label>
-                        <select asp-for="ProductoId" class="form-select" asp-items="ViewBag.productoId">
-                            <option value="">-- Seleccionar Producto --</option>
-                        </select>
+                        <div class="input-with-icon">
+                            <i class="fas fa-cube"></i>
+                            <select asp-for="ProductoId" class="form-select" asp-items="ViewBag.ProductoId">
+                                <option value="">-- Seleccionar Producto --</option>
+                            </select>
+                        </div>
                         <span asp-validation-for="ProductoId" class="validation-error"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label" asp-for="Cantidad">Cantidad</label>
-                        <input asp-for="Cantidad" type="number" min="1" class="form-control" placeholder="Ej: 10" />
-                        <span asp-validation-for="Cantidad" class="validation-error"></span>
+                        <div class="info-box">
+                            <i class="fas fa-info-circle"></i>
+                            <span id="productInfo">Seleccione un producto para ver información adicional</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Sección 4: Motivo de Distribución -->
+            <!-- Sección 3: Cantidad -->
             <div class="section-title">
-                <i class="fas fa-clipboard-list"></i> Motivo de Distribución
+                <i class="fas fa-layer-group"></i> Cantidad
             </div>
             <div class="row">
-                <div class="col-12">
+                <div class="col-md-12">
                     <div class="form-group">
-                        <label class="form-label" asp-for="Motivo">Motivo</label>
-                        <textarea asp-for="Motivo" class="form-textarea" placeholder="Describa el motivo de la distribución..."></textarea>
-                        <span asp-validation-for="Motivo" class="validation-error"></span>
+                        <label class="form-label" asp-for="Cantidad">Cantidad</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-sort-amount-up"></i>
+                            <input asp-for="Cantidad" type="number" min="1" class="form-control"
+                                   placeholder="Ej: 50" id="cantidadInput" />
+                        </div>
+                        <span asp-validation-for="Cantidad" class="validation-error"></span>
+                        <div class="info-box">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span id="stockInfo">Verificando disponibilidad de stock...</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Sección 4: Resumen -->
+            <div class="section-title">
+                <i class="fas fa-chart-line"></i> Resumen del Detalle
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="info-box" id="summaryBox">
+                        <div>
+                            <strong><i class="fas fa-calculator"></i> Resumen:</strong>
+                            <div id="summaryContent" class="mt-2">
+                                <div>Distribución: <span id="distribucionSummary" class="text-muted">No seleccionada</span></div>
+                                <div>Producto: <span id="productoSummary" class="text-muted">No seleccionado</span></div>
+                                <div>Cantidad: <span id="cantidadSummary" class="text-muted">0</span> unidades</div>
+                                <div>Precio unitario: <span id="precioSummary" class="text-muted">$0.00</span></div>
+                                <div class="mt-2"><strong>Subtotal estimado: <span id="subtotalSummary" class="text-primary">$0.00</span></strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-              <!-- Botones de Acción -->
+            <!-- Botones de Acción -->
             <div class="form-actions">
                 <a asp-action="Index" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver a la Lista
                 </a>
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Crear Distribución
+                    <i class="fas fa-save"></i> Crear Detalle
                 </button>
             </div>
-
         </form>
     </div>
 </div>
@@ -327,21 +341,140 @@
     }
 
     <script>
+        // Variables para almacenar información del producto
+        let productoData = {};
+
+        // Función para actualizar el resumen
+        function actualizarResumen() {
+            const distribucionSelect = document.getElementById('DistribucionId');
+            const productoSelect = document.getElementById('ProductoId');
+            const cantidadInput = document.getElementById('cantidadInput');
+
+            const distribucionText = distribucionSelect.options[distribucionSelect.selectedIndex]?.text || 'No seleccionada';
+            const productoTxt = productoSelect.options[productoSelect.selectedIndex]?.text || 'No seleccionado';
+            const cantidad = parseInt(cantidadInput.value) || 0;
+
+            // Actualizar resumen
+            document.getElementById('distribucionSummary').textContent = distribucionText;
+            document.getElementById('productoSummary').textContent = productoTxt;
+            document.getElementById('cantidadSummary').textContent = cantidad;
+
+            // Calcular subtotal si tenemos precio del producto
+            if (productoData.precioCosto && cantidad > 0) {
+                const precio = productoData.precioCosto;
+                const subtotal = precio * cantidad;
+                document.getElementById('precioSummary').textContent = '$' + precio.toFixed(2);
+                document.getElementById('subtotalSummary').textContent = '$' + subtotal.toFixed(2);
+            } else {
+                document.getElementById('precioSummary').textContent = '$0.00';
+                document.getElementById('subtotalSummary').textContent = '$0.00';
+            }
+        }
+
+        // Función para cargar información del producto
+        function cargarProducto(productoId) {
+            if (!productoId) {
+                document.getElementById('productInfo').textContent = 'Seleccione un producto para ver información adicional';
+                productoData = {};
+                actualizarResumen();
+                return;
+            }
+
+            // Simulación de datos - en producción deberías hacer una llamada AJAX
+            // Ejemplo: fetch(`/api/productos/${productoId}`)
+
+            // Por ahora, simulamos datos estáticos
+            productoData = {
+                precioCosto: 25.99, // Este valor vendría de tu API
+                stockActual: 100
+            };
+
+            document.getElementById('productInfo').innerHTML =
+                `<strong>Información del producto:</strong><br>
+                 Precio de costo: $${productoData.precioCosto.toFixed(2)}<br>
+                 Stock disponible: ${productoData.stockActual} unidades`;
+
+            // Verificar stock
+            const cantidad = parseInt(document.getElementById('cantidadInput').value) || 0;
+            verificarStock(cantidad);
+
+            actualizarResumen();
+        }
+
+        // Función para verificar stock
+        function verificarStock(cantidad) {
+            if (!productoData.stockActual) {
+                document.getElementById('stockInfo').innerHTML =
+                    `<i class="fas fa-exclamation-triangle"></i> Seleccione un producto para verificar stock`;
+                return;
+            }
+
+            if (cantidad > productoData.stockActual) {
+                document.getElementById('stockInfo').innerHTML =
+                    `<i class="fas fa-exclamation-circle text-danger"></i>
+                     <span class="text-danger">Stock insuficiente. Disponible: ${productoData.stockActual} unidades</span>`;
+            } else if (cantidad === 0) {
+                document.getElementById('stockInfo').innerHTML =
+                    `<i class="fas fa-info-circle"></i> Stock disponible: ${productoData.stockActual} unidades`;
+            } else {
+                document.getElementById('stockInfo').innerHTML =
+                    `<i class="fas fa-check-circle text-success"></i>
+                     <span class="text-success">Stock suficiente. Disponible: ${productoData.stockActual} unidades</span>`;
+            }
+        }
+
+        // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Establecer fecha actual por defecto
-            const fechaInput = document.getElementById('fechaSalidaInput');
-            const today = new Date().toISOString().split('T')[0];
+            // Cargar producto al cambiar selección
+            document.getElementById('ProductoId').addEventListener('change', function() {
+                cargarProducto(this.value);
+            });
 
-            // Configurar el valor mínimo (hoy) y el valor por defecto
-            fechaInput.min = today;
-            fechaInput.value = today;
+            // Actualizar al cambiar cantidad
+            document.getElementById('cantidadInput').addEventListener('input', function() {
+                const cantidad = parseInt(this.value) || 0;
+                verificarStock(cantidad);
+                actualizarResumen();
+            });
 
-            // También configurar la fecha máxima si se desea (por ejemplo, hasta 1 año en el futuro)
-            const maxDate = new Date();
-            maxDate.setFullYear(maxDate.getFullYear() + 1);
-            fechaInput.max = maxDate.toISOString().split('T')[0];
+            // Actualizar al cambiar distribución
+            document.getElementById('DistribucionId').addEventListener('change', function() {
+                actualizarResumen();
+            });
 
-            console.log('Fecha configurada:', fechaInput.value);
+            // Cargar producto si ya hay uno seleccionado
+            const productoSelect = document.getElementById('ProductoId');
+            if (productoSelect.value) {
+                cargarProducto(productoSelect.value);
+            }
+
+            // Inicializar resumen
+            actualizarResumen();
+        });
+
+        // Validación personalizada antes de enviar
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const cantidad = parseInt(document.getElementById('cantidadInput').value) || 0;
+            const productoId = document.getElementById('ProductoId').value;
+
+            if (!productoId) {
+                e.preventDefault();
+                alert('Por favor, seleccione un producto.');
+                return;
+            }
+
+            if (cantidad <= 0) {
+                e.preventDefault();
+                alert('La cantidad debe ser mayor a 0.');
+                return;
+            }
+
+            // Verificar stock (simulado)
+            if (productoData.stockActual && cantidad > productoData.stockActual) {
+                e.preventDefault();
+                alert('No hay suficiente stock disponible para esta cantidad.');
+                return;
+            }
         });
     </script>
 }

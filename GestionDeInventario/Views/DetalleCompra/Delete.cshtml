@@ -2,9 +2,8 @@
 
 @{
     ViewData["Title"] = "Eliminar Detalle de Compra";
+    var comprasNombres = ViewBag.ComprasNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
     var productosNombres = ViewBag.ProductosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
-    var proveedoresNombres = ViewBag.ProveedoresNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
-    var usuariosNombres = ViewBag.UsuariosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
 }
 
 <style>
@@ -138,14 +137,14 @@
         gap: 0.375rem;
     }
 
-    .badge-info {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
     .badge-success {
         background: #d1fae5;
         color: #065f46;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
     }
 
     .form-actions {
@@ -193,30 +192,6 @@
             border-color: #d1d5db;
         }
 
-    .total-item {
-        background: #fee2e2;
-        border-left: 3px solid var(--danger);
-        grid-column: 1 / -1;
-    }
-
-        .total-item .detail-label {
-            color: #991b1b;
-        }
-
-        .total-item .detail-value {
-            color: #991b1b;
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-    .full-width-item {
-        grid-column: 1 / -1;
-    }
-
-        .full-width-item .detail-value {
-            line-height: 1.6;
-        }
-
     @@media (max-width: 768px) {
         .container-delete {
             padding: 1rem;
@@ -254,95 +229,57 @@
 <div class="container-delete">
     <div class="delete-card">
         <div class="delete-header">
-            <h1><i class="fas fa-trash-alt"></i> @ViewData["Title"]</h1>
+            <h1><i class="fas fa-user-times"></i> @ViewData["Title"]</h1>
             <h4>Confirmación de eliminación permanente</h4>
         </div>
 
         <div class="warning-alert">
             <i class="fas fa-exclamation-triangle"></i>
             <div>
-                <strong>¡ADVERTENCIA CRÍTICA!</strong> Esta acción eliminará permanentemente el registro de número de factura
-                <strong>#@Model.idDetalleCompra</strong> por un monto total de
-                <strong>$@Model.montoTotal.ToString("N2")</strong>. Esta acción no se puede deshacer.
+                <strong>Advertencia:</strong> Esta acción eliminará permanentemente el detalle de compra
+                <strong>ID @Model.IdDetalleCompra</strong>. Esta acción no se puede deshacer.
             </div>
         </div>
 
-        <!-- Información General -->
+        <!-- Datos Personales -->
         <div class="section-title">
-            <i class="fas fa-info-circle"></i> Información General
+            <i class="fas fa-id-card"></i> Información Principal
         </div>
         <div class="detail-grid">
             <div class="detail-item">
-                <div class="detail-label"><i class="fas fa-fingerprint"></i> ID de Compra</div>
-                <div class="detail-value">#@Model.idDetalleCompra</div>
+                <div class="detail-label"><i class="fas fa-fingerprint"></i> ID Detalle</div>
+                <div class="detail-value">@Model.IdDetalleCompra</div>
             </div>
             <div class="detail-item">
-                <div class="detail-label"><i class="fas fa-file-invoice"></i> Número de Factura</div>
-                <div class="detail-value">@Model.numeroFactura</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label"><i class="fas fa-calendar-alt"></i> Fecha de Compra</div>
-                <div class="detail-value">@Model.fechaCompra.ToString("dd/MM/yyyy")</div>
-            </div>
-        </div>
-
-        <!-- Información de Compra -->
-        <div class="section-title">
-            <i class="fas fa-users"></i> Información de Compra
-        </div>
-        <div class="detail-grid">
-            <div class="detail-item">
-                <div class="detail-label"><i class="fas fa-truck"></i> Proveedor</div>
+                <div class="detail-label"><i class="fas fa-shopping-cart"></i> Compra</div>
                 <div class="detail-value">
-                    <span class="badge badge-info">
-                        <i class="fas fa-building"></i>
-                        @proveedoresNombres.GetValueOrDefault(Model.proveedorId, "No disponible")
-                    </span>
+                    @comprasNombres.GetValueOrDefault(Model.CompraId, "No disponible")
                 </div>
             </div>
-            <div class="detail-item">
-                <div class="detail-label"><i class="fas fa-user-tie"></i> Usuario Responsable</div>
-                <div class="detail-value">
-                    <span class="badge badge-success">
-                        <i class="fas fa-user"></i>
-                        @usuariosNombres.GetValueOrDefault(Model.usuarioId, "No disponible")
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Detalles del Producto -->
-        <div class="section-title">
-            <i class="fas fa-box"></i> Detalles del Producto
-        </div>
-        <div class="detail-grid">
             <div class="detail-item">
                 <div class="detail-label"><i class="fas fa-cube"></i> Producto</div>
                 <div class="detail-value">
-                    @productosNombres.GetValueOrDefault(Model.productoId, "No disponible")
+                    @productosNombres.GetValueOrDefault(Model.ProductoId, "No disponible")
                 </div>
             </div>
-            <div class="detail-item">
-                <div class="detail-label"><i class="fas fa-layer-group"></i> Cantidad</div>
-                <div class="detail-value">@Model.cantidad unidades</div>
-            </div>
-                <div class="detail-item">
-                    <div class="detail-label"><i class="fas fa-dollar-sign"></i> Precio Unitario</div>
-                    <div class="detail-value">$@Model.precioUnitarioCosto.ToString("N2")</div>
-                </div>
         </div>
 
-        <!-- Resumen de Compra -->
+        <!-- Información Básica y Contacto -->
         <div class="section-title">
-            <i class="fas fa-calculator"></i> Resumen de Compra
+            <i class="fas fa-info-circle"></i> Detalles de la Compra
         </div>
         <div class="detail-grid">
-            <div class="total-item">
-            <center>
-                    <div class="detail-label"><i class="fas fa-money-bill-wave"></i> MONTO TOTAL A ELIMINAR</div>
-                    <div class="detail-value">$@Model.montoTotal.ToString("N2")</div>
-            </center>
-              
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-hashtag"></i> Cantidad</div>
+                <div class="detail-value">@Model.Cantidad</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-tag"></i> Precio Unitario</div>
+                <div class="detail-value">@Model.PrecioUnitarioCosto.ToString("C")</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-calculator"></i> Subtotal</div>
+                <div class="detail-value">@Model.Subtotal.ToString("C")</div>
             </div>
         </div>
 
@@ -352,7 +289,7 @@
                 <i class="fas fa-arrow-left"></i> Volver a la Lista
             </a>
             <form asp-action="Delete" method="post" style="display: inline;">
-                <input type="hidden" asp-for="idDetalleCompra" />
+                <input type="hidden" asp-for="IdDetalleCompra" />
                 <button type="submit" class="btn btn-danger">
                     <i class="fas fa-trash-alt"></i> Eliminar Permanentemente
                 </button>

@@ -18,10 +18,9 @@ namespace GestionDeInventario.Repository.Implementations
         public async Task<List<DetalleDistribucion>> GetAllAsync() =>
             await _context.DetalleDistribuciones.AsNoTracking().ToListAsync();
         public async Task<DetalleDistribucion?> GetByIdAsync(int idDetalleDistribucion)
-             => await _context.DetalleDistribuciones.AsNoTracking()
-            .Include(e => e.Usuario)
+             => await _context.DetalleDistribuciones
+            .Include(e => e.Distribucion)
             .Include(e => e.Producto)
-            .Include(e => e.Empleado)
             .FirstOrDefaultAsync(e => e.IdDetalleDistribucion == idDetalleDistribucion);
         public async Task<DetalleDistribucion> AddAsync(DetalleDistribucion entity)
         {
@@ -41,7 +40,5 @@ namespace GestionDeInventario.Repository.Implementations
             _context.DetalleDistribuciones.Remove(existing);
             return await _context.SaveChangesAsync() >= 0;
         }
-
-
     }
 }

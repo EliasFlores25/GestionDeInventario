@@ -1,11 +1,11 @@
 ﻿using GestionDeInventario.DTOs.DetalleCompraDTOs;
-using GestionDeInventario.Services.Exceptions;
 using GestionDeInventario.Services.Interfaces;
-using GestionDeInventario.Utilidades;
+using GestionDeInventario.Services.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using GestionDeInventario.Utilidades;
 
 namespace GestionDeInventario.Controllers
 {
@@ -13,110 +13,124 @@ namespace GestionDeInventario.Controllers
     public class DetalleCompraController : Controller
     {
         private readonly IDetalleCompraService _detalleCompraService;
-        private readonly IUsuarioService _usuarioService;
+        private readonly ICompraService _compraService;
         private readonly IProductoService _productoService;
-        private readonly IProveedorService _proveedorService;
+        private readonly ILogger<DetalleCompraController> _logger;
         private readonly ExcelExporter _excelExporter;
-        public DetalleCompraController(IDetalleCompraService detalleCompraService, IUsuarioService usuarioService, IProductoService productoService, IProveedorService proveedorService, ExcelExporter excelExporter)
+
+        public DetalleCompraController(
+            IDetalleCompraService detalleCompraService,
+            ICompraService compraService,
+            IProductoService productoService,
+            ExcelExporter excelExporter,
+            ILogger<DetalleCompraController> logger)
         {
             _detalleCompraService = detalleCompraService;
-            _usuarioService = usuarioService;
+            _compraService = compraService;
             _productoService = productoService;
-            _proveedorService = proveedorService;
             _excelExporter = excelExporter;
+            _logger = logger;
         }
-        private async Task PopulateDropdownsUsuario()
-        {
-            var usuarios = await _usuarioService.GetAllAsync();
-            ViewBag.usuarioId = new SelectList(usuarios, "idUsuario", "nombre");
-        }
-        private async Task PopulateDropdownsProducto()
-        {
-            var productos = await _productoService.GetAllAsync();
-            ViewBag.productoId = new SelectList(productos, "idProducto", "nombre");
-        }
-        private async Task PopulateDropdownsProveedor()
-        {
-            var proveedores = await _proveedorService.GetAllAsync();
-            ViewBag.proveedorId = new SelectList(proveedores, "idProveedor", "nombreEmpresa");
-        }
-        private async Task PopulateUsuarioNamesViewBag()
-        {
-            var usuarios = await _usuarioService.GetAllAsync();
 
-            var usuariosList = usuarios.Select(d => new SelectListItem
+        private async Task PopulateDropdowns()
+        {
+            var compras = await _compraService.GetAllAsync();
+            var productos = await _productoService.GetAllAsync();
+
+            ViewBag.CompraId = new SelectList(compras, "IdCompra", "NumeroFactura");
+            ViewBag.ProductoId = new SelectList(productos, "idProducto", "nombre");
+        }
+
+        private async Task PopulateFilterDropdowns()
+        {
+            var compras = await _compraService.GetAllAsync();
+            var productos = await _productoService.GetAllAsync();
+
+            // Para filtros
+            var comprasList = compras.Select(c => new SelectListItem
             {
-                Value = d.idUsuario.ToString(),
-                Text = d.nombre
+                Value = c.IdCompra.ToString(),
+                Text = c.NumeroFactura
             }).ToList();
-            usuariosList.Insert(0, new SelectListItem { Value = "", Text = "Todos los Usuarios" });
-            ViewBag.usuarioId = usuariosList;
+            comprasList.Insert(0, new SelectListItem { Value = "", Text = "Todas las Compras" });
+            ViewBag.CompraId = comprasList;
 
-            ViewBag.UsuariosNombres = usuarios.ToDictionary(d => d.idUsuario, d => d.nombre);
-        }
-        private async Task PopulateProductoNamesViewBag()
-        {
-            var productos = await _productoService.GetAllAsync();
-
-            var productosList = productos.Select(d => new SelectListItem
+            var productosList = productos.Select(p => new SelectListItem
             {
-                Value = d.idProducto.ToString(),
-                Text = d.nombre
+                Value = p.idProducto.ToString(),
+                Text = p.nombre
             }).ToList();
             productosList.Insert(0, new SelectListItem { Value = "", Text = "Todos los Productos" });
-            ViewBag.productoId = productosList;
+            ViewBag.ProductoId = productosList;
 
-            ViewBag.ProductosNombres = productos.ToDictionary(d => d.idProducto, d => d.nombre);
-        }
-        private async Task PopulateProveedorNamesViewBag()
-        {
-            var proveedores = await _proveedorService.GetAllAsync();
-
-            var proveedoresList = proveedores.Select(d => new SelectListItem
-            {
-                Value = d.idProveedor.ToString(),
-                Text = d.nombreEmpresa
-            }).ToList();
-            proveedoresList.Insert(0, new SelectListItem { Value = "", Text = "Todos los Proveedores" });
-            ViewBag.proveedorId = proveedoresList;
-
-            ViewBag.ProveedoresNombres = proveedores.ToDictionary(d => d.idProveedor, d => d.nombreEmpresa);
+            // Para mostrar nombres en vistas
+            ViewBag.ComprasNombres = compras.ToDictionary(c => c.IdCompra, c => c.NumeroFactura);
+            ViewBag.ProductosNombres = productos.ToDictionary(p => p.idProducto, p => p.nombre);
         }
 
-        public async Task<IActionResult> Index(string numeroFactura, DateTime? fechaCompra, int? productoId, int? proveedorId, int pageNumber = 1, int pageSize = 5)
+        public async Task<IActionResult> Index(
+            int? compraId,
+            int? productoId,
+            decimal? precioMin,
+            decimal? precioMax,
+            int? cantidadMin,
+            int? cantidadMax,
+            int pageNumber = 1,
+            int pageSize = 5)
         {
-            await PopulateUsuarioNamesViewBag();
-            await PopulateProductoNamesViewBag();
-            await PopulateProveedorNamesViewBag();
+            await PopulateFilterDropdowns();
+
             IQueryable<DetalleCompraResponseDTO> query = _detalleCompraService.GetQueryable();
 
-            if (!string.IsNullOrWhiteSpace(numeroFactura))
+            if (compraId.HasValue && compraId.Value > 0)
             {
-                string n_numeroFactura = numeroFactura.ToLower();
-                query = query.Where(c => c.numeroFactura.ToLower().Contains(n_numeroFactura));
+                query = query.Where(d => d.CompraId == compraId.Value);
             }
-            if (productoId is > 0)
-                query = query.Where(c => c.productoId == productoId);
-            if (proveedorId is > 0)
-                query = query.Where(c => c.proveedorId == proveedorId);
-            if (fechaCompra.HasValue)
-                query = query.Where(c => c.fechaCompra.Date == fechaCompra.Value.Date);
+
+            if (productoId.HasValue && productoId.Value > 0)
+            {
+                query = query.Where(d => d.ProductoId == productoId.Value);
+            }
+
+            if (precioMin.HasValue)
+            {
+                query = query.Where(d => d.PrecioUnitarioCosto >= precioMin.Value);
+            }
+
+            if (precioMax.HasValue)
+            {
+                query = query.Where(d => d.PrecioUnitarioCosto <= precioMax.Value);
+            }
+
+            if (cantidadMin.HasValue)
+            {
+                query = query.Where(d => d.Cantidad >= cantidadMin.Value);
+            }
+
+            if (cantidadMax.HasValue)
+            {
+                query = query.Where(d => d.Cantidad <= cantidadMax.Value);
+            }
 
             try
             {
                 int totalRegistros = await query.CountAsync();
                 int totalPages = (int)Math.Ceiling((double)totalRegistros / pageSize);
+
                 pageNumber = Math.Max(1, Math.Min(pageNumber, totalPages > 0 ? totalPages : 1));
 
                 var listaPaginada = await query
+                    .OrderByDescending(d => d.IdDetalleCompra)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();
 
-                ViewBag.CurrentFactura = numeroFactura;
-                ViewBag.CurrentFecha = fechaCompra;
-                ViewBag.CurrentProducto = productoId;
-                ViewBag.CurrentProveedor = proveedorId;
+                ViewBag.CurrentCompraId = compraId;
+                ViewBag.CurrentProductoId = productoId;
+                ViewBag.CurrentPrecioMin = precioMin;
+                ViewBag.CurrentPrecioMax = precioMax;
+                ViewBag.CurrentCantidadMin = cantidadMin;
+                ViewBag.CurrentCantidadMax = cantidadMax;
 
                 ViewBag.PageNumber = pageNumber;
                 ViewBag.TotalPages = totalPages;
@@ -125,94 +139,95 @@ namespace GestionDeInventario.Controllers
                 ViewBag.HasPreviousPage = pageNumber > 1;
                 ViewBag.HasNextPage = pageNumber < totalPages;
 
-                if (!string.IsNullOrWhiteSpace(numeroFactura) || fechaCompra.HasValue || productoId > 0 || proveedorId > 0)
+                if (compraId.HasValue && compraId.Value > 0 ||
+                    productoId.HasValue && productoId.Value > 0 ||
+                    precioMin.HasValue || precioMax.HasValue ||
+                    cantidadMin.HasValue || cantidadMax.HasValue)
                 {
                     ViewData["IsFilterApplied"] = true;
                 }
+
                 return View(listaPaginada);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error al cargar la lista: " + ex.Message;
+                TempData["Error"] = "Ocurrió un error al cargar la lista de detalles de compra: " + ex.Message;
+                await PopulateFilterDropdowns();
 
                 ViewBag.PageNumber = 1;
                 ViewBag.TotalPages = 1;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalRegistros = 0;
+                ViewBag.HasPreviousPage = false;
+                ViewBag.HasNextPage = false;
+
                 return View(new List<DetalleCompraResponseDTO>());
             }
         }
 
         public async Task<IActionResult> Create()
         {
-            await PopulateDropdownsUsuario();
-            await PopulateDropdownsProducto();
-            await PopulateDropdownsProveedor();
+            await PopulateDropdowns();
             return View(new DetalleCompraCreateDTO());
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DetalleCompraCreateDTO detalleCompraDto)
         {
             if (!ModelState.IsValid)
             {
-                await PopulateDropdownsUsuario();
-                await PopulateDropdownsProducto();
-                await PopulateDropdownsProveedor();
+                await PopulateDropdowns();
                 return View(detalleCompraDto);
             }
+
             try
             {
                 var nuevoDetalle = await _detalleCompraService.AddAsync(detalleCompraDto);
                 if (nuevoDetalle == null)
                 {
-                    ModelState.AddModelError("", "No se pudo crear el detalle de la compra.");
-                    await PopulateDropdownsUsuario();
-                    await PopulateDropdownsProducto();
-                    await PopulateDropdownsProveedor();
+                    ModelState.AddModelError("", "No se pudo crear el detalle de compra.");
+                    await PopulateDropdowns();
                     return View(detalleCompraDto);
                 }
-                TempData["Ok"] = "Detalle de la compra creado con éxito.";
+
+                TempData["Ok"] = "Detalle de compra creado con éxito.";
                 return RedirectToAction(nameof(Index));
             }
             catch (BusinessRuleException brex)
             {
                 ModelState.AddModelError(string.Empty, brex.Message);
-                await PopulateDropdownsUsuario();
-                await PopulateDropdownsProducto();
-                await PopulateDropdownsProveedor();
+                await PopulateDropdowns();
                 return View(detalleCompraDto);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Error al crear el detalle de la compra: " + ex.Message);
-                await PopulateDropdownsUsuario();
-                await PopulateDropdownsProducto();
-                await PopulateDropdownsProveedor();
+                ModelState.AddModelError("", "Error al crear el detalle de compra: " + ex.Message);
+                await PopulateDropdowns();
                 return View(detalleCompraDto);
             }
         }
+
         public async Task<IActionResult> Edit(int id)
         {
             try
             {
-                var detalleDto = await _detalleCompraService.GetByIdAsync(id);
-                if (detalleDto == null)
+                var detalleCompraDto = await _detalleCompraService.GetByIdAsync(id);
+                if (detalleCompraDto == null)
                 {
                     return NotFound();
                 }
+
                 var updateDto = new DetalleCompraUpdateDTO
                 {
-                    numeroFactura = detalleDto.numeroFactura,
-                    usuarioId = detalleDto.usuarioId,
-                    proveedorId = detalleDto.proveedorId,
-                    productoId = detalleDto.productoId,
-                    cantidad = detalleDto.cantidad,
-                    precioUnitarioCosto = detalleDto.precioUnitarioCosto,
-                    montoTotal = detalleDto.montoTotal,
-                    fechaCompra = detalleDto.fechaCompra,
+                    IdDetalleCompra = detalleCompraDto.IdDetalleCompra,
+                    CompraId = detalleCompraDto.CompraId,
+                    ProductoId = detalleCompraDto.ProductoId,
+                    Cantidad = detalleCompraDto.Cantidad,
+                    PrecioUnitarioCosto = detalleCompraDto.PrecioUnitarioCosto,
                 };
-                await PopulateDropdownsUsuario();
-                await PopulateDropdownsProducto();
-                await PopulateDropdownsProveedor();
+
+                await PopulateDropdowns();
                 return View(updateDto);
             }
             catch (NotFoundException ex)
@@ -222,28 +237,27 @@ namespace GestionDeInventario.Controllers
             }
             catch (Exception)
             {
-                TempData["ErrorMessage"] = "No se pudo cargar el detalle de la compra para edición.";
+                TempData["ErrorMessage"] = "No se pudo cargar el detalle de compra para edición.";
                 return RedirectToAction(nameof(Index));
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, DetalleCompraUpdateDTO detalleCompraUpdateDTO)
+        public async Task<IActionResult> Edit(int id, DetalleCompraUpdateDTO detalleCompraDto)
         {
             if (!ModelState.IsValid)
             {
-                await PopulateDropdownsUsuario();
-                await PopulateDropdownsProducto();
-                await PopulateDropdownsProveedor();
-                return View(detalleCompraUpdateDTO);
+                await PopulateDropdowns();
+                return View(detalleCompraDto);
             }
+
             try
             {
-                var success = await  _detalleCompraService.UpdateAsync(id, detalleCompraUpdateDTO);
+                var success = await _detalleCompraService.UpdateAsync(id, detalleCompraDto);
                 if (success)
                 {
-                    TempData["Ok"] = "Detalle de la compra actualizado con éxito.";
+                    TempData["Ok"] = "Detalle de compra actualizado con éxito.";
                     return RedirectToAction(nameof(Index));
                 }
                 else
@@ -262,29 +276,36 @@ namespace GestionDeInventario.Controllers
             }
             catch (Exception)
             {
-                ModelState.AddModelError("", "Error al actualizar el detalle de la compra. Verifique si el ID coincide o si la sesión es válida.");
+                ModelState.AddModelError("", "Error al actualizar el detalle de compra. Verifique si el ID coincide o si la sesión es válida.");
             }
-            await PopulateDropdownsUsuario();
-            await PopulateDropdownsProducto();
-            await PopulateDropdownsProveedor();
-            return View(detalleCompraUpdateDTO);
+
+            await PopulateDropdowns();
+            return View(detalleCompraDto);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var detalleCompra = await _detalleCompraService.GetByIdAsync(id);
-            var productos = await _productoService.GetAllAsync();
-            var proveedores = await _proveedorService.GetAllAsync();
-            var usuarios = await _usuarioService.GetAllAsync();
-
-            ViewBag.ProductosNombres = productos?.ToDictionary(d => d.idProducto, d => d.nombre) ?? new Dictionary<int, string>();
-            ViewBag.ProveedoresNombres = proveedores?.ToDictionary(d => d.idProveedor, d => d.nombreEmpresa) ?? new Dictionary<int, string>();
-            ViewBag.UsuariosNombres = usuarios?.ToDictionary(d => d.idUsuario, d => d.nombre) ?? new Dictionary<int, string>();
-            if (detalleCompra == null)
+            try
             {
-                return NotFound();
+                var detalleCompra = await _detalleCompraService.GetByIdAsync(id);
+                var compras = await _compraService.GetAllAsync();
+                var productos = await _productoService.GetAllAsync();
+
+                ViewBag.ComprasNombres = compras?.ToDictionary(c => c.IdCompra, c => c.NumeroFactura) ?? new Dictionary<int, string>();
+                ViewBag.ProductosNombres = productos?.ToDictionary(p => p.idProducto, p => p.nombre) ?? new Dictionary<int, string>();
+
+                if (detalleCompra == null)
+                {
+                    return NotFound();
+                }
+
+                return View(detalleCompra);
             }
-            return View(detalleCompra);
+            catch (NotFoundException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         public async Task<IActionResult> Delete(int id)
@@ -292,17 +313,17 @@ namespace GestionDeInventario.Controllers
             try
             {
                 var detalleCompra = await _detalleCompraService.GetByIdAsync(id);
+                var compras = await _compraService.GetAllAsync();
                 var productos = await _productoService.GetAllAsync();
-                var proveedores = await _proveedorService.GetAllAsync();
-                var usuarios = await _usuarioService.GetAllAsync();
-                ViewBag.ProductosNombres = productos?.ToDictionary(d => d.idProducto, d => d.nombre) ?? new Dictionary<int, string>();
-                ViewBag.ProveedoresNombres = proveedores?.ToDictionary(d => d.idProveedor, d => d.nombreEmpresa) ?? new Dictionary<int, string>();
-                ViewBag.UsuariosNombres = usuarios?.ToDictionary(d => d.idUsuario, d => d.nombre) ?? new Dictionary<int, string>();
+
+                ViewBag.ComprasNombres = compras?.ToDictionary(c => c.IdCompra, c => c.NumeroFactura) ?? new Dictionary<int, string>();
+                ViewBag.ProductosNombres = productos?.ToDictionary(p => p.idProducto, p => p.nombre) ?? new Dictionary<int, string>();
+
                 return View(detalleCompra);
             }
             catch (NotFoundException)
             {
-                TempData["MensajeError"] = "Error: El detalle de la compra solicitado no existe.";
+                TempData["MensajeError"] = "Error: El detalle de compra solicitado no existe.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -314,32 +335,32 @@ namespace GestionDeInventario.Controllers
             try
             {
                 await _detalleCompraService.DeleteAsync(id);
-                TempData["MensajeExito"] = "Detalle de la compra eliminado con éxito.";
+                TempData["MensajeExito"] = "Detalle de compra eliminado con éxito.";
                 return RedirectToAction(nameof(Index));
             }
             catch (NotFoundException)
             {
-                TempData["MensajeError"] = "Error: El detalle de la compra ya no existe o fue eliminado.";
+                TempData["MensajeError"] = "Error: El detalle de compra ya no existe o fue eliminado.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Error al eliminar el detalle de la compra: " + ex.Message);
+                ModelState.AddModelError("", "Error al eliminar el detalle de compra: " + ex.Message);
 
                 try
                 {
                     var detalleCompra = await _detalleCompraService.GetByIdAsync(id);
+                    var compras = await _compraService.GetAllAsync();
                     var productos = await _productoService.GetAllAsync();
-                    var proveedores = await _proveedorService.GetAllAsync();
-                    var usuarios = await _usuarioService.GetAllAsync();
-                    ViewBag.ProductosNombres = productos?.ToDictionary(d => d.idProducto, d => d.nombre) ?? new Dictionary<int, string>();
-                    ViewBag.ProveedoresNombres = proveedores?.ToDictionary(d => d.idProveedor, d => d.nombreEmpresa) ?? new Dictionary<int, string>();
-                    ViewBag.UsuariosNombres = usuarios?.ToDictionary(d => d.idUsuario, d => d.nombre) ?? new Dictionary<int, string>();
+
+                    ViewBag.ComprasNombres = compras?.ToDictionary(c => c.IdCompra, c => c.NumeroFactura) ?? new Dictionary<int, string>();
+                    ViewBag.ProductosNombres = productos?.ToDictionary(p => p.idProducto, p => p.nombre) ?? new Dictionary<int, string>();
+
                     return View("Delete", detalleCompra);
                 }
                 catch (NotFoundException)
                 {
-                    TempData["MensajeError"] = "Error interno: El detalle de la compra fue eliminado antes de mostrar el error.";
+                    TempData["MensajeError"] = "Error interno: El detalle de compra fue eliminado antes de mostrar el error.";
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -364,7 +385,7 @@ namespace GestionDeInventario.Controllers
                 byte[] pdfBytes = pdfGenerator.GenerarArchivoFicha(detalleCompra);
 
                 // Nombre del archivo
-                string nombreArchivo = $"Compra_{detalleCompra.numeroFactura}_{DateTime.Now:yyyyMMdd}.pdf";
+                string nombreArchivo = $"Compra_{detalleCompra.IdDetalleCompra}_{DateTime.Now:yyyyMMdd}.pdf";
 
                 // Retornar archivo
                 return File(pdfBytes, "application/pdf", nombreArchivo);
@@ -372,7 +393,8 @@ namespace GestionDeInventario.Controllers
             catch (Exception ex)
             {
                 // Log del error (opcional)
-                Console.WriteLine($"Error al generar PDF: {ex.Message}");
+                //Console.WriteLine($"Error al generar PDF: {ex.Message}");
+                _logger.LogError(ex, "Error al generar PDF para ID: {Id}", id);
 
                 // Redirigir o mostrar error
                 TempData["ErrorMessage"] = "Error al generar el PDF.";
@@ -409,14 +431,11 @@ namespace GestionDeInventario.Controllers
 
 
 
-        // ACCIÓN PRINCIPAL PARA EXPORTAR EXCEL
+        // ACCIÓN PRINCIPAL PARA EXPORTAR EXCEL (SIMPLIFICADA)
         [HttpGet]
         public async Task<IActionResult> ExportarExcel(
             string numeroFactura = null,
-            DateTime? fechaInicio = null,
-            DateTime? fechaFin = null,
-            int? productoId = null,
-            int? proveedorId = null,
+            string nombreProducto = null, // Cambiado de productoId a nombreProducto
             int maxRegistros = 1000)
         {
             try
@@ -424,30 +443,15 @@ namespace GestionDeInventario.Controllers
                 // Obtener consulta específica para Excel
                 IQueryable<DetalleCompraExcelDTO> query = _detalleCompraService.GetQueryableForExcel();
 
-                // APLICAR FILTROS
+                // APLICAR FILTROS DISPONIBLES
                 if (!string.IsNullOrWhiteSpace(numeroFactura))
                 {
                     query = query.Where(d => d.NumeroFactura.Contains(numeroFactura));
                 }
 
-                if (fechaInicio.HasValue)
+                if (!string.IsNullOrWhiteSpace(nombreProducto))
                 {
-                    query = query.Where(d => d.FechaCompra.Date >= fechaInicio.Value.Date);
-                }
-
-                if (fechaFin.HasValue)
-                {
-                    query = query.Where(d => d.FechaCompra.Date <= fechaFin.Value.Date);
-                }
-
-                if (productoId.HasValue && productoId > 0)
-                {
-                    query = query.Where(d => d.NombreProducto.Contains(productoId.ToString()));
-                }
-
-                if (proveedorId.HasValue && proveedorId > 0)
-                {
-                    query = query.Where(d => d.NombreProveedor.Contains(proveedorId.ToString()));
+                    query = query.Where(d => d.nombre.Contains(nombreProducto));
                 }
 
                 // Limitar cantidad de registros
@@ -480,67 +484,35 @@ namespace GestionDeInventario.Controllers
             }
         }
 
-        // VISTA PARA FORMULARIO DE EXPORTACIÓN
-        [HttpGet]
-        public IActionResult Exportar()
-        {
-            // Opciones para límites
-            ViewBag.MaxRegistrosOpciones = new List<int> { 100, 500, 1000, 5000, 10000 };
-
-            // Puedes cargar listas para dropdowns si es necesario
-            // ViewBag.Productos = await _productoService.GetAllAsync();
-            // ViewBag.Proveedores = await _proveedorService.GetAllAsync();
-
-            return View();
-        }
-
+        // ACCIÓN PARA FORMULARIO POST
         [HttpPost]
         public async Task<IActionResult> Exportar(
             string numeroFactura,
-            DateTime? fechaInicio,
-            DateTime? fechaFin,
-            int? productoId,
-            int? proveedorId,
+            string nombreProducto,
             int maxRegistros = 1000)
         {
             // Redirigir a la acción de exportación con parámetros
-            return RedirectToAction("ExportarExcel", new
-            {
-                numeroFactura,
-                fechaInicio,
-                fechaFin,
-                productoId,
-                proveedorId,
-                maxRegistros
-            });
+            return await ExportarExcel(
+                numeroFactura: numeroFactura,
+                nombreProducto: nombreProducto,
+                maxRegistros: maxRegistros);
         }
 
-        // ACCIÓN RÁPIDA: Exportar con filtros actuales del Index
+        // ACCIÓN RÁPIDA: Exportar con filtros actuales del Index (SIMPLIFICADA)
         [HttpGet]
         public async Task<IActionResult> ExportarRapido()
         {
             try
             {
-                // Obtener parámetros actuales del Index
+                // Obtener parámetros actuales del Index (solo los que existen en el DTO)
                 string numeroFactura = Request.Query["numeroFactura"].ToString();
-                DateTime? fechaCompra = Request.Query["fechaCompra"].Count > 0
-                    ? DateTime.Parse(Request.Query["fechaCompra"])
-                    : null;
-                int? productoId = Request.Query["productoId"].Count > 0
-                    ? int.Parse(Request.Query["productoId"])
-                    : null;
-                int? proveedorId = Request.Query["proveedorId"].Count > 0
-                    ? int.Parse(Request.Query["proveedorId"])
-                    : null;
+                string nombreProducto = Request.Query["nombreProducto"].ToString();
 
-                // Redirigir a ExportarExcel con los parámetros actuales
+                // Redirigir a ExportarExcel con los parámetros disponibles
                 return await ExportarExcel(
-                    numeroFactura,
-                    fechaCompra,
-                    null, // fechaFin
-                    productoId,
-                    proveedorId,
-                    1000);
+                    numeroFactura: !string.IsNullOrEmpty(numeroFactura) ? numeroFactura : null,
+                    nombreProducto: !string.IsNullOrEmpty(nombreProducto) ? nombreProducto : null,
+                    maxRegistros: 1000);
             }
             catch
             {
@@ -549,5 +521,17 @@ namespace GestionDeInventario.Controllers
             }
         }
 
+        // VISTA PARA FORMULARIO DE EXPORTACIÓN (GET - SIMPLIFICADA)
+        [HttpGet]
+        public IActionResult Exportar()
+        {
+            // Opciones para límites
+            ViewBag.MaxRegistrosOpciones = new List<int> { 100, 500, 1000, 5000, 10000 };
+
+            return View();
+        }
+
+
     }
 }
+

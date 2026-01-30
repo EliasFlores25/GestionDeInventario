@@ -3,14 +3,16 @@
 
 @{
     ViewData["Title"] = "Gestión de Detalles de Distribución";
-    var usuarioNombres = ViewBag.UsuariosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
-    var empleadoNombres = ViewBag.EmpleadosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
-    var productoNombres = ViewBag.ProductosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var distribucionesNombres = ViewBag.DistribucionesNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var productosNombres = ViewBag.ProductosNombres as Dictionary<int, string> ?? new Dictionary<int, string>();
 
-    var empleadosList = ViewBag.EmpleadoId as List<SelectListItem> ?? new List<SelectListItem>();
+    var distribucionesList = ViewBag.DistribucionId as List<SelectListItem> ?? new List<SelectListItem>();
+    var productosList = ViewBag.ProductoId as List<SelectListItem> ?? new List<SelectListItem>();
+
     int pageNumber = ViewBag.PageNumber ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalRegistros = ViewBag.TotalRegistros ?? 0;
+    bool isFilterApplied = ViewData["IsFilterApplied"] as bool? ?? false;
 }
 
 <style>
@@ -84,15 +86,6 @@
 
         .btn-secondary:hover {
             background: #f3f4f6;
-        }
-
-    .btn-warning {
-        background: var(--warning);
-        color: white;
-    }
-
-        .btn-warning:hover {
-            background: #d97706;
         }
 
     .btn-sm {
@@ -181,12 +174,6 @@
         border-left: 4px solid var(--danger);
     }
 
-    .alert-warning {
-        background: #fef3c7;
-        color: #92400e;
-        border-left: 4px solid var(--warning);
-    }
-
     .table-desktop {
         display: none;
         background: white;
@@ -199,7 +186,7 @@
         .table-desktop table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1300px;
+            min-width: 1000px;
         }
 
         .table-desktop th {
@@ -216,34 +203,19 @@
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--border);
             vertical-align: middle;
-            white-space: nowrap; /* Evita saltos de línea */
         }
 
         .table-desktop tr:hover {
             background: #f8fafc;
         }
 
-    /* Columnas específicas para mantener contenido en una línea */
-    .td-usuario, .td-empleado, .td-producto {
+    /* Columnas específicas */
+    .td-distribucion, .td-producto {
         max-width: 180px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-
-    .td-motivo {
-        max-width: 200px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        cursor: pointer;
-        color: var(--primary);
-        display: block;
-    }
-
-        .td-motivo:hover {
-            color: #1d4ed8;
-        }
 
     .cards-mobile {
         display: grid;
@@ -296,32 +268,6 @@
         font-weight: 600;
         color: var(--dark);
     }
-
-    .motivo-mobile {
-        max-height: 20px;
-        overflow: hidden;
-        position: relative;
-        cursor: pointer;
-        padding-right: 20px;
-    }
-
-        .motivo-mobile::after {
-            content: '...';
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            background: white;
-            padding-left: 5px;
-        }
-
-        .motivo-mobile.expanded {
-            max-height: none;
-            white-space: pre-wrap;
-        }
-
-            .motivo-mobile.expanded::after {
-                display: none;
-            }
 
     .card-actions {
         display: flex;
@@ -403,130 +349,117 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    .modal-motivo {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
+    .btn-danger {
+        background: var(--danger);
+        color: white;
     }
 
-    .modal-content {
-        background: white;
-        padding: 2rem;
-        border-radius: 10px;
-        max-width: 500px;
-        width: 90%;
-        max-height: 80vh;
-        overflow-y: auto;
-    }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
 
     @@media (min-width: 768px) {
-        .container-distribuciones {
-            padding: 1.5rem;
-        }
+        .container-distribuciones
 
-        .table-desktop {
-            display: block;
-        }
+    {
+        padding: 1.5rem;
+    }
 
-        .cards-mobile {
-            display: none;
-        }
+    .table-desktop {
+        display: block;
+    }
 
-        .header h1 {
-            font-size: 1.75rem;
-        }
+    .cards-mobile {
+        display: none;
+    }
+
+    .header h1 {
+        font-size: 1.75rem;
+    }
+
     }
 
     @@media (max-width: 767px) {
-        .table-desktop {
-            display: none;
-        }
+        .table-desktop
 
-        .cards-mobile {
-            display: grid;
-        }
-
-        .header {
-            padding: 0.75rem;
-        }
-
-        .filter-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .card-info {
-            grid-template-columns: 1fr;
-        }
+    {
+        display: none;
     }
 
-    /* Botones en móvil - una línea */
-    @@media (max-width: 767px) {
-        .filter-actions {
-            gap: 0.4rem;
-            justify-content: center;
-        }
+    .cards-mobile {
+        display: grid;
+    }
 
-            .filter-actions .btn {
-                padding: 0.4rem 0.6rem;
-                font-size: 0.8rem;
-                min-width: 0;
-                flex: 1 1 auto;
-            }
+    .header {
+        padding: 0.75rem;
+    }
+
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-info {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    /* Responsive para filtros */
+    @@media (max-width: 767px) {
+        .filter-actions
+
+    {
+        gap: 0.4rem;
+        justify-content: center;
+    }
+
+    .filter-actions .btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+        flex: 1 1 auto;
+    }
+
     }
 
     @@media (max-width: 480px) {
-        .filter-actions {
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            padding-bottom: 0.25rem;
-            justify-content: flex-start;
-        }
+        .filter-actions
 
-            .filter-actions .btn {
-                flex-shrink: 0;
-                white-space: nowrap;
-            }
-                /* Solo íconos en móvil pequeño */
-                .filter-actions .btn span {
-                    display: none;
-                }
-
-                .filter-actions .btn i {
-                    margin-right: 0;
-                    font-size: 1rem;
-                }
-
-        .btn-excel, .btn-excel-filtered {
-            min-width: 40px;
-            width: 40px;
-            justify-content: center;
-            padding: 0.4rem;
-        }
+    {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        justify-content: flex-start;
     }
 
-    .btn-danger:hover {
-        background: #dc2626;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+    .filter-actions .btn {
+        flex-shrink: 0;
+        white-space: nowrap;
     }
 
-    .btn-sm:hover {
-        transform: scale(1.1);
+        .filter-actions .btn span {
+            display: none;
+        }
+
+        .filter-actions .btn i {
+            margin-right: 0;
+            font-size: 1rem;
+        }
+
+    .btn-excel, .btn-excel-filtered {
+        min-width: 40px;
+        width: 40px;
+        justify-content: center;
+        padding: 0.4rem;
+    }
+
     }
 </style>
 
 <div class="container-distribuciones">
     <div class="header">
-        <h1><i class="fas fa-truck-moving"></i> @ViewData["Title"]</h1>
+        <h1><i class="fas fa-boxes"></i> @ViewData["Title"]</h1>
         <div class="d-flex gap-2">
-            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Nueva Distribución</a>
+            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Nuevo Detalle</a>
             <button class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#filters">
                 <i class="fas fa-filter"></i> Filtros
             </button>
@@ -548,17 +481,22 @@
 
     <div class="filters collapse" id="filters">
         <form asp-action="Index" method="get">
-            <input type="hidden" name="page" value="1" />
+            <input type="hidden" name="pageNumber" value="1" />
             <div class="filter-grid">
-                <input type="text" class="form-control" name="numeroDistribucion" placeholder="Número de Distribución" value="@ViewBag.CurrentFactura">
-                <input type="date" class="form-control" name="fechaSalida" value="@(ViewBag.CurrentFecha?.ToString("yyyy-MM-dd"))">
-                <select class="form-select" name="empleadoId">
-                    <option value="">Todos los empleados</option>
-                    @foreach (var item in empleadosList)
+                <select class="form-select" name="distribucionId">
+                    @foreach (var item in distribucionesList)
                     {
-                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentProducto?.ToString())">@item.Text</option>
+                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentDistribucionId?.ToString())">@item.Text</option>
                     }
                 </select>
+                <select class="form-select" name="productoId">
+                    @foreach (var item in productosList)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == ViewBag.CurrentProductoId?.ToString())">@item.Text</option>
+                    }
+                </select>
+                <input type="number" class="form-control" name="cantidadMin" placeholder="Cantidad mínima" value="@ViewBag.CurrentCantidadMin">
+                <input type="number" class="form-control" name="cantidadMax" placeholder="Cantidad máxima" value="@ViewBag.CurrentCantidadMax">
             </div>
             <div class="filter-actions">
                 <a asp-action="Exportar" class="btn btn-excel">
@@ -567,6 +505,12 @@
                 <a asp-action="ExportarRapido" class="btn btn-excel-filtered">
                     <i class="fas fa-download"></i> <span>Exportar Filtros</span>
                 </a>
+                @if (isFilterApplied)
+                {
+                    <a asp-action="ExportarRapido" class="btn btn-excel-filtered">
+                        <i class="fas fa-download"></i> <span>Exportar Filtros</span>
+                    </a>
+                }
                 <a asp-action="Index" class="btn btn-secondary">
                     <i class="fas fa-times"></i> <span>Limpiar</span>
                 </a>
@@ -582,14 +526,10 @@
             <thead>
                 <tr>
                     <th>Distribución</th>
-                    <th>Fecha Salida</th>
-                    <th>Usuario</th>
-                    <th>Empleado</th>
                     <th>Producto</th>
                     <th>Cantidad</th>
-                    <th>Motivo</th>
                     <th>Precio Unitario</th>
-                    <th>Monto Total</th>
+                    <th>Subtotal</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -599,32 +539,19 @@
                     foreach (var item in Model)
                     {
                         <tr>
-                            <td>
-                                <span class="badge badge-primary">@item.NumeroDistribucion</span>
+                           
+                            <td class="td-distribucion" title="@distribucionesNombres.GetValueOrDefault(item.DistribucionId, "N/A")">
+                                @distribucionesNombres.GetValueOrDefault(item.DistribucionId, "N/A")
                             </td>
-                            <td>
-                                @item.FechaSalida.ToString("dd/MM/yyyy")
-                            </td>
-                            <td class="td-usuario" title="@usuarioNombres.GetValueOrDefault(item.UsuarioId, "N/A")">
-                                @usuarioNombres.GetValueOrDefault(item.UsuarioId, "N/A")
-                            </td>
-                            <td class="td-empleado" title="@empleadoNombres.GetValueOrDefault(item.EmpleadoId, "N/A")">
-                                @empleadoNombres.GetValueOrDefault(item.EmpleadoId, "N/A")
-                            </td>
-                            <td class="td-producto" title="@productoNombres.GetValueOrDefault(item.ProductoId, "N/A")">
-                                @productoNombres.GetValueOrDefault(item.ProductoId, "N/A")
+                            <td class="td-producto" title="@productosNombres.GetValueOrDefault(item.ProductoId, "N/A")">
+                                @productosNombres.GetValueOrDefault(item.ProductoId, "N/A")
                             </td>
                             <td>
                                 <span class="badge badge-success">@item.Cantidad</span>
                             </td>
-                            <td>
-                                <span class="td-motivo" onclick="mostrarMotivo('@Html.Raw(item.Motivo?.Replace("'", "\\'"))')" title="@item.Motivo">
-                                    @item.Motivo
-                                </span>
-                            </td>
                             <td class="monetary-value">@item.PrecioCostoUnitario.ToString("C")</td>
                             <td class="monetary-value">
-                                <strong>@item.MontoTotal.ToString("C")</strong>
+                                <strong>@item.Subtotal.ToString("C")</strong>
                             </td>
                             <td>
                                 <div class="d-flex gap-1 justify-content-center">
@@ -637,9 +564,11 @@
                                     <a asp-action="Delete" asp-route-id="@item.IdDetalleDistribucion" class="btn btn-secondary btn-sm" title="Eliminar">
                                         <i class="fas fa-trash"></i>
                                     </a>
-                                    <a asp-controller="DetalleDistribucion" asp-action="DescargarPdf" asp-route-id="@item.IdDetalleDistribucion" target="_blank" class="btn btn-danger btn-sm" title="Generar Reporte PDF">
+                                    <a asp-action="DescargarPdf" asp-route-id="@item.IdDetalleDistribucion"
+                                       target="_blank" class="btn btn-danger btn-sm" title="Generar PDF">
                                         <i class="fas fa-file-pdf"></i>
                                     </a>
+
                                 </div>
                             </td>
                         </tr>
@@ -648,10 +577,10 @@
                 else
                 {
                     <tr>
-                        <td colspan="10" class="empty-state">
-                            <i class="fas fa-truck-loading fa-2x mb-2"></i>
-                            <p>No hay distribuciones registradas</p>
-                            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Crear Primera Distribución</a>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-boxes fa-2x mb-2"></i>
+                            <p>No hay detalles de distribución registrados</p>
+                            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Crear Primer Detalle</a>
                         </td>
                     </tr>
                 }
@@ -666,40 +595,25 @@
             {
                 <div class="card">
                     <div class="card-header">
-                        <div>
-                            <strong><i class="fas fa-hashtag"></i> @item.NumeroDistribucion</strong>
-                            <div class="text-muted small mt-1">
-                                <i class="fas fa-calendar-alt"></i> @item.FechaSalida.ToString("dd/MM/yyyy")
-                            </div>
-                        </div>
+                        <strong>
+                            Distribución: @distribucionesNombres.GetValueOrDefault(item.DistribucionId, "N/A")
+                        </strong>
                         <span class="badge badge-success">@item.Cantidad unidades</span>
                     </div>
                     <div class="card-info">
                         <div class="info-item">
-                            <span class="info-label">Usuario</span>
-                            <span class="info-value">@usuarioNombres.GetValueOrDefault(item.UsuarioId, "N/A")</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Empleado</span>
-                            <span class="info-value">@empleadoNombres.GetValueOrDefault(item.EmpleadoId, "N/A")</span>
-                        </div>
-                        <div class="info-item">
                             <span class="info-label">Producto</span>
-                            <span class="info-value">@productoNombres.GetValueOrDefault(item.ProductoId, "N/A")</span>
+                            <span class="info-value">@productosNombres.GetValueOrDefault(item.ProductoId, "N/A")</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Precio Unitario</span>
                             <span class="info-value monetary-value">@item.PrecioCostoUnitario.ToString("C")</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Monto Total</span>
+                            <span class="info-label">Subtotal</span>
                             <span class="info-value monetary-value">
-                                <strong>@item.MontoTotal.ToString("C")</strong>
+                                <strong>@item.Subtotal.ToString("C")</strong>
                             </span>
-                        </div>
-                        <div class="info-item" style="grid-column: 1 / -1;">
-                            <span class="info-label">Motivo</span>
-                            <div class="info-value motivo-mobile" onclick="this.classList.toggle('expanded')">@item.Motivo</div>
                         </div>
                     </div>
                     <div class="card-actions">
@@ -716,9 +630,9 @@
         else
         {
             <div class="empty-state">
-                <i class="fas fa-truck-loading fa-2x mb-2"></i>
-                <p>No hay distribuciones registradas</p>
-                <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Crear Primera Distribución</a>
+                <i class="fas fa-boxes fa-2x mb-2"></i>
+                <p>No hay detalles de distribución registrados</p>
+                <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Crear Primer Detalle</a>
             </div>
         }
     </div>
@@ -728,13 +642,14 @@
         <div class="pagination-container">
             <nav>
                 <ul class="pagination">
-                    @if (pageNumber > 1)
+                    @if (ViewBag.HasPreviousPage)
                     {
                         <li>
                             <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber - 1)"
-                               asp-route-numeroDistribucion="@ViewBag.CurrentFactura"
-                               asp-route-fechaSalida="@(ViewBag.CurrentFecha?.ToString("yyyy-MM-dd"))"
-                               asp-route-empleadoId="@ViewBag.CurrentProducto">
+                               asp-route-distribucionId="@ViewBag.CurrentDistribucionId"
+                               asp-route-productoId="@ViewBag.CurrentProductoId"
+                               asp-route-cantidadMin="@ViewBag.CurrentCantidadMin"
+                               asp-route-cantidadMax="@ViewBag.CurrentCantidadMax">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                         </li>
@@ -745,9 +660,10 @@
                         {
                             <li>
                                 <a class="page-link @(i == pageNumber ? "active" : "")" asp-action="Index" asp-route-pageNumber="@i"
-                                   asp-route-numeroDistribucion="@ViewBag.CurrentFactura"
-                                   asp-route-fechaSalida="@(ViewBag.CurrentFecha?.ToString("yyyy-MM-dd"))"
-                                   asp-route-empleadoId="@ViewBag.CurrentProducto">
+                                   asp-route-distribucionId="@ViewBag.CurrentDistribucionId"
+                                   asp-route-productoId="@ViewBag.CurrentProductoId"
+                                   asp-route-cantidadMin="@ViewBag.CurrentCantidadMin"
+                                   asp-route-cantidadMax="@ViewBag.CurrentCantidadMax">
                                     @i
                                 </a>
                             </li>
@@ -757,13 +673,14 @@
                             <li><span class="page-link disabled">...</span></li>
                         }
                     }
-                    @if (pageNumber < totalPages)
+                    @if (ViewBag.HasNextPage)
                     {
                         <li>
                             <a class="page-link" asp-action="Index" asp-route-pageNumber="@(pageNumber + 1)"
-                               asp-route-numeroDistribucion="@ViewBag.CurrentFactura"
-                               asp-route-fechaSalida="@(ViewBag.CurrentFecha?.ToString("yyyy-MM-dd"))"
-                               asp-route-empleadoId="@ViewBag.CurrentProducto">
+                               asp-route-distribucionId="@ViewBag.CurrentDistribucionId"
+                               asp-route-productoId="@ViewBag.CurrentProductoId"
+                               asp-route-cantidadMin="@ViewBag.CurrentCantidadMin"
+                               asp-route-cantidadMax="@ViewBag.CurrentCantidadMax">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>
@@ -776,35 +693,25 @@
 
 @section Scripts {
     <script>
-        function mostrarMotivo(motivo) {
-            motivo = motivo.replace(/\\'/g, "'");
-            const modal = $(`
-                <div class="modal-motivo">
-                    <div class="modal-content">
-                        <h4><i class="fas fa-clipboard-list"></i> Motivo de Distribución</h4>
-                        <p style="word-break: break-word; white-space: pre-wrap;">${motivo}</p>
-                        <button class="btn btn-primary" onclick="$(this).closest('.modal-motivo').remove()">
-                            <i class="fas fa-times"></i> Cerrar
-                        </button>
-                    </div>
-                </div>
-            `);
-            modal.on('click', e => { if (e.target === modal[0]) modal.remove(); });
-            $('body').append(modal);
-        }
-
         $(document).ready(function() {
-            setTimeout(() => $('.alert').fadeOut(300, function() { $(this).remove(); }), 4000);
+            // Auto-hide alerts after 4 seconds
+            setTimeout(() => {
+                $('.alert').fadeOut(300, function() { $(this).remove(); });
+            }, 4000);
 
+            // Cambiar ícono del botón de filtros
             $('#filters').on('show.bs.collapse', function() {
                 $('[data-bs-target="#filters"] i').removeClass('fa-filter').addClass('fa-times');
             }).on('hide.bs.collapse', function() {
                 $('[data-bs-target="#filters"] i').removeClass('fa-times').addClass('fa-filter');
             });
 
+            // Smooth scroll al cambiar de página
             $(document).on('click', '.page-link', function(e) {
                 if (!$(this).hasClass('disabled') && !$(this).hasClass('active')) {
-                    $('html, body').animate({ scrollTop: $('.container-distribuciones').offset().top - 20 }, 300);
+                    $('html, body').animate({
+                        scrollTop: $('.container-distribuciones').offset().top - 20
+                    }, 300);
                 }
             });
         });

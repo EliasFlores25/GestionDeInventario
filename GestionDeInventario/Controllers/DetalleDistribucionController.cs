@@ -1,5 +1,6 @@
 ﻿using GestionDeInventario.DTOs.DetalleDistribucionDTOs;
 using GestionDeInventario.Services.Exceptions;
+using GestionDeInventario.Services.Implementations;
 using GestionDeInventario.Services.Interfaces;
 using GestionDeInventario.Utilidades;
 using Microsoft.AspNetCore.Authorization;
@@ -9,112 +10,114 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GestionDeInventario.Controllers
 {
+    [Authorize(Roles = "Administrador")]
     public class DetalleDistribucionController : Controller
     {
         private readonly IDetalleDistribucionService _detalleDistribucionService;
-        private readonly IUsuarioService _usuarioService;
-        private readonly IEmpleadoService _empleadoService;
-        public readonly IProductoService _productoService;
+        private readonly IDistribucionService _distribucionService;
+        private readonly IProductoService _productoService;
+        private readonly ILogger<DetalleDistribucionController> _logger;
         private readonly ExcelExporter _excelExporter;
-        public DetalleDistribucionController(IDetalleDistribucionService dDetalleservice, IUsuarioService usuarioService, IEmpleadoService empleadoService, IProductoService productoService, ExcelExporter excelExporter)
+
+        public DetalleDistribucionController(
+            IDetalleDistribucionService detalleDistribucionService,
+            IDistribucionService distribucionService,
+            IProductoService productoService,
+            ExcelExporter excelExporter,
+            ILogger<DetalleDistribucionController> logger)
         {
-            _detalleDistribucionService = dDetalleservice;
-            _usuarioService = usuarioService;
-            _empleadoService = empleadoService;
+            _detalleDistribucionService = detalleDistribucionService;
+            _distribucionService = distribucionService;
             _productoService = productoService;
             _excelExporter = excelExporter;
+            _logger = logger;
         }
-        private async Task PopulateDropdownsUsuario()
+
+        private async Task PopulateDropdowns()
         {
-            var usuarios = await _usuarioService.GetAllAsync();
-            ViewBag.usuarioId = new SelectList(usuarios, "idUsuario", "nombre");
-        }
-        private async Task PopulateDropdownsProducto()
-        {
+            var distribuciones = await _distribucionService.GetAllAsync();
             var productos = await _productoService.GetAllAsync();
-            ViewBag.productoId = new SelectList(productos, "idProducto", "nombre");
-        }
-        private async Task PopulateDropdownsEmpleado()
-        {
-            var empleados = await _empleadoService.GetAllAsync();
-            ViewBag.empleadoId = new SelectList(empleados, "idEmpleado", "nombre");
+
+            ViewBag.DistribucionId = new SelectList(distribuciones, "IdDistribucion", "NumeroDistribucion");
+            ViewBag.ProductoId = new SelectList(productos, "idProducto", "nombre");
         }
 
-        private async Task PopulateUsuarioNamesViewBag()
+        private async Task PopulateFilterDropdowns()
         {
-            var usuarios = await _usuarioService.GetAllAsync();
+            var distribuciones = await _distribucionService.GetAllAsync();
+            var productos = await _productoService.GetAllAsync();
 
-            var usuariosList = usuarios.Select(d => new SelectListItem
+            // Para filtros
+            var distribucionesList = distribuciones.Select(d => new SelectListItem
             {
-                Value = d.idUsuario.ToString(),
-                Text = d.nombre
+                Value = d.IdDistribucion.ToString(),
+                Text = d.NumeroDistribucion
             }).ToList();
-            usuariosList.Insert(0, new SelectListItem { Value = "", Text = "Todos los Usuarios" });
-            ViewBag.usuarioId = usuariosList;
+            distribucionesList.Insert(0, new SelectListItem { Value = "", Text = "Todas las Distribuciones" });
+            ViewBag.DistribucionId = distribucionesList;
 
-            ViewBag.UsuariosNombres = usuarios.ToDictionary(d => d.idUsuario, d => d.nombre);
-        }
-        private async Task PopulateProductoNamesViewBag()
-        {
-            var productos = await _productoService.GetAllAsync();
-
-            var productosList = productos.Select(d => new SelectListItem
+            var productosList = productos.Select(p => new SelectListItem
             {
-                Value = d.idProducto.ToString(),
-                Text = d.nombre
+                Value = p.idProducto.ToString(),
+                Text = p.nombre
             }).ToList();
             productosList.Insert(0, new SelectListItem { Value = "", Text = "Todos los Productos" });
-            ViewBag.productoId = productosList;
+            ViewBag.ProductoId = productosList;
 
-            ViewBag.ProductosNombres = productos.ToDictionary(d => d.idProducto, d => d.nombre);
+            // Para mostrar nombres en vistas
+            ViewBag.DistribucionesNombres = distribuciones.ToDictionary(d => d.IdDistribucion, d => d.NumeroDistribucion);
+            ViewBag.ProductosNombres = productos.ToDictionary(p => p.idProducto, p => p.nombre);
         }
-        private async Task PopulateEmpleadoNamesViewBag()
+
+        public async Task<IActionResult> Index(
+            int? distribucionId,
+            int? productoId,
+            int? cantidadMin,
+            int? cantidadMax,
+            int pageNumber = 1,
+            int pageSize = 5)
         {
-            var empleados = await _empleadoService.GetAllAsync();
+            await PopulateFilterDropdowns();
 
-            var empleadosList = empleados.Select(d => new SelectListItem
-            {
-                Value = d.idEmpleado.ToString(),
-                Text = $"{d.nombre} {d.apellido}"
-            }).ToList();
-
-            empleadosList.Insert(0, new SelectListItem { Value = "", Text = "Todos los Empleados" });
-            ViewBag.empleadoId = empleadosList;
-
-            ViewBag.EmpleadosNombres = empleados.ToDictionary(
-                d => d.idEmpleado,
-                d => $"{d.nombre} {d.apellido}"
-                );
-        }
-        public async Task<IActionResult> Index(string numeroDistribucion, DateTime? fechaSalida, int? empleadoId, int pageNumber = 1, int pageSize = 5)
-        {
-            await PopulateUsuarioNamesViewBag();
-            await PopulateProductoNamesViewBag();
-            await PopulateEmpleadoNamesViewBag();
             IQueryable<DetalleDistribucionResponseDTO> query = _detalleDistribucionService.GetQueryable();
-            if (!string.IsNullOrWhiteSpace(numeroDistribucion))
+
+            if (distribucionId.HasValue && distribucionId.Value > 0)
             {
-                string n_numeroDistribucion = numeroDistribucion.ToLower();
-                query = query.Where(c => c.NumeroDistribucion.ToLower().Contains(n_numeroDistribucion));
+                query = query.Where(d => d.DistribucionId == distribucionId.Value);
             }
-            if (fechaSalida.HasValue)
-                query = query.Where(c => c.FechaSalida.Date == fechaSalida.Value.Date);
-            if (empleadoId is > 0)
-                query = query.Where(c => c.EmpleadoId == empleadoId);
+
+            if (productoId.HasValue && productoId.Value > 0)
+            {
+                query = query.Where(d => d.ProductoId == productoId.Value);
+            }
+
+            if (cantidadMin.HasValue)
+            {
+                query = query.Where(d => d.Cantidad >= cantidadMin.Value);
+            }
+
+            if (cantidadMax.HasValue)
+            {
+                query = query.Where(d => d.Cantidad <= cantidadMax.Value);
+            }
+
             try
             {
                 int totalRegistros = await query.CountAsync();
                 int totalPages = (int)Math.Ceiling((double)totalRegistros / pageSize);
+
                 pageNumber = Math.Max(1, Math.Min(pageNumber, totalPages > 0 ? totalPages : 1));
 
                 var listaPaginada = await query
-                  .Skip((pageNumber - 1) * pageSize)
-                  .Take(pageSize)
-                  .ToListAsync();
+                    .OrderByDescending(d => d.IdDetalleDistribucion)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
 
-                ViewBag.CurrentFactura = numeroDistribucion;
-                ViewBag.CurrentFecha = fechaSalida;
-                ViewBag.CurrentProducto = empleadoId;
+                ViewBag.CurrentDistribucionId = distribucionId;
+                ViewBag.CurrentProductoId = productoId;
+                ViewBag.CurrentCantidadMin = cantidadMin;
+                ViewBag.CurrentCantidadMax = cantidadMax;
 
                 ViewBag.PageNumber = pageNumber;
                 ViewBag.TotalPages = totalPages;
@@ -123,95 +126,93 @@ namespace GestionDeInventario.Controllers
                 ViewBag.HasPreviousPage = pageNumber > 1;
                 ViewBag.HasNextPage = pageNumber < totalPages;
 
-                if (!string.IsNullOrWhiteSpace(numeroDistribucion) || fechaSalida.HasValue || empleadoId > 0)
+                if (distribucionId.HasValue && distribucionId.Value > 0 ||
+                    productoId.HasValue && productoId.Value > 0 ||
+                    cantidadMin.HasValue || cantidadMax.HasValue)
                 {
                     ViewData["IsFilterApplied"] = true;
                 }
+
                 return View(listaPaginada);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error al cargar la lista: " + ex.Message;
+                TempData["Error"] = "Ocurrió un error al cargar la lista de detalles de distribución: " + ex.Message;
+                await PopulateFilterDropdowns();
 
                 ViewBag.PageNumber = 1;
                 ViewBag.TotalPages = 1;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalRegistros = 0;
+                ViewBag.HasPreviousPage = false;
+                ViewBag.HasNextPage = false;
+
                 return View(new List<DetalleDistribucionResponseDTO>());
             }
         }
 
         public async Task<IActionResult> Create()
         {
-            await PopulateDropdownsUsuario();
-            await PopulateDropdownsProducto();
-            await PopulateDropdownsEmpleado();
+            await PopulateDropdowns();
             return View(new DetalleDistribucionCreateDTO());
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DetalleDistribucionCreateDTO detalleDistribucionDto)
         {
             if (!ModelState.IsValid)
             {
-                await PopulateDropdownsUsuario();
-                await PopulateDropdownsProducto();
-                await PopulateDropdownsEmpleado();
+                await PopulateDropdowns();
                 return View(detalleDistribucionDto);
             }
+
             try
             {
                 var nuevoDetalle = await _detalleDistribucionService.AddAsync(detalleDistribucionDto);
                 if (nuevoDetalle == null)
                 {
-                    ModelState.AddModelError("", "No se pudo crear el detalle de la distribución.");
-                    await PopulateDropdownsUsuario();
-                    await PopulateDropdownsProducto();
-                    await PopulateDropdownsEmpleado();
+                    ModelState.AddModelError("", "No se pudo crear el detalle de distribución.");
+                    await PopulateDropdowns();
                     return View(detalleDistribucionDto);
                 }
-                TempData["Ok"] = "Detalle de la distribución creado con éxito.";
+
+                TempData["Ok"] = "Detalle de distribución creado con éxito.";
                 return RedirectToAction(nameof(Index));
             }
             catch (BusinessRuleException brex)
             {
                 ModelState.AddModelError(string.Empty, brex.Message);
-                await PopulateDropdownsUsuario();
-                await PopulateDropdownsProducto();
-                await PopulateDropdownsEmpleado();
+                await PopulateDropdowns();
                 return View(detalleDistribucionDto);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Error al crear el detalle de la distribución: " + ex.Message);
-                await PopulateDropdownsUsuario();
-                await PopulateDropdownsProducto();
-                await PopulateDropdownsEmpleado();
+                ModelState.AddModelError("", "Error al crear el detalle de distribución: " + ex.Message);
+                await PopulateDropdowns();
                 return View(detalleDistribucionDto);
             }
         }
+
         public async Task<IActionResult> Edit(int id)
         {
             try
             {
-                var detalleDto = await _detalleDistribucionService.GetByIdAsync(id);
-                if (detalleDto == null)
+                var detalleDistribucionDto = await _detalleDistribucionService.GetByIdAsync(id);
+                if (detalleDistribucionDto == null)
                 {
                     return NotFound();
                 }
+
                 var updateDto = new DetalleDistribucionUpdateDTO
                 {
-                    NumeroDistribucion = detalleDto.NumeroDistribucion,
-                    UsuarioId = detalleDto.UsuarioId,
-                    EmpleadoId = detalleDto.EmpleadoId,
-                    ProductoId = detalleDto.ProductoId,
-                    Cantidad = detalleDto.Cantidad,
-                    FechaSalida = detalleDto.FechaSalida,
-                    Motivo = detalleDto.Motivo,
-                    MontoTotal = detalleDto.MontoTotal,
-                    PrecioCostoUnitario = detalleDto.PrecioCostoUnitario
+                    IdDetalleDistribucion = detalleDistribucionDto.IdDetalleDistribucion,
+                    DistribucionId = detalleDistribucionDto.DistribucionId,
+                    ProductoId = detalleDistribucionDto.ProductoId,
+                    Cantidad = detalleDistribucionDto.Cantidad,
                 };
-                await PopulateDropdownsUsuario();
-                await PopulateDropdownsProducto();
-                await PopulateDropdownsEmpleado();
+
+                await PopulateDropdowns();
                 return View(updateDto);
             }
             catch (NotFoundException ex)
@@ -221,27 +222,27 @@ namespace GestionDeInventario.Controllers
             }
             catch (Exception)
             {
-                TempData["ErrorMessage"] = "No se pudo cargar el detalle de la distribución para edición.";
+                TempData["ErrorMessage"] = "No se pudo cargar el detalle de distribución para edición.";
                 return RedirectToAction(nameof(Index));
             }
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, DetalleDistribucionUpdateDTO detalleDistribucionUpdateDTO)
+        public async Task<IActionResult> Edit(int id, DetalleDistribucionUpdateDTO detalleDistribucionDto)
         {
             if (!ModelState.IsValid)
             {
-                await PopulateDropdownsUsuario();
-                await PopulateDropdownsProducto();
-                await PopulateDropdownsEmpleado();
-                return View(detalleDistribucionUpdateDTO);
+                await PopulateDropdowns();
+                return View(detalleDistribucionDto);
             }
+
             try
             {
-                var success = await _detalleDistribucionService.UpdateAsync(id, detalleDistribucionUpdateDTO);
+                var success = await _detalleDistribucionService.UpdateAsync(id, detalleDistribucionDto);
                 if (success)
                 {
-                    TempData["Ok"] = "Detalle de la distribución actualizado con éxito.";
+                    TempData["Ok"] = "Detalle de distribución actualizado con éxito.";
                     return RedirectToAction(nameof(Index));
                 }
                 else
@@ -260,45 +261,54 @@ namespace GestionDeInventario.Controllers
             }
             catch (Exception)
             {
-                ModelState.AddModelError("", "Error al actualizar el detalle de la distribución. Verifique si el ID coincide o si la sesión es válida.");
+                ModelState.AddModelError("", "Error al actualizar el detalle de distribución. Verifique si el ID coincide o si la sesión es válida.");
             }
-            await PopulateDropdownsUsuario();
-            await PopulateDropdownsProducto();
-            await PopulateDropdownsEmpleado();
-            return View(detalleDistribucionUpdateDTO);
+
+            await PopulateDropdowns();
+            return View(detalleDistribucionDto);
         }
+
         public async Task<IActionResult> Details(int id)
         {
-            var detalleDistribucion = await _detalleDistribucionService.GetByIdAsync(id);
-            var empleados = await _empleadoService.GetAllAsync();
-            var productos = await _productoService.GetAllAsync();
-            var usuarios = await _usuarioService.GetAllAsync();
-
-            ViewBag.EmpleadosNombres = empleados?.ToDictionary(d => d.idEmpleado, d => d.nombre) ?? new Dictionary<int, string>();
-            ViewBag.ProductosNombres = productos?.ToDictionary(d => d.idProducto, d => d.nombre) ?? new Dictionary<int, string>();
-            ViewBag.UsuariosNombres = usuarios?.ToDictionary(d => d.idUsuario, d => d.nombre) ?? new Dictionary<int, string>();
-            if (detalleDistribucion == null)
+            try
             {
-                return NotFound();
+                var detalleDistribucion = await _detalleDistribucionService.GetByIdAsync(id);
+                var distribuciones = await _distribucionService.GetAllAsync();
+                var productos = await _productoService.GetAllAsync();
+
+                ViewBag.DistribucionesNombres = distribuciones?.ToDictionary(d => d.IdDistribucion, d => d.NumeroDistribucion) ?? new Dictionary<int, string>();
+                ViewBag.ProductosNombres = productos?.ToDictionary(p => p.idProducto, p => p.nombre) ?? new Dictionary<int, string>();
+
+                if (detalleDistribucion == null)
+                {
+                    return NotFound();
+                }
+
+                return View(detalleDistribucion);
             }
-            return View(detalleDistribucion);
+            catch (NotFoundException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
+
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
                 var detalleDistribucion = await _detalleDistribucionService.GetByIdAsync(id);
-                var empleados = await _empleadoService.GetAllAsync();
+                var distribuciones = await _distribucionService.GetAllAsync();
                 var productos = await _productoService.GetAllAsync();
-                var usuarios = await _usuarioService.GetAllAsync();
-                ViewBag.EmpleadosNombres = empleados?.ToDictionary(d => d.idEmpleado, d => d.nombre) ?? new Dictionary<int, string>();
-                ViewBag.ProductosNombres = productos?.ToDictionary(d => d.idProducto, d => d.nombre) ?? new Dictionary<int, string>();
-                ViewBag.UsuariosNombres = usuarios?.ToDictionary(d => d.idUsuario, d => d.nombre) ?? new Dictionary<int, string>();
+
+                ViewBag.DistribucionesNombres = distribuciones?.ToDictionary(d => d.IdDistribucion, d => d.NumeroDistribucion) ?? new Dictionary<int, string>();
+                ViewBag.ProductosNombres = productos?.ToDictionary(p => p.idProducto, p => p.nombre) ?? new Dictionary<int, string>();
+
                 return View(detalleDistribucion);
             }
             catch (NotFoundException)
             {
-                TempData["MensajeError"] = "Error: El detalle de la distribución solicitado no existe.";
+                TempData["MensajeError"] = "Error: El detalle de distribución solicitado no existe.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -310,36 +320,146 @@ namespace GestionDeInventario.Controllers
             try
             {
                 await _detalleDistribucionService.DeleteAsync(id);
-                TempData["MensajeExito"] = "Detalle de la distribución eliminado con éxito.";
+                TempData["MensajeExito"] = "Detalle de distribución eliminado con éxito.";
                 return RedirectToAction(nameof(Index));
             }
             catch (NotFoundException)
             {
-                TempData["MensajeError"] = "Error: El detalle de la distribución ya no existe o fue eliminado.";
+                TempData["MensajeError"] = "Error: El detalle de distribución ya no existe o fue eliminado.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Error al eliminar el detalle de la distribución: " + ex.Message);
+                ModelState.AddModelError("", "Error al eliminar el detalle de distribución: " + ex.Message);
 
                 try
                 {
                     var detalleDistribucion = await _detalleDistribucionService.GetByIdAsync(id);
-                    var empleados = await _empleadoService.GetAllAsync();
+                    var distribuciones = await _distribucionService.GetAllAsync();
                     var productos = await _productoService.GetAllAsync();
-                    var usuarios = await _usuarioService.GetAllAsync();
-                    ViewBag.EmpleadosNombres = empleados?.ToDictionary(d => d.idEmpleado, d => d.nombre) ?? new Dictionary<int, string>();
-                    ViewBag.ProductosNombres = productos?.ToDictionary(d => d.idProducto, d => d.nombre) ?? new Dictionary<int, string>();
-                    ViewBag.UsuariosNombres = usuarios?.ToDictionary(d => d.idUsuario, d => d.nombre) ?? new Dictionary<int, string>();
-                    return View(detalleDistribucion);
+
+                    ViewBag.DistribucionesNombres = distribuciones?.ToDictionary(d => d.IdDistribucion, d => d.NumeroDistribucion) ?? new Dictionary<int, string>();
+                    ViewBag.ProductosNombres = productos?.ToDictionary(p => p.idProducto, p => p.nombre) ?? new Dictionary<int, string>();
+
+                    return View("Delete", detalleDistribucion);
                 }
                 catch (NotFoundException)
                 {
-                    TempData["MensajeError"] = "Error interno: El detalle de la distribución fue eliminado antes de mostrar el error.";
+                    TempData["MensajeError"] = "Error interno: El detalle de distribución fue eliminado antes de mostrar el error.";
                     return RedirectToAction(nameof(Index));
                 }
             }
         }
+
+        // Métodos para Excel
+
+        // ACCIÓN PRINCIPAL PARA EXPORTAR EXCEL (SIN FECHAS)
+        [HttpGet]
+        public async Task<IActionResult> ExportarExcel(
+            string numeroDistribucion = null,
+            string nombreProducto = null,
+            int maxRegistros = 1000)
+        {
+            try
+            {
+                // Obtener consulta específica para Excel
+                IQueryable<DetalleDistribucionExcelDTO> query = _detalleDistribucionService.GetQueryableForExcel();
+
+                // APLICAR FILTROS DISPONIBLES
+                if (!string.IsNullOrWhiteSpace(numeroDistribucion))
+                {
+                    query = query.Where(d => d.NumeroDistribucion.Contains(numeroDistribucion));
+                }
+
+                if (!string.IsNullOrWhiteSpace(nombreProducto))
+                {
+                    query = query.Where(d => d.nombre.Contains(nombreProducto));
+                }
+
+                // Limitar cantidad de registros
+                query = query.Take(maxRegistros);
+
+                // Obtener datos
+                var datos = await query.ToListAsync();
+
+                if (!datos.Any())
+                {
+                    TempData["ErrorMessage"] = "No hay distribuciones para exportar con los filtros seleccionados.";
+                    return RedirectToAction("Index");
+                }
+
+                // Generar Excel
+                byte[] excelBytes = _excelExporter.ExportarDetalleDistribucion(datos);
+
+                // Nombre del archivo
+                string nombreArchivo = $"Distribuciones_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                return File(excelBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    nombreArchivo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al exportar Excel de distribuciones");
+                TempData["ErrorMessage"] = $"Error al generar el Excel: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // ACCIÓN PARA FORMULARIO POST (SIN FECHAS)
+        [HttpPost]
+        public async Task<IActionResult> Exportar(
+            string numeroDistribucion,
+            string nombreProducto,
+            int maxRegistros = 1000)
+        {
+            // Redirigir a la acción de exportación con parámetros
+            return await ExportarExcel(
+                numeroDistribucion: numeroDistribucion,
+                nombreProducto: nombreProducto,
+                maxRegistros: maxRegistros);
+        }
+
+        // ACCIÓN RÁPIDA: Exportar con filtros actuales del Index (SIN FECHAS)
+        [HttpGet]
+        public async Task<IActionResult> ExportarRapido()
+        {
+            try
+            {
+                // Obtener parámetros actuales del Index
+                string numeroDistribucion = Request.Query["numeroDistribucion"].ToString();
+                string nombreProducto = Request.Query["nombreProducto"].ToString();
+
+                // Redirigir a ExportarExcel con los parámetros disponibles
+                return await ExportarExcel(
+                    numeroDistribucion: !string.IsNullOrEmpty(numeroDistribucion) ? numeroDistribucion : null,
+                    nombreProducto: !string.IsNullOrEmpty(nombreProducto) ? nombreProducto : null,
+                    maxRegistros: 1000);
+            }
+            catch
+            {
+                // Si hay error, exportar todo
+                return await ExportarExcel(maxRegistros: 1000);
+            }
+        }
+
+        // VISTA PARA FORMULARIO DE EXPORTACIÓN (GET) - SIN REFERENCIAS A FECHAS
+        [HttpGet]
+        public IActionResult Exportar()
+        {
+            // Opciones para límites
+            ViewBag.MaxRegistrosOpciones = new List<int> { 100, 500, 1000, 5000, 10000 };
+
+            // QUITADO: No hay referencias a fechas
+            // ViewBag.FechaInicioDefault = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
+            // ViewBag.FechaFinDefault = DateTime.Now.ToString("yyyy-MM-dd");
+
+            return View();
+        }
+
+
+
+        // ==================== MÉTODOS PDF ====================
 
         // SOLO PDF - Acción para descargar PDF
         [HttpGet]
@@ -355,24 +475,21 @@ namespace GestionDeInventario.Controllers
                     return NotFound("No se encontró el detalle de distribución.");
                 }
 
-                // Generar PDF
+                // Generar PDF - NOTA: Asegúrate de que la clase DetalleDistribucionPDF existe
                 var pdfGenerator = new DetalleDistribucionPDF();
                 byte[] pdfBytes = pdfGenerator.GenerarArchivoFicha(detalleDistribucion);
 
-                // Nombre del archivo
-                string nombreArchivo = $"Distribucion_{detalleDistribucion.NumeroDistribucion}_{DateTime.Now:yyyyMMdd}.pdf";
+                // Nombre del archivo (CORREGIDO: Cambié "Compra_" por "DetalleDistribucion_")
+                string nombreArchivo = $"DetalleDistribucion_{detalleDistribucion.IdDetalleDistribucion}_{DateTime.Now:yyyyMMdd}.pdf";
 
                 // Retornar archivo
                 return File(pdfBytes, "application/pdf", nombreArchivo);
             }
             catch (Exception ex)
             {
-                // Log del error
-                Console.WriteLine($"Error al generar PDF: {ex.Message}");
-
-                // Redirigir o mostrar error
-                TempData["ErrorMessage"] = "Error al generar el PDF.";
-                return RedirectToAction("Index", "DetalleDistribucion");
+                _logger.LogError(ex, "Error al generar PDF para ID: {Id}", id);
+                TempData["ErrorMessage"] = $"Error al generar el PDF: {ex.Message}";
+                return RedirectToAction("Index");
             }
         }
 
@@ -395,158 +512,12 @@ namespace GestionDeInventario.Controllers
                 // Retornar sin nombre para visualizar en navegador
                 return File(pdfBytes, "application/pdf");
             }
-            catch (Exception)
-            {
-                TempData["ErrorMessage"] = "Error al generar el PDF.";
-                return RedirectToAction("Index", "DetalleDistribucion");
-            }
-        }
-
-
-
-
-        // ACCIÓN PRINCIPAL PARA EXPORTAR EXCEL
-        [HttpGet]
-        public async Task<IActionResult> ExportarExcel(
-            string numeroDistribucion = null,
-            DateTime? fechaInicio = null,
-            DateTime? fechaFin = null,
-            int? empleadoId = null,
-            int? productoId = null,
-            int maxRegistros = 1000)
-        {
-            try
-            {
-                // Obtener consulta específica para Excel
-                IQueryable<DetalleDistribucionExcelDTO> query = _detalleDistribucionService.GetQueryableForExcel();
-
-                // APLICAR FILTROS (igual que en Index)
-                if (!string.IsNullOrWhiteSpace(numeroDistribucion))
-                {
-                    query = query.Where(d => d.NumeroDistribucion.Contains(numeroDistribucion));
-                }
-
-                if (fechaInicio.HasValue)
-                {
-                    query = query.Where(d => d.FechaSalida.Date >= fechaInicio.Value.Date);
-                }
-
-                if (fechaFin.HasValue)
-                {
-                    query = query.Where(d => d.FechaSalida.Date <= fechaFin.Value.Date);
-                }
-
-                if (empleadoId.HasValue && empleadoId > 0)
-                {
-                    // Si tienes ID de empleado en el DTO Excel, agrégalo
-                    // Si no, puedes filtrar por nombre (menos eficiente)
-                    query = query.Where(d => d.NombreEmpleado.Contains(empleadoId.ToString()));
-                }
-
-                if (productoId.HasValue && productoId > 0)
-                {
-                    // Similar para producto
-                    query = query.Where(d => d.NombreProducto.Contains(productoId.ToString()));
-                }
-
-                // Limitar cantidad de registros
-                query = query.Take(maxRegistros);
-
-                // Obtener datos
-                var datos = await query.ToListAsync();
-
-                if (!datos.Any())
-                {
-                    TempData["ErrorMessage"] = "No hay datos para exportar con los filtros seleccionados.";
-                    return RedirectToAction("Index");
-                }
-
-                // Generar Excel
-                byte[] excelBytes = _excelExporter.ExportarDetalleDistribucion(datos);
-
-                // Nombre del archivo
-                string nombreArchivo = $"Distribuciones_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-
-                return File(excelBytes,
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    nombreArchivo);
-            }
             catch (Exception ex)
             {
-                // Log del error
-                Console.WriteLine($"Error al exportar Excel: {ex.Message}");
-
-                TempData["ErrorMessage"] = $"Error al generar el Excel: {ex.Message}";
+                _logger.LogError(ex, "Error al generar PDF para ID: {Id}", id);
+                TempData["ErrorMessage"] = $"Error al generar el PDF: {ex.Message}";
                 return RedirectToAction("Index");
             }
         }
-
-        // ACCIÓN PARA FORMULARIO DE EXPORTACIÓN
-        [HttpGet]
-        public IActionResult Exportar()
-        {
-            // Puedes pasar opciones para límites
-            ViewBag.MaxRegistrosOpciones = new List<int> { 100, 500, 1000, 5000, 10000 };
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Exportar(
-            string numeroDistribucion,
-            DateTime? fechaInicio,
-            DateTime? fechaFin,
-            int? empleadoId,
-            int? productoId,
-            int maxRegistros = 1000)
-        {
-            // Redirigir a la acción de exportación con parámetros
-            return RedirectToAction("ExportarExcel", new
-            {
-                numeroDistribucion,
-                fechaInicio,
-                fechaFin,
-                empleadoId,
-                productoId,
-                maxRegistros
-            });
-        }
-
-        // ACCIÓN RÁPIDA: Exportar con filtros actuales del Index
-        [HttpGet]
-        public async Task<IActionResult> ExportarRapido()
-        {
-            try
-            {
-                // Obtener parámetros actuales del Index
-                string numeroDistribucion = Request.Query["numeroDistribucion"].ToString();
-                DateTime? fechaInicio = Request.Query["fechaInicio"].Count > 0
-                    ? DateTime.Parse(Request.Query["fechaInicio"])
-                    : null;
-                DateTime? fechaFin = Request.Query["fechaFin"].Count > 0
-                    ? DateTime.Parse(Request.Query["fechaFin"])
-                    : null;
-                int? empleadoId = Request.Query["empleadoId"].Count > 0
-                    ? int.Parse(Request.Query["empleadoId"])
-                    : null;
-                int? productoId = Request.Query["productoId"].Count > 0
-                    ? int.Parse(Request.Query["productoId"])
-                    : null;
-
-                // Redirigir a ExportarExcel con los parámetros actuales
-                return await ExportarExcel(
-                    numeroDistribucion,
-                    fechaInicio,
-                    fechaFin,
-                    empleadoId,
-                    productoId,
-                    1000);
-            }
-            catch
-            {
-                // Si hay error, exportar todo
-                return await ExportarExcel(maxRegistros: 1000);
-            }
-        }
-
     }
 }

@@ -107,12 +107,6 @@
             background: #f3f4f6;
         }
 
-    .date-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-    }
-
     .help-text {
         font-size: 0.85rem;
         color: #6b7280;
@@ -124,10 +118,6 @@
         .export-container {
             padding: 1.5rem;
             margin: 1rem;
-        }
-
-        .date-row {
-            grid-template-columns: 1fr;
         }
 
         .form-actions {
@@ -166,12 +156,10 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label">Rango de Fechas</label>
-            <div class="date-row">
-                <input type="date" name="fechaInicio" class="form-control" placeholder="Fecha Inicio">
-                <input type="date" name="fechaFin" class="form-control" placeholder="Fecha Fin">
-            </div>
-            <span class="help-text">Opcional - selecciona un rango específico</span>
+            <label class="form-label">Nombre del Producto</label>
+            <input type="text" name="nombreProducto" class="form-control"
+                   placeholder="Buscar por nombre del producto">
+            <span class="help-text">Filtrar por nombre del producto</span>
         </div>
 
         <div class="form-group">
@@ -198,20 +186,9 @@
 
 @section Scripts {
     <script>
+        // No se necesita script para fechas ya que no hay campos de fecha
         document.addEventListener('DOMContentLoaded', function() {
-            const fechaInicio = document.querySelector('[name="fechaInicio"]');
-            const fechaFin = document.querySelector('[name="fechaFin"]');
-
-            if (!fechaInicio.value) {
-                const thirtyDaysAgo = new Date();
-                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                fechaInicio.value = thirtyDaysAgo.toISOString().split('T')[0];
-            }
-
-            if (!fechaFin.value) {
-                const today = new Date().toISOString().split('T')[0];
-                fechaFin.value = today;
-            }
+            // Scripts adicionales si necesitas en el futuro
         });
     </script>
 }

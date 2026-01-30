@@ -1,7 +1,7 @@
 ﻿@model GestionDeInventario.DTOs.DetalleCompraDTOs.DetalleCompraCreateDTO
 
 @{
-    ViewData["Title"] = "Registrar Nueva Compra";
+    ViewData["Title"] = "Agregar Detalle de Compra";
 }
 
 <style>
@@ -9,7 +9,6 @@
         --primary: #2563eb;
         --primary-dark: #1d4ed8;
         --success: #10b981;
-        --warning: #f59e0b;
         --danger: #ef4444;
         --dark: #1f2937;
         --light: #f8fafc;
@@ -74,7 +73,6 @@
 
     .form-group {
         margin-bottom: 1.25rem;
-        position: relative;
     }
 
     .form-label {
@@ -105,11 +103,6 @@
             color: var(--text-light);
             opacity: 0.7;
         }
-
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        opacity: 1;
-    }
 
     .validation-error {
         color: var(--danger);
@@ -172,6 +165,38 @@
             border-color: #d1d5db;
         }
 
+    .input-with-icon {
+        position: relative;
+    }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .input-with-icon input, .input-with-icon select {
+            padding-left: 3rem;
+        }
+
+    .amount-display {
+        background: #f0f9ff;
+        border: 2px solid #bae6fd;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 0.5rem;
+        text-align: right;
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+        .amount-display span {
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
     @@media (max-width: 768px) {
         .container-create {
             padding: 1rem;
@@ -189,11 +214,6 @@
                 width: 100%;
                 justify-content: center;
             }
-
-        .form-row {
-            flex-direction: column;
-            gap: 1.25rem;
-        }
     }
 
     @@media (max-width: 576px) {
@@ -210,86 +230,87 @@
 <div class="container-create">
     <div class="create-card">
         <div class="create-header">
-            <h1><i class="fas fa-shopping-cart"></i> @ViewData["Title"]</h1>
-            <h4>Registra los detalles de la compra incluyendo producto, cantidad y proveedor.</h4>
+            <h1><i class="fas fa-cart-plus"></i> @ViewData["Title"]</h1>
+            <h4>Agrega un nuevo producto a la compra. El total se calculará automáticamente.</h4>
         </div>
 
-        <form asp-action="Create" id="compraForm">
+        <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="alert-danger"></div>
 
-            <!-- Sección 1: Información de Factura -->
+            <!-- Sección 1: Información de la Compra -->
             <div class="section-title">
-                <i class="fas fa-file-invoice"></i> Información de Factura
+                <i class="fas fa-shopping-cart"></i> Información de la Compra
             </div>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="form-group">
-                        <label class="form-label" asp-for="numeroFactura">Número de Factura</label>
-                        <input asp-for="numeroFactura" class="form-control" placeholder="Ej: F-001-2024-0001" />
-                        <span asp-validation-for="numeroFactura" class="validation-error"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label" asp-for="fechaCompra">Fecha de Compra</label>
-                        <input asp-for="fechaCompra" type="date" class="form-control" id="fechaCompraInput" />
-                        <span asp-validation-for="fechaCompra" class="validation-error"></span>
+                        <label class="form-label" asp-for="CompraId">Compra</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-receipt"></i>
+                            <select asp-for="CompraId" class="form-select" asp-items="ViewBag.CompraId">
+                                <option value="">-- Seleccionar Compra --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="CompraId" class="validation-error"></span>
                     </div>
                 </div>
             </div>
 
-            <!-- Sección 2: Selección de Proveedor y Usuario -->
+            <!-- Sección 2: Producto -->
             <div class="section-title">
-                <i class="fas fa-users"></i> Información de Compra
+                <i class="fas fa-box"></i> Producto
             </div>
-
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="form-group">
-                        <label class="form-label" asp-for="proveedorId">Proveedor</label>
-                        <select asp-for="proveedorId" class="form-select" asp-items="ViewBag.proveedorId">
-                            <option value="">-- Seleccionar Proveedor --</option>
-                        </select>
-                        <span asp-validation-for="proveedorId" class="validation-error"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label" asp-for="usuarioId">Usuario Responsable</label>
-                        <select asp-for="usuarioId" class="form-select" asp-items="ViewBag.usuarioId">
-                            <option value="">-- Seleccionar Usuario --</option>
-                        </select>
-                        <span asp-validation-for="usuarioId" class="validation-error"></span>
+                        <label class="form-label" asp-for="ProductoId">Producto</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-cube"></i>
+                            <select asp-for="ProductoId" class="form-select" asp-items="ViewBag.ProductoId">
+                                <option value="">-- Seleccionar Producto --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="ProductoId" class="validation-error"></span>
                     </div>
                 </div>
             </div>
 
-            <!-- Sección 3: Detalles del Producto -->
+            <!-- Sección 3: Cantidad y Precio -->
             <div class="section-title">
-                <i class="fas fa-box"></i> Detalles del Producto
+                <i class="fas fa-calculator"></i> Cantidad y Precio
             </div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label" asp-for="productoId">Producto</label>
-                        <select asp-for="productoId" class="form-select" asp-items="ViewBag.productoId">
-                            <option value="">-- Seleccionar Producto --</option>
-                        </select>
-                        <span asp-validation-for="productoId" class="validation-error"></span>
+                        <label class="form-label" asp-for="Cantidad">Cantidad</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-layer-group"></i>
+                            <input asp-for="Cantidad" type="number" min="1" class="form-control" placeholder="Ej: 10" />
+                        </div>
+                        <span asp-validation-for="Cantidad" class="validation-error"></span>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label" asp-for="cantidad">Cantidad</label>
-                        <input asp-for="cantidad" type="number" min="1" class="form-control" placeholder="Ej: 10" />
-                        <span asp-validation-for="cantidad" class="validation-error"></span>
+                        <label class="form-label" asp-for="PrecioUnitarioCosto">Precio Unitario ($)</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input asp-for="PrecioUnitarioCosto" type="number" step="0.01" min="0" class="form-control" placeholder="Ej: 25.99" />
+                        </div>
+                        <span asp-validation-for="PrecioUnitarioCosto" class="validation-error"></span>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label class="form-label" asp-for="precioUnitarioCosto">Precio Unitario ($)</label>
-                        <input asp-for="precioUnitarioCosto" type="number" step="0.01" min="0" class="form-control" placeholder="0.00" />
-                        <span asp-validation-for="precioUnitarioCosto" class="validation-error"></span>
+            </div>
+
+            <!-- Sección 4: Cálculo del Total -->
+            <div class="section-title">
+                <i class="fas fa-chart-line"></i> Resumen
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="amount-display" id="totalDisplay">
+                        <div>Subtotal estimado: <span id="subtotal">$0.00</span></div>
+                        <small class="text-muted">El cálculo se actualiza automáticamente</small>
                     </div>
                 </div>
             </div>
@@ -300,7 +321,7 @@
                     <i class="fas fa-arrow-left"></i> Volver a la Lista
                 </a>
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Crear Compra
+                    <i class="fas fa-save"></i> Agregar Detalle
                 </button>
             </div>
         </form>
@@ -313,21 +334,41 @@
     }
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Establecer fecha actual por defecto
-            const fechaInput = document.getElementById('fechaCompraInput');
-            const today = new Date().toISOString().split('T')[0];
+        // Función para calcular el subtotal
+        function calcularSubtotal() {
+            const cantidad = document.getElementById('Cantidad').value || 0;
+            const precio = document.getElementById('PrecioUnitarioCosto').value || 0;
+            const subtotal = cantidad * precio;
 
-            // Configurar el valor mínimo (hoy) y el valor por defecto
-            fechaInput.min = today;
-            fechaInput.value = today;
+            document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+        }
 
-            // También configurar la fecha máxima si se desea (por ejemplo, hasta 1 año en el futuro)
-            const maxDate = new Date();
-            maxDate.setFullYear(maxDate.getFullYear() + 1);
-            fechaInput.max = maxDate.toISOString().split('T')[0];
+        // Event listeners para inputs
+        document.getElementById('Cantidad').addEventListener('input', calcularSubtotal);
+        document.getElementById('PrecioUnitarioCosto').addEventListener('input', calcularSubtotal);
 
-            console.log('Fecha configurada:', fechaInput.value);
+        // Calcular subtotal inicial
+        calcularSubtotal();
+
+        // Opcional: Cargar información del producto seleccionado
+        document.getElementById('ProductoId').addEventListener('change', function() {
+            // Aquí podrías agregar lógica para cargar automáticamente
+            // el precio del producto si lo tienes disponible
+            // Por ejemplo, mediante una llamada AJAX
+            const productoId = this.value;
+            if (productoId) {
+                // Ejemplo de llamada AJAX (descomentar y adaptar según tu API)
+                /*
+                fetch(`/api/productos/${productoId}/precio`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.precio) {
+                            document.getElementById('PrecioUnitarioCosto').value = data.precio;
+                            calcularSubtotal();
+                        }
+                    });
+                */
+            }
         });
     </script>
 }

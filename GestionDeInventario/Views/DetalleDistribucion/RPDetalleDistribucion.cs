@@ -1,8 +1,8 @@
 ﻿using GestionDeInventario.DTOs.DetalleDistribucionDTOs;
+using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System.Globalization;
-using QuestPDF.Fluent;
 
 namespace GestionDeInventario.Views.DetalleDistribucion
 {
@@ -48,14 +48,6 @@ namespace GestionDeInventario.Views.DetalleDistribucion
                                             .Bold()
                                             .FontColor(Colors.Black);
                                     });
-
-                                row.ConstantItem(80)
-                                    .AlignRight()
-                                    .Text(text =>
-                                    {
-                                        text.Span("Distribución:\n").Bold();
-                                        text.Span(Model.NumeroDistribucion).FontSize(9);
-                                    });
                             });
 
                         column.Item()
@@ -71,16 +63,16 @@ namespace GestionDeInventario.Views.DetalleDistribucion
                                 row.RelativeItem()
                                     .Text(text =>
                                     {
-                                        text.Span("Fecha Salida: ").Bold();
-                                        text.Span($"{Model.FechaSalida:dd/MM/yyyy}");
+                                        text.Span("Fecha: ").Bold();
+                                        text.Span($"{DateTime.Now:dd/MM/yyyy}");
                                     });
 
                                 row.RelativeItem()
                                     .AlignRight()
                                     .Text(text =>
                                     {
-                                        text.Span("Motivo: ").Bold();
-                                        text.Span(Model.Motivo ?? "Sin especificar");
+                                        text.Span("Detalle ID: ").Bold();
+                                        text.Span(Model.IdDetalleDistribucion.ToString());
                                     });
                             });
                     });
@@ -95,7 +87,7 @@ namespace GestionDeInventario.Views.DetalleDistribucion
                             .PaddingBottom(15)
                             .Row(row =>
                             {
-                                // Empleado asignado
+                                // Distribución
                                 row.RelativeItem()
                                     .Background(Colors.Grey.Lighten5)
                                     .Padding(10)
@@ -104,41 +96,61 @@ namespace GestionDeInventario.Views.DetalleDistribucion
                                     .Column(col =>
                                     {
                                         col.Item()
-                                            .Text("EMPLEADO ASIGNADO")
+                                            .Text("INFORMACIÓN DE DISTRIBUCIÓN")
                                             .FontSize(11)
                                             .Bold()
                                             .FontColor(Colors.Blue.Darken3);
 
                                         col.Item().PaddingTop(3);
 
-                                        if (Model.Empleado != null)
+                                        if (Model.Distribucion != null)
                                         {
                                             col.Item()
-                                                .Text($"{Model.Empleado.nombre} {Model.Empleado.apellido}")
-                                                .Bold()
-                                                .FontSize(11);
-
-                                            col.Item()
                                                 .Text(text =>
                                                 {
-                                                    text.Span("Departamento: ");
-                                                    text.Span(Model.Empleado.departamento?.nombre ?? "N/A");
+                                                    text.Span("Número de Distribución: ").Bold();
+                                                    text.Span(Model.Distribucion.NumeroDistribucion?.ToString() ?? "N/A");
                                                 });
 
-                                            col.Item()
-                                                .Text(text =>
+                                            if (Model.Distribucion.FechaSalida != default)
+                                            {
+                                                col.Item()
+                                                    .Text(text =>
+                                                    {
+                                                        text.Span("Fecha Salida: ").Bold();
+                                                        text.Span($"{Model.Distribucion.FechaSalida:dd/MM/yyyy}");
+                                                    });
+                                            }
+
+                                            // AGREGADO: INFORMACIÓN DEL EMPLEADO
+                                            if (Model.Distribucion.Empleado != null)
+                                            {
+                                                col.Item().PaddingTop(5);
+                                                col.Item()
+                                                    .Text(text =>
+                                                    {
+                                                        text.Span("Empleado Encargado: ").Bold();
+                                                        text.Span($"{Model.Distribucion.Empleado.nombre} {Model.Distribucion.Empleado.apellido}");
+                                                    });
+
+                                                if (!string.IsNullOrEmpty(Model.Distribucion.Empleado.telefono))
                                                 {
-                                                    text.Span("Teléfono: ");
-                                                    text.Span(Model.Empleado.telefono ?? "N/A");
-                                                });
+                                                    col.Item()
+                                                        .Text(text =>
+                                                        {
+                                                            text.Span("Teléfono: ").Bold();
+                                                            text.Span(Model.Distribucion.Empleado.telefono);
+                                                        });
+                                                }
+                                            }
                                         }
                                         else
                                         {
-                                            col.Item().Text("N/A").Italic();
+                                            col.Item().Text("Información de distribución no disponible").Italic();
                                         }
                                     });
 
-                                // Usuario que registra
+                                // Producto
                                 row.RelativeItem()
                                     .PaddingLeft(10)
                                     .Background(Colors.Grey.Lighten5)
@@ -148,23 +160,41 @@ namespace GestionDeInventario.Views.DetalleDistribucion
                                     .Column(col =>
                                     {
                                         col.Item()
-                                            .Text("REGISTRADO POR")
+                                            .Text("PRODUCTO")
                                             .FontSize(11)
                                             .Bold()
                                             .FontColor(Colors.Blue.Darken3);
 
                                         col.Item().PaddingTop(3);
 
-                                        if (Model.Usuario != null)
+                                        if (Model.Producto != null)
                                         {
                                             col.Item()
-                                                .Text(Model.Usuario.nombre)
+                                                .Text(Model.Producto.nombre ?? "Producto")
                                                 .Bold()
                                                 .FontSize(11);
+
+                                            col.Item()
+                                                .Text(text =>
+                                                {
+                                                    text.Span("ID Producto: ");
+                                                    text.Span(Model.Producto.idProducto.ToString());
+                                                });
+
+                                            // AGREGADO: INFORMACIÓN ADICIONAL DEL PRODUCTO
+                                            if (!string.IsNullOrEmpty(Model.Producto.unidadMedida))
+                                            {
+                                                col.Item()
+                                                    .Text(text =>
+                                                    {
+                                                        text.Span("Unidad de Medida: ");
+                                                        text.Span(Model.Producto.unidadMedida);
+                                                    });
+                                            }
                                         }
                                         else
                                         {
-                                            col.Item().Text("N/A").Italic();
+                                            col.Item().Text("Producto no disponible").Italic();
                                         }
                                     });
                             });
@@ -202,7 +232,7 @@ namespace GestionDeInventario.Views.DetalleDistribucion
                                                 .Text(text =>
                                                 {
                                                     text.Span("Producto: ").Bold();
-                                                    text.Span(Model.Producto.nombre);
+                                                    text.Span(Model.Producto.nombre ?? "N/A");
                                                 });
 
                                             row.RelativeItem()
@@ -230,7 +260,7 @@ namespace GestionDeInventario.Views.DetalleDistribucion
                                     columns.RelativeColumn(3);   // Descripción
                                     columns.ConstantColumn(70);  // Cantidad
                                     columns.ConstantColumn(90);  // Precio Costo
-                                    columns.ConstantColumn(90);  // Valor Total
+                                    columns.ConstantColumn(90);  // Subtotal
                                 });
 
                                 // Encabezado
@@ -240,64 +270,39 @@ namespace GestionDeInventario.Views.DetalleDistribucion
                                     header.Cell().Element(CellHeader).Text("DESCRIPCIÓN");
                                     header.Cell().Element(CellHeader).Text("CANTIDAD").Light();
                                     header.Cell().Element(CellHeader).Text("PRECIO COSTO").Light();
-                                    header.Cell().Element(CellHeader).Text("VALOR TOTAL").Light();
+                                    header.Cell().Element(CellHeader).Text("SUBTOTAL").Light();
                                 });
 
                                 // Datos
                                 table.Cell().Element(CellData).Text("1").AlignCenter();
                                 table.Cell().Element(CellData).Text(Model.Producto?.nombre ?? "Producto");
                                 table.Cell().Element(CellData).Text(Model.Cantidad.ToString("N0")).Light();
-                                table.Cell().Element(CellData).Text(FormatCurrency(Model.PrecioCostoUnitario)).Light();
-                                table.Cell().Element(CellData).Text(FormatCurrency(Model.MontoTotal)).Light();
+                                table.Cell().Element(CellData).Text(FormatUSD(Model.PrecioCostoUnitario)).Light();
+                                table.Cell().Element(CellData).Text(FormatUSD(Model.Subtotal)).Light();
 
-                                // Resumen
-                                table.Cell().ColumnSpan(5).Element(CellSummary)
+                                // Total
+                                table.Cell().ColumnSpan(5).Element(CellTotal)
                                     .PaddingTop(10)
                                     .Row(row =>
                                     {
                                         row.RelativeItem();
                                         row.ConstantItem(250)
-                                            .Column(col =>
+                                            .Row(totalRow =>
                                             {
-                                                // Cantidad total
-                                                col.Item()
-                                                    .Row(sumRow =>
-                                                    {
-                                                        sumRow.RelativeItem()
-                                                            .Text("Cantidad Total:")
-                                                            .FontSize(10);
+                                                totalRow.RelativeItem()
+                                                    .Text("TOTAL DISTRIBUCIÓN:")
+                                                    .Bold()
+                                                    .FontSize(12);
 
-                                                        sumRow.ConstantItem(80)
-                                                            .AlignRight()
-                                                            .Text($"{Model.Cantidad:N0} unidades")
-                                                            .FontSize(10);
-                                                    });
-
-                                                // Valor total - ETIQUETA EN NEGRO
-                                                col.Item()
-                                                    .PaddingTop(5)
-                                                    .BorderTop(1)
-                                                    .BorderColor(Colors.Grey.Medium)
-                                                    .PaddingTop(5)
-                                                    .Row(totalRow =>
-                                                    {
-                                                        totalRow.RelativeItem()
-                                                            .Text("VALOR TOTAL:")
-                                                            .Bold()
-                                                            .FontSize(12)
-                                                            .FontColor(Colors.Black);  // NEGRO
-
-                                                        totalRow.ConstantItem(90)
-                                                            .AlignRight()
-                                                            .Text(FormatCurrency(Model.MontoTotal))
-                                                            .Bold()
-                                                            .FontSize(12)
-                                                            .FontColor(Colors.Blue.Darken3);  // VALOR EN AZUL
-                                                    });
+                                                totalRow.ConstantItem(90)
+                                                    .AlignRight()
+                                                    .Text(FormatUSD(Model.Subtotal))
+                                                    .Bold()
+                                                    .FontSize(12)
+                                                    .FontColor(Colors.Blue.Darken3);
                                             });
                                     });
                             });
-
                     });
 
                 // PIE DE PÁGINA
@@ -340,7 +345,7 @@ namespace GestionDeInventario.Views.DetalleDistribucion
             });
         }
 
-        private string FormatCurrency(decimal amount)
+        private string FormatUSD(decimal amount)
         {
             return amount.ToString("C", CultureInfo.GetCultureInfo("en-US"));
         }
@@ -364,7 +369,7 @@ namespace GestionDeInventario.Views.DetalleDistribucion
                 .PaddingHorizontal(5);
         }
 
-        private static IContainer CellSummary(IContainer container)
+        private static IContainer CellTotal(IContainer container)
         {
             return container
                 .BorderTop(2)

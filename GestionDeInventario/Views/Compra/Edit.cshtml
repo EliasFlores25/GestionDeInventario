@@ -1,0 +1,513 @@
+﻿@model GestionDeInventario.DTOs.CompraDTOs.CompraUpdateDTO
+
+@{
+    ViewData["Title"] = "Editar Compra";
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --warning: #f59e0b;
+        --warning-dark: #d97706;
+        --danger: #ef4444;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --text-light: #6b7280;
+    }
+
+    .container-edit {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .edit-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border-top: 5px solid var(--warning);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .edit-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+        .edit-header h1 {
+            color: var(--dark);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+            .edit-header h1 i {
+                color: var(--warning);
+            }
+
+        .edit-header h4 {
+            color: var(--text-light);
+            font-weight: 400;
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+        }
+
+    .section-title {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--warning);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+        .form-label.required::after {
+            content: " *";
+            color: var(--danger);
+        }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        background: white;
+    }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--warning);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+    .datetime-input {
+        position: relative;
+    }
+
+        .datetime-input .form-control {
+            padding-right: 2.5rem;
+        }
+
+        .datetime-input i {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+        }
+
+    .validation-error {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .field-error {
+        border-color: var(--danger) !important;
+    }
+
+        .field-error:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid var(--danger);
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .alert-danger i {
+            font-size: 1.1rem;
+        }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-warning {
+        background: var(--warning);
+        color: white;
+    }
+
+        .btn-warning:hover {
+            background: var(--warning-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2);
+        }
+
+    .btn-secondary {
+        background: white;
+        color: var(--dark);
+        border: 2px solid var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+    .compra-info {
+        background: #fffbeb;
+        border: 1px solid #fef3c7;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .compra-info i {
+            color: var(--warning);
+            font-size: 1.25rem;
+        }
+
+        .compra-info .info-content {
+            flex: 1;
+        }
+
+        .compra-info .info-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .compra-info .info-text {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+    .info-id {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #f3f4f6;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: var(--dark);
+        font-weight: 500;
+    }
+
+        .info-id i {
+            color: var(--warning);
+        }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+    }
+
+    @@media (max-width: 768px) {
+        .container-edit {
+            padding: 1rem;
+        }
+
+        .edit-card {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+        .compra-info {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .edit-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .edit-card {
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+        }
+    }
+
+    .readonly-field {
+        background-color: #f9fafb;
+        border-color: #e5e7eb;
+        cursor: not-allowed;
+    }
+</style>
+
+<div class="container-edit">
+    <div class="edit-card">
+        <div class="edit-header">
+            <h1><i class="fas fa-edit"></i> @ViewData["Title"]</h1>
+            <h4>Modificación de datos de compra</h4>
+        </div>
+
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> Por favor, corrige los errores en el formulario.
+            </div>
+
+            <!-- Información de la compra -->
+            <div class="compra-info">
+                <i class="fas fa-info-circle"></i>
+                <div class="info-content">
+                    <div class="info-title">Estás editando la compra:</div>
+                    <p class="info-text">Puedes modificar todos los campos excepto el ID de compra, el cual es identificador único.</p>
+                </div>
+                <span class="info-id"><i class="fas fa-hashtag"></i> ID: @Model.IdCompra</span>
+            </div>
+
+            <input type="hidden" asp-for="IdCompra" />
+
+            <!-- Sección 1: Información de la Factura -->
+            <div class="section-title">
+                <i class="fas fa-file-invoice"></i> Información de la Factura
+            </div>
+
+            <div class="form-group">
+                <label class="form-label required" asp-for="NumeroFactura">Número de Factura</label>
+                <input asp-for="NumeroFactura" class="form-control @(ViewData.ModelState["NumeroFactura"]?.Errors.Any() == true ? "field-error" : "")"
+                       placeholder="Ej: FAC-001-2024"
+                       maxlength="50" />
+                <span asp-validation-for="NumeroFactura" class="validation-error"></span>
+                <small class="text-muted">Mínimo 2 caracteres, máximo 50 caracteres</small>
+            </div>
+
+            <!-- Sección 2: Datos de la Compra -->
+            <div class="section-title">
+                <i class="fas fa-shopping-bag"></i> Datos de la Compra
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label required" asp-for="UsuarioId">Usuario Responsable</label>
+                    <select asp-for="UsuarioId" class="form-select @(ViewData.ModelState["UsuarioId"]?.Errors.Any() == true ? "field-error" : "")"
+                            asp-items="ViewBag.UsuarioId">
+                        <option value="">-- Seleccionar Usuario --</option>
+                    </select>
+                    <span asp-validation-for="UsuarioId" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required" asp-for="ProveedorId">Proveedor</label>
+                    <select asp-for="ProveedorId" class="form-select @(ViewData.ModelState["ProveedorId"]?.Errors.Any() == true ? "field-error" : "")"
+                            asp-items="ViewBag.ProveedorId">
+                        <option value="">-- Seleccionar Proveedor --</option>
+                    </select>
+                    <span asp-validation-for="ProveedorId" class="validation-error"></span>
+                </div>
+            </div>
+
+            <!-- Sección 3: Fecha de la Compra -->
+            <div class="section-title">
+                <i class="fas fa-calendar-alt"></i> Fecha de la Compra
+            </div>
+
+            <div class="form-group">
+                <label class="form-label required" asp-for="FechaCompra">Fecha y Hora</label>
+                <div class="datetime-input">
+                    <input asp-for="FechaCompra" type="datetime-local"
+                           class="form-control @(ViewData.ModelState["FechaCompra"]?.Errors.Any() == true ? "field-error" : "")" />
+                    <i class="fas fa-calendar"></i>
+                </div>
+                <span asp-validation-for="FechaCompra" class="validation-error"></span>
+                <small class="text-muted">Formato: dd/mm/aaaa hh:mm</small>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a la Lista
+                </a>
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Formatear la fecha para el input datetime-local
+            function formatDateTimeLocal(date) {
+                if (!date) return '';
+
+                // Si es string, convertirlo a Date
+                if (typeof date === 'string') {
+                    date = new Date(date);
+                }
+
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+
+            // Asegurarse de que la fecha esté formateada correctamente
+            const fechaInput = document.getElementById('FechaCompra');
+            if (fechaInput.value) {
+                try {
+                    fechaInput.value = formatDateTimeLocal(fechaInput.value);
+                } catch (e) {
+                    console.error('Error formateando fecha:', e);
+                }
+            }
+
+            // Validación en tiempo real
+            $('form').on('submit', function(e) {
+                let isValid = true;
+
+                // Validar número de factura
+                const factura = $('#NumeroFactura').val().trim();
+                if (factura.length < 2 || factura.length > 50) {
+                    isValid = false;
+                    if (!$('#NumeroFactura').hasClass('field-error')) {
+                        $('#NumeroFactura').addClass('field-error');
+                    }
+                }
+
+                // Validar selects
+                if ($('#UsuarioId').val() === '') {
+                    isValid = false;
+                    if (!$('#UsuarioId').hasClass('field-error')) {
+                        $('#UsuarioId').addClass('field-error');
+                    }
+                }
+
+                if ($('#ProveedorId').val() === '') {
+                    isValid = false;
+                    if (!$('#ProveedorId').hasClass('field-error')) {
+                        $('#ProveedorId').addClass('field-error');
+                    }
+                }
+
+                // Validar fecha
+                if (!$('#FechaCompra').val()) {
+                    isValid = false;
+                    if (!$('#FechaCompra').hasClass('field-error')) {
+                        $('#FechaCompra').addClass('field-error');
+                    }
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    // Scroll al primer error
+                    $('.field-error').first().focus();
+
+                    // Mostrar mensaje de error
+                    alert('Por favor, complete todos los campos requeridos correctamente.');
+                }
+            });
+
+            // Limpiar errores al cambiar
+            $('.form-control, .form-select').on('input change', function() {
+                $(this).removeClass('field-error');
+
+                // Actualizar mensajes de validación
+                const fieldName = $(this).attr('id');
+                const errorSpan = $(`[data-valmsg-for="${fieldName}"]`);
+                if (errorSpan.length > 0) {
+                    errorSpan.text('');
+                }
+            });
+
+            // Auto-focus en el primer campo con error o en el primer campo
+            const firstError = $('.field-error').first();
+            if (firstError.length > 0) {
+                firstError.focus();
+            } else {
+                $('#NumeroFactura').focus();
+            }
+
+            // Mostrar/Ocultar ayuda para la fecha
+            $('#FechaCompra').on('focus', function() {
+                $(this).next('i').css('color', 'var(--warning)');
+            }).on('blur', function() {
+                $(this).next('i').css('color', 'var(--text-light)');
+            });
+        });
+    </script>
+}

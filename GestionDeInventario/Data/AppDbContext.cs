@@ -1,5 +1,6 @@
 ﻿using GestionDeInventario.Models;
 using Microsoft.EntityFrameworkCore;
+
 namespace GestionDeInventario.Data
 {
     public class AppDbContext : DbContext
@@ -7,12 +8,18 @@ namespace GestionDeInventario.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
+
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Empleado> Empleados { get; set; }
         public DbSet<Producto> Productos { get; set; }
         public DbSet<Departamento> Departamentos { get; set; }
-        public DbSet <DetalleCompra> DetalleCompras { get; set; }
+        public DbSet<DetalleCompra> DetalleCompras { get; set; }
         public DbSet<Proveedor> Proveedores { get; set; }
         public DbSet<DetalleDistribucion> DetalleDistribuciones { get; set; }
+        public DbSet<Compra> Compras { get; set; }
+        public DbSet<Distribucion> Distribuciones { get; set; }
+
+
+
     }
 }

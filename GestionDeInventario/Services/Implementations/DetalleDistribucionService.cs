@@ -18,18 +18,13 @@ namespace GestionDeInventario.Services.Implementations
             return new DetalleDistribucionResponseDTO
             {
                 IdDetalleDistribucion = x.IdDetalleDistribucion,
-                NumeroDistribucion = x.NumeroDistribucion,
-                UsuarioId = x.UsuarioId,
-                Usuario = x.Usuario,
-                EmpleadoId = x.EmpleadoId,
-                Empleado = x.Empleado,
+                DistribucionId = x.DistribucionId,
+                Distribucion = x.Distribucion,
                 ProductoId = x.ProductoId,
                 Producto = x.Producto,
                 Cantidad = x.Cantidad,
-                FechaSalida = x.FechaSalida,
-                Motivo = x.Motivo ?? string.Empty,
                 PrecioCostoUnitario = x.PrecioCostoUnitario,
-                MontoTotal = x.MontoTotal,
+                Subtotal = x.Subtotal,
             };
         }
         public IQueryable<DetalleDistribucionResponseDTO> GetQueryable()
@@ -37,19 +32,16 @@ namespace GestionDeInventario.Services.Implementations
             return _repository.GetQueryable().Select(x => new DetalleDistribucionResponseDTO
             {
                 IdDetalleDistribucion = x.IdDetalleDistribucion,
-                NumeroDistribucion = x.NumeroDistribucion,
-                UsuarioId = x.UsuarioId,
-                EmpleadoId = x.EmpleadoId,
+                DistribucionId = x.DistribucionId,
                 ProductoId = x.ProductoId,
                 Cantidad = x.Cantidad,
-                FechaSalida = x.FechaSalida,
-                Motivo = x.Motivo,
                 PrecioCostoUnitario = x.PrecioCostoUnitario,
-                MontoTotal = x.MontoTotal,
+                Subtotal = x.Subtotal,
             });
         }
         public async Task<List<DetalleDistribucionResponseDTO>> GetAllAsync() =>
             (await _repository.GetAllAsync()).Select(MapToResponseDTO).ToList();
+
         public async Task<DetalleDistribucionResponseDTO> GetByIdAsync(int idDetalleDistribucion)
         {
             var x = await _repository.GetByIdAsync(idDetalleDistribucion);
@@ -64,13 +56,9 @@ namespace GestionDeInventario.Services.Implementations
             // 1. Mapeo de DTO a Modelo
             var detalleDistribucion = new DetalleDistribucion
             {
-                NumeroDistribucion = dto.NumeroDistribucion,
-                UsuarioId = dto.UsuarioId,
-                EmpleadoId = dto.EmpleadoId,
+                DistribucionId = dto.DistribucionId,
                 ProductoId = dto.ProductoId,
                 Cantidad = dto.Cantidad,
-                FechaSalida = dto.FechaSalida,
-                Motivo = dto.Motivo,
             };
             try
             {
@@ -88,15 +76,9 @@ namespace GestionDeInventario.Services.Implementations
             var current = await _repository.GetByIdAsync(idDetalleDistribucion);
             if (current == null) throw new NotFoundException("No existe la distribución.");
 
-            current.NumeroDistribucion = dto.NumeroDistribucion.Trim();
-            current.EmpleadoId = dto.EmpleadoId;
+            current.DistribucionId = dto.DistribucionId;
             current.ProductoId = dto.ProductoId;
             current.Cantidad = dto.Cantidad;
-            current.FechaSalida = dto.FechaSalida;
-            current.Motivo = dto.Motivo;
-            current.UsuarioId = dto.UsuarioId;
-            //current.PrecioCostoUnitario = dto.PrecioCostoUnitario;
-            current.MontoTotal = dto.MontoTotal;
             try
             {
                 return await _repository.UpdateAsync(current);
@@ -122,38 +104,27 @@ namespace GestionDeInventario.Services.Implementations
             }
         }
 
-
-
-
-
-        // NUEVO: Método para Excel
+        //  Método para Excel
         public IQueryable<DetalleDistribucionExcelDTO> GetQueryableForExcel()
         {
             return _repository.GetQueryable()
                 .Select(x => new DetalleDistribucionExcelDTO
                 {
                     IdDetalleDistribucion = x.IdDetalleDistribucion,
-                    NumeroDistribucion = x.NumeroDistribucion,
-                    FechaSalida = x.FechaSalida,
-                    NombreEmpleado = x.Empleado != null
-                        ? $"{x.Empleado.nombre} {x.Empleado.apellido}"
-                        : $"ID: {x.EmpleadoId}",
-                    NombreProducto = x.Producto != null
-                        ? x.Producto.nombre
-                        : $"ID: {x.ProductoId}",
+
+                    NumeroDistribucion = x.Distribucion != null
+                        ? x.Distribucion.NumeroDistribucion : $"ID: {x.DistribucionId}",
+
+                    nombre = x.Producto != null
+                        ? x.Producto.nombre : $"ID: {x.ProductoId}",
+
                     Cantidad = x.Cantidad,
-                    Motivo = x.Motivo ?? "Sin motivo",
+
                     PrecioCostoUnitario = x.PrecioCostoUnitario,
-                    MontoTotal = x.MontoTotal,
-                    UsuarioRegistro = x.Usuario != null
-                        ? x.Usuario.nombre
-                        : $"ID: {x.UsuarioId}"
+
+                    Subtotal = x.Subtotal,
                 })
                 .AsQueryable();
-
-
-
-
         }
     }
 }
