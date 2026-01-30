@@ -32,14 +32,19 @@
             color: #333;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             line-height: 1.6;
+            padding-top: 70px; /* Espacio para header fijo */
         }
 
-        /* Header mejorado */
+        /* Header mejorado y fijo */
         .navbar {
             background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
             box-shadow: var(--shadow-lg);
             padding: 0.8rem 0;
             transition: var(--transition);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1030;
         }
 
         .navbar-brand {
@@ -59,7 +64,135 @@
                 box-shadow: var(--shadow-sm);
             }
 
-        /* Menú de navegación */
+        /* Sidebar fijo a la izquierda */
+        .sidebar {
+            position: fixed;
+            top: 70px; /* Altura del header */
+            left: 0;
+            height: calc(100vh - 70px);
+            width: 250px;
+            background: white;
+            box-shadow: var(--shadow-md);
+            z-index: 1020;
+            overflow-y: auto;
+            transition: var(--transition);
+            transform: translateX(-100%);
+        }
+
+        .sidebar-open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--light-bg);
+        }
+
+        .sidebar-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+        }
+
+            .sidebar-title i {
+                margin-right: 0.5rem;
+                color: var(--secondary-color);
+            }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-group-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: #495057;
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+            .sidebar-link:hover {
+                background-color: rgba(52, 152, 219, 0.1);
+                color: var(--primary-color);
+                border-left-color: var(--secondary-color);
+            }
+
+            .sidebar-link.active {
+                background-color: rgba(52, 152, 219, 0.15);
+                color: var(--primary-color);
+                border-left-color: var(--primary-color);
+                font-weight: 500;
+            }
+
+            .sidebar-link i {
+                width: 20px;
+                margin-right: 0.75rem;
+                font-size: 0.9rem;
+                text-align: center;
+            }
+
+        /* Botón para abrir/cerrar sidebar */
+        .sidebar-toggle {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            margin-right: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+            .sidebar-toggle:hover {
+                background: rgba(255,255,255,0.2);
+            }
+
+        /* Contenido principal con margen para sidebar */
+        .main-content {
+            margin-left: 0;
+            transition: var(--transition);
+            padding: 1rem;
+        }
+
+        .content-with-sidebar {
+            margin-left: 250px;
+        }
+
+        /* Overlay para móviles */
+        .sidebar-overlay {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1019;
+            display: none;
+        }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+        /* Menú de navegación en header simplificado */
         .navbar-nav .nav-link {
             color: rgba(255,255,255,0.9) !important;
             font-weight: 500;
@@ -67,7 +200,6 @@
             margin: 0 0.125rem;
             border-radius: 6px;
             transition: var(--transition);
-            position: relative;
         }
 
             .navbar-nav .nav-link:hover {
@@ -79,12 +211,6 @@
             .navbar-nav .nav-link.active {
                 background: rgba(52, 152, 219, 0.2);
                 color: white !important;
-            }
-
-            .navbar-nav .nav-link i {
-                width: 20px;
-                text-align: center;
-                margin-right: 0.5rem;
             }
 
         /* Menú desplegable de usuario */
@@ -122,18 +248,15 @@
         }
 
         @@keyframes fadeIn {
-            from
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
 
-        {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Breadcrumbs mejorados */
@@ -191,7 +314,7 @@
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: var(--shadow-sm);
-            min-height: calc(100vh - 250px);
+            min-height: calc(100vh - 200px);
         }
 
         /* Footer mejorado */
@@ -200,50 +323,124 @@
             color: rgba(255,255,255,0.8);
             margin-top: 2rem;
             padding: 1.5rem 0 !important;
+            margin-left: 0;
+            transition: var(--transition);
         }
 
-            footer a {
-                color: rgba(255,255,255,0.9);
-                transition: var(--transition);
-                font-weight: 500;
+        .footer-with-sidebar {
+            margin-left: 250px;
+        }
+
+        footer a {
+            color: rgba(255,255,255,0.9);
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+            footer a:hover {
+                color: white;
+                text-decoration: none;
             }
 
-                footer a:hover {
-                    color: white;
-                    text-decoration: none;
+        /* Responsive */
+        @@media (max-width: 1199px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .content-with-sidebar, .footer-with-sidebar {
+                margin-left: 220px;
+            }
+        }
+
+        @@media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .sidebar-open {
+                transform: translateX(0);
+            }
+
+            .content-with-sidebar, .footer-with-sidebar {
+                margin-left: 0;
+            }
+
+            .main-content {
+                padding: 0.5rem;
+            }
+
+            main {
+                padding: 1rem;
+                min-height: calc(100vh - 150px);
+            }
+        }
+
+        @@media (max-width: 768px) {
+            body {
+                padding-top: 60px;
+            }
+
+            .navbar {
+                padding: 0.5rem 0;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+                .navbar-brand i {
+                    padding: 0.4rem;
+                    margin-right: 0.5rem;
                 }
 
-        /* Responsive */
-        @@media (max-width: 768px) {
-            .navbar-nav
+            .sidebar {
+                top: 60px;
+                height: calc(100vh - 60px);
+            }
 
-        {
-            background: rgba(44, 62, 80, 0.95);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-top: 0.5rem;
+            .sidebar-toggle {
+                padding: 0.4rem 0.8rem;
+                margin-right: 0.5rem;
+            }
+
+            .main-content {
+                padding: 0.25rem;
+            }
+
+            main {
+                padding: 0.75rem;
+                border-radius: 8px;
+            }
+
+            .breadcrumb-simple {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
         }
 
-        .nav-link {
-            padding: 0.75rem 1rem !important;
-            margin: 0.25rem 0;
+        @@media (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+            }
+
+            .sidebar-link {
+                padding: 0.75rem 1rem;
+            }
+
+            .container.main-container {
+                padding: 0.5rem;
+            }
+
+            footer {
+                padding: 1rem 0 !important;
+                font-size: 0.85rem;
+                margin-top: 1rem;
+            }
         }
 
-        .user-menu {
-            margin-top: 1rem;
-        }
-
-        .container.main-container {
-            padding: 1rem;
-        }
-
-        main {
-            padding: 1rem;
-        }
-
-        }
-
-        /* Efectos hover para cards */
+        /* Efectos hover */
         .card {
             transition: var(--transition);
             border: none;
@@ -268,11 +465,29 @@
                 box-shadow: var(--shadow-md);
             }
 
-        /* Separador visual */
-        .separator {
-            height: 1px;
-            background: linear-gradient(to right, transparent, var(--border-color), transparent);
-            margin: 1.5rem 0;
+        /* Indicador de enlace activo */
+        .active-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            margin-left: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -280,90 +495,25 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container-fluid">
-                <!-- Logo mejorado -->
+                <!-- Botón para abrir/cerrar sidebar -->
+                <button class="sidebar-toggle" type="button" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Logo -->
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">
                     <i class="fas fa-boxes"></i>
                     <span>InventarioPro</span>
                 </a>
 
-                <!-- Botón toggle con mejor diseño -->
-                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <!-- Botón toggle para móviles -->
+                <button class="navbar-toggler border-0 d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Contenido del navbar -->
+                <!-- Contenido del navbar (solo usuario) -->
                 <div class="collapse navbar-collapse" id="navbarContent">
-                    <!-- Menú principal -->
-                    <ul class="navbar-nav me-auto">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Index">
-                                    <i class="fas fa-home"></i> Inicio
-                                </a>
-                            </li>
-
-                            @if (User.IsInRole("Administrador") || User.IsInRole("Gerente") || User.IsInRole("Empleado"))
-                            {
-                                <div class="separator d-lg-none"></div>
-
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Empleado" asp-action="Index">
-                                        <i class="fas fa-users"></i> Empleados
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Producto" asp-action="Index">
-                                        <i class="fas fa-box-open"></i> Productos
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Departamento" asp-action="Index">
-                                        <i class="fas fa-building"></i> Departamentos
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Proveedor" asp-action="Index">
-                                        <i class="fas fa-truck"></i> Proveedores
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Compra" asp-action="Index">
-                                        <i class="fas fa-truck"></i> Compras
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Distribucion" asp-action="Index">
-                                        <i class="fas fa-truck"></i> Distribuciones
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="DetalleCompra" asp-action="Index">
-                                        <i class="fas fa-receipt"></i> Detalles de la Compras
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="DetalleDistribucion" asp-action="Index">
-                                        <i class="fas fa-shipping-fast"></i> Detalles de la Distribución
-                                    </a>
-                                </li>
-                            }
-
-                            @if (User.IsInRole("Administrador"))
-                            {
-                                <div class="separator d-lg-none"></div>
-
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Usuario" asp-action="Index">
-                                        <i class="fas fa-user-cog"></i> Usuarios
-                                    </a>
-                                </li>
-                            }
-                        }
-                    </ul>
-
-                    <!-- Menú de usuario mejorado -->
-                    <div class="user-menu">
+                    <div class="user-menu ms-auto">
                         <ul class="navbar-nav">
                             @if (User.Identity.IsAuthenticated)
                             {
@@ -407,121 +557,269 @@
         </nav>
     </header>
 
-    <div class="container main-container">
-        <main role="main" class="pb-3">
-            <!-- Breadcrumbs mejorados -->
-            @if (ViewContext.RouteData.Values["controller"]?.ToString() != "Home")
+    <!-- Sidebar para módulos -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h6 class="sidebar-title">
+                <i class="fas fa-th-large"></i> Menú de Módulos
+            </h6>
+        </div>
+
+        <nav class="sidebar-nav">
+            @if (User.Identity.IsAuthenticated)
             {
-                <nav class="breadcrumb-simple">
-                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
-                        <i class="fas fa-home me-1"></i> Inicio
+                <!-- Inicio -->
+                <div class="nav-group">
+                    <div class="nav-group-title">Principal</div>
+                    <a class="sidebar-link" asp-controller="Home" asp-action="Index">
+                        <i class="fas fa-home"></i>
+                        <span>Inicio</span>
                     </a>
-                    @if (ViewContext.RouteData.Values["controller"] != null)
-                    {
-                        <span class="mx-2">›</span>
-                        <a asp-controller="@ViewContext.RouteData.Values["controller"]" asp-action="Index" class="text-decoration-none">
-                            @ViewContext.RouteData.Values["controller"]
+                </div>
+
+                @if (User.IsInRole("Administrador") || User.IsInRole("Gerente") || User.IsInRole("Empleado"))
+                {
+                    <!-- Módulos principales -->
+                    <div class="nav-group">
+                        <div class="nav-group-title">Gestión</div>
+
+                        <a class="sidebar-link" asp-controller="Empleado" asp-action="Index">
+                            <i class="fas fa-users"></i>
+                            <span>Empleados</span>
                         </a>
-                    }
-                    @if (ViewContext.RouteData.Values["action"]?.ToString() != "Index")
-                    {
-                        <span class="mx-2">›</span>
-                        <span class="fw-medium">@ViewData["Title"]</span>
-                    }
-                </nav>
-            }
 
-            <!-- Alertas mejoradas -->
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle me-3 fs-4"></i>
-                        <div class="flex-grow-1">
-                            @TempData["SuccessMessage"]
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <a class="sidebar-link" asp-controller="Producto" asp-action="Index">
+                            <i class="fas fa-box-open"></i>
+                            <span>Productos</span>
+                        </a>
+
+                        <a class="sidebar-link" asp-controller="Departamento" asp-action="Index">
+                            <i class="fas fa-building"></i>
+                            <span>Departamentos</span>
+                        </a>
+
+                        <a class="sidebar-link" asp-controller="Proveedor" asp-action="Index">
+                            <i class="fas fa-truck"></i>
+                            <span>Proveedores</span>
+                        </a>
                     </div>
-                </div>
-            }
-            @if (TempData["ErrorMessage"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle me-3 fs-4"></i>
-                        <div class="flex-grow-1">
-                            @TempData["ErrorMessage"]
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+
+                    <!-- Transacciones -->
+                    <div class="nav-group">
+                        <div class="nav-group-title">Transacciones</div>
+
+                        <a class="sidebar-link" asp-controller="Compra" asp-action="Index">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Compras</span>
+                        </a>
+
+                        <a class="sidebar-link" asp-controller="Distribucion" asp-action="Index">
+                            <i class="fas fa-truck-loading"></i>
+                            <span>Distribuciones</span>
+                        </a>
+
+                        <a class="sidebar-link" asp-controller="DetalleCompra" asp-action="Index">
+                            <i class="fas fa-receipt"></i>
+                            <span>Detalles de Compras</span>
+                        </a>
+
+                        <a class="sidebar-link" asp-controller="DetalleDistribucion" asp-action="Index">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Detalles de Distribución</span>
+                        </a>
                     </div>
-                </div>
+                }
+
+                @if (User.IsInRole("Administrador"))
+                {
+                    <!-- Administración -->
+                    <div class="nav-group">
+                        <div class="nav-group-title">Administración</div>
+
+                        <a class="sidebar-link" asp-controller="Usuario" asp-action="Index">
+                            <i class="fas fa-user-cog"></i>
+                            <span>Usuarios</span>
+                        </a>
+                    </div>
+                }
             }
+            else
+            {
+                <!-- Menú para no autenticados -->
+                <div class="nav-group">
+                    <div class="nav-group-title">Acceso</div>
 
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
-                    <i class="fas fa-copyright me-1"></i> @DateTime.Now.Year - Sistema de Gestión de Inventario
-                </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">
-                        <i class="fas fa-shield-alt me-1"></i>Política de Privacidad
+                    <a class="sidebar-link" asp-controller="Auth" asp-action="Login">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Iniciar Sesión</span>
                     </a>
+
+                    <a class="sidebar-link" asp-controller="Auth" asp-action="Register">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Registrarse</span>
+                    </a>
+                </div>
+            }
+        </nav>
+    </aside>
+
+    <!-- Overlay para móviles -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Contenido principal -->
+    <div class="main-content" id="mainContent">
+        <div class="container main-container">
+            <main role="main" class="pb-3">
+                <!-- Breadcrumbs mejorados -->
+                @if (ViewContext.RouteData.Values["controller"]?.ToString() != "Home")
+                {
+                    <nav class="breadcrumb-simple">
+                        <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i> Inicio
+                        </a>
+                        @if (ViewContext.RouteData.Values["controller"] != null)
+                        {
+                            <span class="mx-2">›</span>
+                            <a asp-controller="@ViewContext.RouteData.Values["controller"]" asp-action="Index" class="text-decoration-none">
+                                @ViewContext.RouteData.Values["controller"]
+                            </a>
+                        }
+                        @if (ViewContext.RouteData.Values["action"]?.ToString() != "Index")
+                        {
+                            <span class="mx-2">›</span>
+                            <span class="fw-medium">@ViewData["Title"]</span>
+                        }
+                    </nav>
+                }
+
+                <!-- Alertas mejoradas -->
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle me-3 fs-4"></i>
+                            <div class="flex-grow-1">
+                                @TempData["SuccessMessage"]
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle me-3 fs-4"></i>
+                            <div class="flex-grow-1">
+                                @TempData["ErrorMessage"]
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+
+        <footer class="border-top" id="mainFooter">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                        <i class="fas fa-copyright me-1"></i> @DateTime.Now.Year - Sistema de Gestión de Inventario
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">
+                            <i class="fas fa-shield-alt me-1"></i>Política de Privacidad
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </footer>
+        </footer>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         $(document).ready(function() {
+            var sidebar = $('#sidebar');
+            var mainContent = $('#mainContent');
+            var mainFooter = $('#mainFooter');
+            var sidebarToggle = $('#sidebarToggle');
+            var sidebarOverlay = $('#sidebarOverlay');
+            var sidebarOpen = false;
+
+            // Función para abrir/cerrar sidebar
+            function toggleSidebar() {
+                sidebarOpen = !sidebarOpen;
+
+                if (sidebarOpen) {
+                    sidebar.addClass('sidebar-open');
+                    sidebarOverlay.addClass('active');
+
+                    // En pantallas grandes, ajustar contenido
+                    if ($(window).width() >= 992) {
+                        mainContent.addClass('content-with-sidebar');
+                        mainFooter.addClass('footer-with-sidebar');
+                    }
+
+                    // Cambiar ícono
+                    sidebarToggle.html('<i class="fas fa-times"></i>');
+                } else {
+                    sidebar.removeClass('sidebar-open');
+                    sidebarOverlay.removeClass('active');
+                    mainContent.removeClass('content-with-sidebar');
+                    mainFooter.removeClass('footer-with-sidebar');
+
+                    // Restaurar ícono
+                    sidebarToggle.html('<i class="fas fa-bars"></i>');
+                }
+            }
+
+            // Toggle sidebar al hacer clic en el botón
+            sidebarToggle.click(toggleSidebar);
+
+            // Cerrar sidebar al hacer clic en overlay (móviles)
+            sidebarOverlay.click(toggleSidebar);
+
+            // Cerrar sidebar al hacer clic en un enlace (móviles)
+            $('.sidebar-link').click(function() {
+                if ($(window).width() < 992) {
+                    toggleSidebar();
+                }
+            });
+
             // Auto-cerrar alertas después de 5 segundos
             setTimeout(function() {
                 $('.alert-dismissible').alert('close');
             }, 5000);
 
-            // Mejorar la detección de vista CRUD
+            // Detectar vista CRUD
             var currentPath = window.location.pathname.toLowerCase();
-            var currentAction = '@ViewContext.RouteData.Values["action"]'?.toLowerCase();
             var crudPaths = ['/create', '/edit/', '/details/', '/delete/'];
-
-            var isCrudView = crudPaths.some(path => currentPath.includes(path)) ||
-                           (currentAction && ['create', 'edit', 'details', 'delete'].includes(currentAction));
+            var isCrudView = crudPaths.some(path => currentPath.includes(path));
 
             if (isCrudView) {
-                // Animación para ocultar el menú
-                $('.navbar-nav.me-auto').hide();
-
-                // Crear botón flotante para mostrar/ocultar menú
-                if (!$('#floatingMenuBtn').length) {
-                    $('body').append(`
-                        <button id="floatingMenuBtn" class="btn btn-primary shadow-lg rounded-pill"
-                                style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 0.75rem 1.25rem;">
-                            <i class="fas fa-bars me-2"></i>Mostrar Menú
-                        </button>
-                    `);
-
-                    $('#floatingMenuBtn').click(function() {
-                        $('.navbar-nav.me-auto').slideToggle(300);
-                        $(this).find('i').toggleClass('fa-bars fa-times');
-                        $(this).find('span').toggle();
-                    });
+                // Ajustar sidebar si está abierto
+                if (sidebarOpen) {
+                    mainContent.addClass('content-with-sidebar');
+                    mainFooter.addClass('footer-with-sidebar');
                 }
             }
 
-            // Mejorar marcado de enlace activo
+            // Marcar enlace activo en sidebar
             var currentRoute = window.location.pathname;
-            $('.navbar-nav .nav-link').each(function() {
+            $('.sidebar-link').each(function() {
                 var linkHref = $(this).attr('href');
                 if (linkHref && currentRoute.startsWith(linkHref)) {
                     $(this).addClass('active');
                     $(this).append('<span class="active-dot"></span>');
+
+                    // Abrir sidebar automáticamente si no está abierto
+                    if (!sidebarOpen && $(window).width() >= 992) {
+                        toggleSidebar();
+                    }
                 }
             });
 
@@ -534,6 +832,42 @@
                 }, 500);
                 window.location.href = $(this).attr('href');
             });
+
+            // Ajustar en resize de ventana
+            $(window).resize(function() {
+                if ($(window).width() >= 992 && sidebarOpen) {
+                    mainContent.addClass('content-with-sidebar');
+                    mainFooter.addClass('footer-with-sidebar');
+                    sidebarOverlay.removeClass('active');
+                } else if ($(window).width() < 992) {
+                    mainContent.removeClass('content-with-sidebar');
+                    mainFooter.removeClass('footer-with-sidebar');
+                }
+
+                // Cerrar sidebar en móviles si está abierto al cambiar a desktop
+                if ($(window).width() >= 992 && !sidebarOpen) {
+                    mainContent.removeClass('content-with-sidebar');
+                    mainFooter.removeClass('footer-with-sidebar');
+                }
+            });
+
+            // Abrir sidebar automáticamente en desktop al cargar (opcional)
+            if ($(window).width() >= 992 && !isCrudView) {
+                setTimeout(function() {
+                    if (!sidebarOpen) {
+                        toggleSidebar();
+                    }
+                }, 300);
+            }
+
+            // Mejorar experiencia en móviles
+            if ($(window).width() < 992) {
+                // Evitar que el sidebar se abra automáticamente en móviles
+                sidebar.removeClass('sidebar-open');
+                sidebarOverlay.removeClass('active');
+                sidebarToggle.html('<i class="fas fa-bars"></i>');
+                sidebarOpen = false;
+            }
         });
     </script>
 
